@@ -154,6 +154,7 @@ const FLATS = [
   {id:'H', short:'Кул Гали, 15', rent:50500, params:'3-комн. · 72 м² · 11/14 эт. · лифт', lift:true, beds2:true, parking:true, sad:15, sadName:'Сад № 41', school:14, schoolName:'Школа № 19', clinic:8, park:9, stop:3, car:19, kids:true, verified:true, owner:'Динар', ownerG:'m', docs:'07.10', x:80, y:48},
   {id:'J', short:'Чуйкова, 33', rent:45500, params:'2-комн. · 55 м² · 4/12 эт. · лифт', lift:true, beds2:false, parking:true, sad:4, sadName:'Сад № 123', school:8, schoolName:'Школа № 45', clinic:11, park:3, stop:2, car:24, kids:true, verified:true, owner:'Альбина', ownerG:'f', docs:'13.10', x:44, y:57},
   {id:'K', short:'Карбышева, 12', rent:40500, params:'2-комн. · 47 м² · 3/5 эт.', lift:false, beds2:false, parking:false, sad:3, sadName:'Сад № 87', school:12, schoolName:'Школа № 12', clinic:16, park:6, stop:4, car:31, kids:true, verified:true, owner:'Ильдар', ownerG:'m', docs:'11.10', x:27, y:45},
+  {id:'L', short:'Адоратского, 27', rent:56000, params:'3-комн. · 76 м² · 5/10 эт. · лифт', lift:true, beds2:true, parking:true, sad:5, sadName:'Сад № 41', school:7, schoolName:'Школа № 19', clinic:9, park:4, stop:3, car:25, kids:true, verified:true, owner:'Марат', ownerG:'m', docs:'14.10', x:64, y:38},
   {id:'I', short:'Глушко, 6', rent:41000, params:'2-комн. · 52 м² · 2/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:11, sadName:'Сад № 87', school:10, schoolName:'Школа № 12', clinic:14, park:6, stop:4, car:29, kids:false, verified:true, owner:'Ольга', ownerG:'f', docs:'10.10', x:16, y:54}
 ];
 FLATS.forEach(f => { f.entry = f.rent*2 + UTIL; const m = f.params.match(/(\d+)\/(\d+) эт/); f.floor = +m[1]; f.floors = +m[2]; });
@@ -244,7 +245,7 @@ function results(flt){
 function relaxOptions(){
   const out = [];
   const f = S.filters;
-  if(f.sad && f.sad < 15){ const nx = f.sad < 10 ? 10 : 15, n = results({...f, sad:nx}).length; if(n) out.push({label:'Сад до ' + nx + ' минут', n, act:'relax-sad', v:nx}); }
+  if(f.sad && f.sad < 30){ const nx = f.sad < 10 ? 10 : f.sad < 15 ? 15 : 30, n = results({...f, sad:nx}).length; if(n) out.push({label:'Сад до ' + nx + ' минут', n, act:'relax-sad', v:nx}); }
   if(f.lift){ const n = results({...f, lift:false}).length; if(n) out.push({label:'Без лифта', n, act:'relax-lift'}); }
   if(f.beds2){ const n = results({...f, beds2:false}).length; if(n) out.push({label:'Любое число спален', n, act:'relax-beds'}); }
   if(f.parking){ const n = results({...f, parking:false}).length; if(n) out.push({label:'Без парковки', n, act:'relax-park'}); }
@@ -342,8 +343,9 @@ V.anketa = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько лет ребёнку?</div>' + choice('age', ['до 1 года','1–3 года','3–7 лет','7+ лет'], a.age) + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что должно быть рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько идти до сада пешком?</div>' +
-      '<div class="chips">' + [5,10,15].map(v => '<button class="chip' + (a.sadMax===v?' on':'') + '" data-act="sadmax" data-v="' + v + '">до ' + v + ' мин</button>').join('') + '</div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="sadrange">Сколько идти до сада пешком?</label>' +
+      '<input id="sadrange" type="range" min="5" max="30" step="5" value="' + a.sadMax + '" data-act="range">' +
+      '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700" id="sadval">до ' + a.sadMax + ' минут</span><span>30 мин</span></div></div>' +
     '<div class="box small muted">Адрес работы добавим на следующем шаге, чтобы считать дорогу.</div>' + stepFoot(2);
   }
   if(n === 3) return stepTop(3) +
@@ -607,9 +609,11 @@ SH.more = () => {
   const t = (k,l) => '<button class="list-row" data-act="draft-toggle" data-v="' + k + '" aria-pressed="' + !!d[k] + '"><span>' + l + '</span><span class="tgl' + (d[k]?' on':'') + '"></span></button>';
   return sheet('<div class="h1" style="font-size:17px">Фильтры</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сад пешком</div><div class="chips">' + [[5,'до 5 мин'],[10,'до 10 мин'],[15,'до 15 мин'],[0,'не важно']].map(([v,l]) =>
-      '<button class="chip' + ((d.sad||0)===v?' on':'') + '" data-act="draft-sad" data-v="' + v + '">' + l + '</button>').join('') + '</div></div>' +
+      '<button class="chip' + ((d.sad||0)===v?' on':'') + '" data-act="draft-sad" data-v="' + v + '">' + l + '</button>').join('') + '</div>' +
+      '<input id="fsadrange" type="range" min="5" max="30" step="5" value="' + (d.sad||30) + '" aria-label="Сад пешком, минут">' +
+      '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700" id="fsadval">' + (d.sad ? 'до ' + d.sad + ' минут' : 'не важно') + '</span><span>30 мин</span></div></div>' +
     '<div>' + t('beds2','2 спальни') + t('lift','Лифт') + t('parking','Парковка во дворе') + t('kids','Можно с детьми') + t('verified','Собственник проверен') + '</div>' +
-    '<button class="btn p" data-act="apply-more">Показать ' + kv(results(d).length) + '</button>');
+    '<button class="btn p" id="applymore" data-act="apply-more">Показать ' + kv(results(d).length) + '</button>');
 };
 SH.district = () => {
   const q = findTxt(S.placeQ), cur = S.anketa.city;
@@ -780,6 +784,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.matches('span[data-act]')){ e.preventDefault(); e.target.click(); } });
 document.addEventListener('input', e => {
+  if(e.target.id === 'fsadrange'){ const v = +e.target.value; S.sheetDraft.sad = v; $('#fsadval').textContent = 'до ' + v + ' минут'; document.querySelectorAll('[data-act=draft-sad]').forEach(c => c.classList.toggle('on', +c.dataset.v === v)); $('#applymore').textContent = 'Показать ' + kv(results(S.sheetDraft).length); }
   if(e.target.id === 'sadrange'){ S.anketa.sadMax = +e.target.value; $('#sadval').textContent = 'до ' + e.target.value + ' минут'; }
   if(e.target.id === 'work'){ S.anketa.work = e.target.value; }
   if(e.target.id === 'msg'){ S.draft = e.target.value; }
