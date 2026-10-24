@@ -144,33 +144,73 @@ const findTxt = s => s.toLowerCase().replace(/ё/g,'е').trim();
 const SADS = {'Сад № 87':[24,50], 'Сад № 123':[47,53], 'Сад № 41':[70,39]};
 const UTIL = 8000;
 const FLATS = [
-  {id:'A', rent:38500, params:'2-комн. · 50 м² · 2/5 эт.', lift:false, beds2:false, parking:true, sad:14, sadName:'Сад № 87', school:11, schoolName:'Школа № 12', clinic:20, park:5, stop:4, work:'30 мин на авто', kids:true, verified:true, owner:'Олег', ownerG:'m', docs:'10.10', x:22, y:30},
-  {id:'B', rent:42000, params:'2-комн. · 54 м² · 5/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:6, sadName:'Сад № 123', school:9, schoolName:'Школа № 45', clinic:12, park:4, stop:3, work:'25 мин на авто', kids:true, verified:true, owner:'Ирина', ownerG:'f', docs:'12.10', x:48, y:44},
-  {id:'C', rent:47500, params:'2-комн. · 61 м² · 8/16 эт. · лифт', lift:true, beds2:false, parking:true, sad:9, sadName:'Сад № 41', school:12, schoolName:'Школа № 45', clinic:7, park:6, stop:2, work:'20 мин на авто', kids:true, verified:false, owner:'Марина', ownerG:'f', docs:null, x:70, y:26},
-  {id:'D', rent:39000, params:'2-комн. · 48 м² · 4/10 эт. · лифт', lift:true, beds2:false, parking:false, sad:8, sadName:'Сад № 123', school:10, schoolName:'Школа № 45', clinic:15, park:3, stop:5, work:'28 мин на авто', kids:true, verified:true, owner:'Айдар', ownerG:'m', docs:'09.10', x:38, y:62},
-  {id:'E', rent:44000, params:'2-комн. · 57 м² · 7/12 эт. · лифт', lift:true, beds2:false, parking:true, sad:9, sadName:'Сад № 41', school:6, schoolName:'Школа № 19', clinic:10, park:7, stop:4, work:'22 мин на авто', kids:true, verified:true, owner:'Гульнара', ownerG:'f', docs:'11.10', x:62, y:58},
-  {id:'F', rent:52000, params:'3-комн. · 74 м² · 6/9 эт. · лифт', lift:true, beds2:true, parking:true, sad:13, sadName:'Сад № 87', school:8, schoolName:'Школа № 12', clinic:9, park:5, stop:3, work:'26 мин на авто', kids:true, verified:true, owner:'Рустем', ownerG:'m', docs:'08.10', x:28, y:78},
-  {id:'G', rent:49000, params:'3-комн. · 70 м² · 3/5 эт.', lift:false, beds2:true, parking:false, sad:7, sadName:'Сад № 123', school:9, schoolName:'Школа № 45', clinic:13, park:4, stop:6, work:'27 мин на авто', kids:true, verified:true, owner:'Светлана', ownerG:'f', docs:'12.10', x:56, y:76},
-  {id:'H', rent:50500, params:'3-комн. · 72 м² · 11/14 эт. · лифт', lift:true, beds2:true, parking:true, sad:15, sadName:'Сад № 41', school:14, schoolName:'Школа № 19', clinic:8, park:9, stop:3, work:'19 мин на авто', kids:true, verified:true, owner:'Динар', ownerG:'m', docs:'07.10', x:80, y:48},
-  {id:'I', rent:41000, params:'2-комн. · 52 м² · 2/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:11, sadName:'Сад № 87', school:10, schoolName:'Школа № 12', clinic:14, park:6, stop:4, work:'29 мин на авто', kids:false, verified:true, owner:'Ольга', ownerG:'f', docs:'10.10', x:16, y:54}
+  {id:'A', short:'Серова, 12', rent:38500, params:'2-комн. · 50 м² · 2/5 эт.', lift:false, beds2:false, parking:true, sad:14, sadName:'Сад № 87', school:11, schoolName:'Школа № 12', clinic:20, park:5, stop:4, car:30, kids:true, verified:true, owner:'Олег', ownerG:'m', docs:'10.10', x:22, y:30},
+  {id:'B', short:'Амирхана, 21', rent:42000, params:'2-комн. · 54 м² · 5/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:6, sadName:'Сад № 123', school:9, schoolName:'Школа № 45', clinic:12, park:4, stop:3, car:25, kids:true, verified:true, owner:'Ирина', ownerG:'f', docs:'12.10', x:48, y:44},
+  {id:'C', short:'Ямашева, 54', rent:47500, params:'2-комн. · 61 м² · 8/16 эт. · лифт', lift:true, beds2:false, parking:true, sad:9, sadName:'Сад № 41', school:12, schoolName:'Школа № 45', clinic:7, park:6, stop:2, car:20, kids:true, verified:false, owner:'Марина', ownerG:'f', docs:null, x:70, y:26},
+  {id:'D', short:'Мусина, 7', rent:39000, params:'2-комн. · 48 м² · 4/10 эт. · лифт', lift:true, beds2:false, parking:false, sad:8, sadName:'Сад № 123', school:10, schoolName:'Школа № 45', clinic:15, park:3, stop:5, car:28, kids:true, verified:true, owner:'Айдар', ownerG:'m', docs:'09.10', x:38, y:62},
+  {id:'E', short:'Гаврилова, 18', rent:44000, params:'2-комн. · 57 м² · 7/12 эт. · лифт', lift:true, beds2:false, parking:true, sad:9, sadName:'Сад № 41', school:6, schoolName:'Школа № 19', clinic:10, park:7, stop:4, car:22, kids:true, verified:true, owner:'Гульнара', ownerG:'f', docs:'11.10', x:62, y:58},
+  {id:'F', short:'Четаева, 3', rent:52000, params:'3-комн. · 74 м² · 6/9 эт. · лифт', lift:true, beds2:true, parking:true, sad:13, sadName:'Сад № 87', school:8, schoolName:'Школа № 12', clinic:9, park:5, stop:3, car:26, kids:true, verified:true, owner:'Рустем', ownerG:'m', docs:'08.10', x:28, y:78},
+  {id:'G', short:'Ибрагимова, 9', rent:49000, params:'3-комн. · 70 м² · 3/5 эт.', lift:false, beds2:true, parking:false, sad:7, sadName:'Сад № 123', school:9, schoolName:'Школа № 45', clinic:13, park:4, stop:6, car:27, kids:true, verified:true, owner:'Светлана', ownerG:'f', docs:'12.10', x:56, y:76},
+  {id:'H', short:'Кул Гали, 15', rent:50500, params:'3-комн. · 72 м² · 11/14 эт. · лифт', lift:true, beds2:true, parking:true, sad:15, sadName:'Сад № 41', school:14, schoolName:'Школа № 19', clinic:8, park:9, stop:3, car:19, kids:true, verified:true, owner:'Динар', ownerG:'m', docs:'07.10', x:80, y:48},
+  {id:'J', short:'Чуйкова, 33', rent:45500, params:'2-комн. · 55 м² · 4/12 эт. · лифт', lift:true, beds2:false, parking:true, sad:4, sadName:'Сад № 123', school:8, schoolName:'Школа № 45', clinic:11, park:3, stop:2, car:24, kids:true, verified:true, owner:'Альбина', ownerG:'f', docs:'13.10', x:44, y:57},
+  {id:'K', short:'Карбышева, 12', rent:40500, params:'2-комн. · 47 м² · 3/5 эт.', lift:false, beds2:false, parking:false, sad:3, sadName:'Сад № 87', school:12, schoolName:'Школа № 12', clinic:16, park:6, stop:4, car:31, kids:true, verified:true, owner:'Ильдар', ownerG:'m', docs:'11.10', x:27, y:45},
+  {id:'I', short:'Глушко, 6', rent:41000, params:'2-комн. · 52 м² · 2/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:11, sadName:'Сад № 87', school:10, schoolName:'Школа № 12', clinic:14, park:6, stop:4, car:29, kids:false, verified:true, owner:'Ольга', ownerG:'f', docs:'10.10', x:16, y:54}
 ];
-FLATS.forEach(f => f.entry = f.rent*2 + UTIL);
+FLATS.forEach(f => { f.entry = f.rent*2 + UTIL; const m = f.params.match(/(\d+)\/(\d+) эт/); f.floor = +m[1]; f.floors = +m[2]; });
+const fmtMin = m => m < 60 ? m + ' мин' : Math.floor(m/60) + ' ч' + (m%60 ? ' ' + m%60 + ' мин' : '');
+const COMMUTE = {'авто': f => fmtMin(f.car) + ' на авто', 'транспорт': f => fmtMin(Math.round(f.car*1.6 + 4)) + ' на транспорте', 'пешком': f => fmtMin(Math.round(f.car*3.4)) + ' пешком'};
+const workTxt = f => S.anketa.commute.map(c => COMMUTE[c](f)).join('<br>');
 const byId = id => FLATS.find(f => f.id === id);
 const REPLIES = {
+  'Есть лифт?': f => liftAns(f),
   'Какой залог?': f => 'Залог ' + rub(f.rent) + ', как месяц аренды. Можно внести в два платежа.',
   'Можно с животными?': () => 'Небольшую собаку или кошку можно, крупных животных нет.',
   'Есть ли кондиционер?': () => 'Да, в спальне. В детской стоит вентилятор.'
 };
+function liftAns(f){ return f.lift ? 'Да, лифт есть, коляска в него помещается, проверяли со своей.' : 'Лифта нет, квартира на ' + f.floor + ' этаже. Коляску соседи оставляют под лестницей на первом этаже.'; }
+const RULES = [
+  [/лифт/, f => liftAns(f)],
+  [/залог|депозит|предоплат/, f => REPLIES['Какой залог?'](f)],
+  [/живот|кошк|собак|питом/, f => REPLIES['Можно с животными?'](f)],
+  [/кондиц/, f => REPLIES['Есть ли кондиционер?'](f)],
+  [/коммун|счетчик|квартплат|жкх|отоплен/, () => 'Коммуналка зимой около 8 000 ₽, летом меньше. Счётчики на воду и свет стоят.'],
+  [/регистрац|прописк/, () => 'Временную регистрацию оформим, это бесплатно.'],
+  [/садик|сад[ау ]|сад$|детсад/, f => f.sadName + ' в ' + f.sad + ' ' + plural(f.sad,'минуте','минутах','минутах') + ' пешком, дом к нему закреплён.'],
+  [/школ/, f => f.schoolName + ' в ' + f.school + ' ' + plural(f.school,'минуте','минутах','минутах') + ' пешком, дом к ней закреплён.'],
+  [/ребен|дет|малыш/, f => f.kids ? 'С ребёнком можно, у самих двое детей. Во дворе есть площадка.' : 'Извините, семьям с маленькими детьми не сдаю.'],
+  [/парков|машин/, f => f.parking ? 'Во дворе есть парковка, места обычно находятся.' : 'Своей парковки во дворе нет, машины ставят вдоль улицы.'],
+  [/мебел|техник|стирал|холодил|посудомо|кроват/, () => 'Квартира с мебелью и техникой: холодильник, стиральная машина, плита. Детской кроватки нет, можно поставить свою.'],
+  [/торг|скидк|дешевл|подешев/, () => 'Цена окончательная. Если подпишем договор на год, первый месяц коммуналки оплачу сам.'],
+  [/договор|срок|надолго/, () => 'Договор на 11 месяцев с продлением. Подпишем на просмотре, если всё понравится.'],
+  [/интернет|wi.?fi|вайфай|вай-фай/, () => 'Интернет проведён, роутер оставлю.'],
+  [/ремонт/, () => 'Ремонт сделан два года назад, всё аккуратно.'],
+  [/балкон|лоджи/, () => 'Балкон застеклён, можно сушить бельё.'],
+  [/этаж/, f => 'Квартира на ' + f.floor + ' этаже из ' + f.floors + '.'],
+  [/шум|сосед/, () => 'Соседи спокойные, в подъезде много семей с детьми.'],
+  [/адрес|где дом|где наход/, f => 'Дом на ' + f.short + '. Номер квартиры напишу после записи на просмотр.'],
+  [/въех|въезд|заех|засел|свободн|когда/, () => 'Квартира свободна, заехать можно с 1 ноября. Раньше тоже можно договориться.'],
+  [/просмотр|посмотр|показ|приех/, () => 'Конечно. Выберите внизу удобный день и время, я подтвержу.'],
+  [/спасиб/, () => 'Пожалуйста! Пишите, если что-то ещё.'],
+  [/^(здравствуйте|привет|добрый день|добрый вечер|доброе утро)[!. ]*$/, f => 'Здравствуйте! Я ' + f.owner + ', спрашивайте.']
+];
+function answer(f, text){
+  if(REPLIES[text]) return REPLIES[text](f);
+  const q = findTxt(text), hits = RULES.filter(([re]) => re.test(q)).slice(0,2).map(([,fn]) => fn(f));
+  return hits.length ? hits.join(' ') : 'Этого точно не скажу, уточню и напишу сегодня вечером. Остальное могу показать на просмотре.';
+}
 const DAYS = ['Пт, 16 октября','Сб, 17 октября','Вс, 18 октября'];
-const DAYW = {'Пт, 16 октября':'в пятницу, 16 октября','Сб, 17 октября':'в субботу, 17 октября','Вс, 18 октября':'в воскресенье, 18 октября'};
+const WD = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], WDA = {'Пн':'в понедельник','Вт':'во вторник','Ср':'в среду','Чт':'в четверг','Пт':'в пятницу','Сб':'в субботу','Вс':'в воскресенье'};
+const dayW = d => WDA[d.split(', ')[0]] + ', ' + d.split(', ')[1];
+const dayOf = v => { const [y,m,dd] = v.split('-').map(Number); return WD[new Date(y, m-1, dd).getDay()] + ', ' + dd + ' ' + MONTHS[m-1]; };
 function gen(f){ const n = f.owner; if(f.ownerG === 'm') return n + 'а'; if(/[гкхжшчщ]а$/.test(n)) return n.slice(0,-1) + 'и'; return n.replace(/а$/,'ы'); }
 const TIMES = ['10:00','12:00','15:00','18:00'];
+const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 
 /* ---------- state ---------- */
 function fresh(){
   return {
     screen:'welcome', stack:[], tab:'search', cur:'B', step:1,
-    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', near:['sad','clinic','park','liftc'], sadMax:10, work:'ул. Баумана, 1', commute:'авто', kids:true, verified:true},
+    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', near:['sad','clinic','park','liftc'], sadMax:10, work:'ул. Баумана, 1', commute:['авто'], kids:true, verified:true},
     filters:{sad:10, lift:true, kids:true, verified:true, beds2:false, parking:false}, anketaDone:true,
     sort:'sad', fav:[], scroll:{}, cityQ:'', placeQ:'', whenDate:'',
     chats:{},
@@ -204,7 +244,7 @@ function results(flt){
 function relaxOptions(){
   const out = [];
   const f = S.filters;
-  if(f.sad && f.sad < 15){ const n = results({...f, sad:15}).length; if(n) out.push({label:'Сад до 15 минут', n, act:'relax-sad'}); }
+  if(f.sad && f.sad < 15){ const nx = f.sad < 10 ? 10 : 15, n = results({...f, sad:nx}).length; if(n) out.push({label:'Сад до ' + nx + ' минут', n, act:'relax-sad', v:nx}); }
   if(f.lift){ const n = results({...f, lift:false}).length; if(n) out.push({label:'Без лифта', n, act:'relax-lift'}); }
   if(f.beds2){ const n = results({...f, beds2:false}).length; if(n) out.push({label:'Любое число спален', n, act:'relax-beds'}); }
   if(f.parking){ const n = results({...f, parking:false}).length; if(n) out.push({label:'Без парковки', n, act:'relax-park'}); }
@@ -237,8 +277,9 @@ function toast(text, action){ S.toast = {text, action}; render(); const id = Mat
 
 /* ---------- pieces ---------- */
 function topBack(title, right, extra){
-  return '<div class="top"><button data-act="back" aria-label="Назад">←</button><span class="t">' + title + '</span>' + (right||'') + '</div>' + (extra||'');
+  return '<div class="top"><button data-act="back" aria-label="Назад">←</button><span class="t">' + title + '</span>' + (right||'') + homeBtn() + '</div>' + (extra||'');
 }
+const homeBtn = () => '<button data-act="home" aria-label="На главную" title="На главную" style="font-size:18px;padding:0 2px">⌂</button>';
 function tabs(){
   const items = [['search','Поиск'],['map','Карта'],['fav','Избранное'],['chats','Чаты'],['profile','Профиль']];
   return '<nav class="tabs">' + items.map(([k,l]) => '<button data-act="tab" data-v="' + k + '" class="' + (S.tab===k?'cur':'') + '"><i></i>' + l + '</button>').join('') + '</nav>';
@@ -246,7 +287,8 @@ function tabs(){
 function heart(f){ const on = S.fav.includes(f.id); return '<span class="heart" role="button" tabindex="0" data-act="fav" data-v="' + f.id + '" aria-label="' + (on?'Убрать из избранного':'В избранное') + '">' + (on?'♥':'♡') + '</span>'; }
 function cmpBar(){
   const n = S.fav.length;
-  if(n < 2) return '';
+  if(!n) return '';
+  if(n < 2) return '<div class="cmpbar" style="font-weight:600"><button data-act="tab" data-v="fav">♡ 1 в избранном</button><span class="small muted">Добавьте ещё одну, чтобы сравнить</span></div>';
   return '<div class="cmpbar"><button data-act="tab" data-v="fav">♡ ' + n + ' в избранном</button><button data-act="compare">Сравнить ' + kv(n) + ' →</button></div>';
 }
 function ownerLine(f){
@@ -280,7 +322,6 @@ function citySearch(){
     (list.length ? choice('city', list.slice(0,8), a.city) : '<div class="small muted">Такого города нет в списке. Проверьте написание.</div>');
 }
 const WHENS = ['через 2 недели','через месяц','через 2–3 месяца'];
-const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
 const dateTxt = v => { const [y,m,d] = v.split('-').map(Number); return d + ' ' + MONTHS[m-1] + (y !== 2026 ? ' ' + y : ''); };
 function whenPick(){
   const a = S.anketa, own = !WHENS.includes(a.when);
@@ -301,15 +342,15 @@ V.anketa = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько лет ребёнку?</div>' + choice('age', ['до 1 года','1–3 года','3–7 лет','7+ лет'], a.age) + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что должно быть рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="sadrange">Сколько идти до сада пешком?</label>' +
-      '<input id="sadrange" type="range" min="5" max="30" step="5" value="' + a.sadMax + '" data-act="range">' +
-      '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700" id="sadval">до ' + a.sadMax + ' минут</span><span>30 мин</span></div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько идти до сада пешком?</div>' +
+      '<div class="chips">' + [5,10,15].map(v => '<button class="chip' + (a.sadMax===v?' on':'') + '" data-act="sadmax" data-v="' + v + '">до ' + v + ' мин</button>').join('') + '</div></div>' +
     '<div class="box small muted">Адрес работы добавим на следующем шаге, чтобы считать дорогу.</div>' + stepFoot(2);
   }
   if(n === 3) return stepTop(3) +
     '<div class="h1">Где будет работа?</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="work">Адрес работы</label><input id="work" class="field" value="' + esc(a.work) + '" data-act="work" autocomplete="off"></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Как будете добираться?</div>' + choice('commute', ['авто','транспорт','пешком'], a.commute) + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Как будете добираться?</div><div class="small muted">Можно выбрать несколько</div><div class="chips">' +
+      ['авто','транспорт','пешком'].map(c => { const on = a.commute.includes(c); return '<button class="chip' + (on?' on':'') + '" data-act="commute" data-v="' + c + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + c + '</button>'; }).join('') + '</div></div>' +
     '<div class="box small muted">Время до работы покажем в карточке каждой квартиры.</div>' + stepFoot(3);
   return stepTop(4) +
     '<div class="h1">Что ещё важно?</div>' +
@@ -337,7 +378,7 @@ function searchTop(){
 }
 function flatCard(f, big){
   return '<div class="flat"><button data-act="open" data-v="' + f.id + '" class="img" style="height:' + (big?150:110) + 'px;border-radius:0;width:100%">фото квартиры · 1/12</button>' +
-    '<div class="in"><div class="row"><button data-act="open" data-v="' + f.id + '" style="font-size:17px;font-weight:800">' + rub(f.rent) + '/мес</button>' + heart(f) + '</div>' +
+    '<div class="in"><div class="small" style="font-weight:700">' + f.short + '</div><div class="row"><button data-act="open" data-v="' + f.id + '" style="font-size:17px;font-weight:800">' + rub(f.rent) + '/мес</button>' + heart(f) + '</div>' +
     '<div class="small">Въезд: <b>' + rub(f.entry) + '</b> · без комиссии</div>' +
     '<div class="small muted">' + f.params + '</div>' +
     '<div class="small">Сад пешком ' + f.sad + ' мин · Школа ' + f.school + ' мин · Поликлиника ' + f.clinic + ' мин</div>' +
@@ -366,7 +407,7 @@ V.results = () => {
       '<div style="font-size:19px;line-height:25px;font-weight:800">Под эти фильтры квартир пока нет</div>' +
       '<div class="muted" style="font-size:14px;line-height:20px">В этом районе мало квартир' + (S.filters.beds2?' с двумя спальнями':'') + (S.filters.lift?' и лифтом':'') + ' у сада. Анкета и фильтры сохранены.</div>' +
       (opts.length ? '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Попробуйте ослабить один фильтр:</div>' +
-        opts.map(o => '<button class="btn s" style="justify-content:space-between;padding:0 14px" data-act="' + o.act + '"><span>' + o.label + '</span><span class="small">ещё ' + kv(o.n) + '</span></button>').join('') + '</div>'
+        opts.map(o => '<button class="btn s" style="justify-content:space-between;padding:0 14px" data-act="' + o.act + '" data-v="' + (o.v||'') + '"><span>' + o.label + '</span><span class="small">ещё ' + kv(o.n) + '</span></button>').join('') + '</div>'
         : '<button class="btn s" data-act="reset-filters">Снять все фильтры</button>') +
       '<div style="flex:1"></div>' +
       (S.subscribed ? '<div class="box small" style="text-align:center">✓ Пришлём пуш, когда появится подходящая квартира</div>'
@@ -389,10 +430,10 @@ V.card = () => {
       '<div class="row"><span>' + f.schoolName + ' <span class="muted">· закреплена</span></span><b>пешком ' + f.school + ' мин</b></div>' +
       '<div class="row"><span>Детская поликлиника</span><b>пешком ' + f.clinic + ' мин</b></div>' +
       '<div class="row"><span>Парк · Остановка</span><b>' + f.park + ' · ' + f.stop + ' мин</b></div>' +
-      '<div class="row muted"><span>До работы (из анкеты)</span><span>' + f.work + '</span></div></div>';
+      '<div class="row muted" style="align-items:flex-start"><span>До работы (из анкеты)</span><span style="text-align:right">' + workTxt(f) + '</span></div></div>';
   const from = {results:'К выдаче', fav:'К избранному', compare:'К сравнению', map:'К карте', chat:'К чату'}[S.stack[S.stack.length-1]] || 'Назад';
-  return '<div class="top"><button data-act="back">← ' + from + '</button><span class="t"></span>' +
-      '<button data-act="fav" data-v="' + f.id + '" aria-label="' + (on?'Убрать из избранного':'В избранное') + '" style="font-size:17px">' + (on?'♥':'♡') + '</button><button data-act="share" aria-label="Поделиться">↗</button></div>' +
+  return '<div class="top"><button data-act="back">← ' + from + '</button><span class="t small" style="text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + f.short + '</span>' +
+      '<button data-act="fav" data-v="' + f.id + '" aria-label="' + (on?'Убрать из избранного':'В избранное') + '" style="font-size:17px">' + (on?'♥':'♡') + '</button><button data-act="share" aria-label="Поделиться">↗</button>' + homeBtn() + '</div>' +
     '<div class="body" style="gap:12px">' +
     '<button class="img" style="height:150px;width:100%" data-act="photo">фото · ' + (S.photo||1) + '/12</button>' +
     '<div class="row"><b style="font-size:19px">' + rub(f.rent) + '/мес</b><span class="small muted">' + f.params.split(' · ').slice(0,2).join(' · ') + '</span></div>' +
@@ -403,19 +444,27 @@ V.card = () => {
       '<div class="row muted"><span>Коммуналка, в среднем</span><span>≈ ' + rub(UTIL) + '</span></div>' +
       '<div class="row muted"><span>Комиссия</span><span>0 ₽</span></div>' +
       '<div class="row" style="font-weight:800;border-top:1px solid var(--line);padding-top:8px"><span>Итого при въезде</span><span>' + rub(f.entry) + '</span></div></div>' +
+    houseBox(f) +
     near +
     '<div class="box small"><span>' + ownerLine(f) + '</span></div>' +
-    '</div><div class="foot"><button class="btn s" data-act="fav" data-v="' + f.id + '">' + (on?'В избранном ♥':'В избранное') + '</button><button class="btn p" data-act="write" data-v="' + f.id + '">Написать</button></div>';
+    '</div>' + (S.fav.length >= 2 ? cmpBar() : '') + '<div class="foot"><button class="btn s" data-act="fav" data-v="' + f.id + '">' + (on?'В избранном ♥':'В избранное') + '</button><button class="btn p" data-act="write" data-v="' + f.id + '">Написать</button></div>';
 };
 
+function houseBox(f){
+  return '<div class="box"><div style="font-weight:800">Квартира и дом</div>' +
+    '<div class="row muted"><span>Комнаты и площадь</span><span>' + f.params.split(' · ').slice(0,2).join(', ') + '</span></div>' +
+    '<div class="row muted"><span>Этаж</span><span>' + f.floor + ' из ' + f.floors + '</span></div>' +
+    '<div class="row"><span>Лифт</span><b>' + (f.lift ? 'есть, коляска помещается' : 'нет') + '</b></div>' +
+    '<div class="row muted"><span>Парковка</span><span>' + (f.parking ? 'во дворе' : 'вдоль улицы') + '</span></div></div>';
+}
 function verdict(list){
   const bySad = [...list].sort((a,b)=>a.sad-b.sad)[0];
   const cheap = [...list].sort((a,b)=>a.entry-b.entry)[0];
-  let t = bySad.id + ' ближе всех к саду (' + bySad.sad + ' ' + plural(bySad.sad,'минута','минуты','минут') + ')' + (bySad.lift ? ' и с лифтом' : ', но без лифта');
-  if(cheap.id !== bySad.id) t += ', но въезд на ' + rub(bySad.entry - cheap.entry) + ' дороже ' + cheap.id + '.';
+  let t = 'Квартира на ' + bySad.short + ' ближе всех к саду (' + bySad.sad + ' ' + plural(bySad.sad,'минута','минуты','минут') + ')' + (bySad.lift ? ' и с лифтом' : ', но без лифта');
+  if(cheap.id !== bySad.id) t += ', но въезд на ' + rub(bySad.entry - cheap.entry) + ' дороже, чем на ' + cheap.short + '.';
   else t += ' и с самым дешёвым въездом.';
-  const unv = list.filter(f => !f.verified).map(f=>f.id);
-  if(unv.length) t += ' У ' + unv.join(' и ') + ' собственник ещё не проверен.';
+  const unv = list.filter(f => !f.verified).map(f=>f.short);
+  if(unv.length) t += ' На ' + unv.join(' и ') + ' собственник ещё не проверен.';
   return {text:t, best:bySad};
 }
 V.compare = () => {
@@ -429,7 +478,7 @@ V.compare = () => {
     ['Лифт', f=>f.lift?1:0, f=>f.lift?'да':'нет', null],
     ['Собственник', f=>f.verified?1:0, f=>f.verified?'✓':'—', null]
   ];
-  let g = '<div class="grid" style="--n:' + list.length + '"><div class="hd"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '">' + f.id + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
+  let g = '<div class="grid" style="--n:' + list.length + '"><div class="hd"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '" style="font-size:11px;line-height:14px">' + f.short.replace(', ', '<br>') + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
   rows.forEach(([l,val,show,best]) => {
     const vals = list.map(val), b = best ? Math.min(...vals) : null;
     g += '<div>' + l + '</div>' + list.map((f,i) => '<div class="c' + (best && vals[i]===b ? ' best' : '') + '">' + show(f) + '</div>').join('');
@@ -443,8 +492,8 @@ V.compare = () => {
     '<div class="small muted">Учёл: минуты до сада, сумму въезда, лифт</div>' +
     '<div class="small muted">Решение за вами · <button class="link" data-act="why">Почему такой вывод?</button></div></div>';
   return head + '<div class="body" style="gap:12px"><div class="small muted">По приоритетам вашей анкеты · обновлено 2 мин назад</div>' + g +
-    '<div class="small muted">Серым выделено лучшее значение в строке. Нажмите на букву, чтобы открыть квартиру</div>' + ai +
-    '</div><div class="foot one"><button class="btn p" data-act="book-from-compare" data-v="' + v.best.id + '">Записаться на просмотр ' + v.best.id + '</button></div>';
+    '<div class="small muted">Серым выделено лучшее значение в строке. Нажмите на адрес, чтобы открыть квартиру</div>' + ai +
+    '</div><div class="foot one"><button class="btn p" data-act="pick-book">Записаться на просмотр</button></div>';
 };
 
 function bookingBox(f){
@@ -463,7 +512,7 @@ V.chat = () => {
   const asked = msgs.filter(m=>m.me).map(m=>m.t);
   const quick = Object.keys(REPLIES).filter(q => !asked.includes(q));
   return '<div class="top"><button data-act="back" aria-label="Назад">←</button><div class="t" style="display:flex;flex-direction:column"><span>' + f.owner + (f.verified?' ✓':'') + '</span><span class="small muted" style="font-weight:500">собственник · отвечает за час</span></div>' +
-      '<button class="small muted link" data-act="open" data-v="' + f.id + '">Квартира ' + f.id + '</button></div>' +
+      '<button class="small muted link" data-act="open" data-v="' + f.id + '">' + f.short + '</button>' + homeBtn() + '</div>' +
     (M.offline ? '<div class="small" style="flex:none;padding:8px 18px;border-bottom:1px solid var(--ink);background:var(--soft)"><b>Нет подключения к интернету.</b> Сообщения сохранены и уйдут сами, когда появится сеть.</div>' : '') +
     '<div class="body" style="gap:10px;background:#FAFAFB">' +
     '<div class="box small" style="background:var(--paper)"><span>Номер и чат бесплатны. Не переводите деньги до просмотра.</span></div>' +
@@ -487,7 +536,7 @@ V.chats = () => {
   const ids = Object.keys(S.chats).filter(id => S.chats[id].length);
   return '<div class="top"><span class="t">Чаты</span></div><div class="body" style="gap:0">' +
     (ids.length ? ids.map(id => { const f = byId(id), m = S.chats[id], last = m[m.length-1]; const b = S.booking[id];
-      return '<button class="list-row" data-act="chat" data-v="' + id + '"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>' + f.owner + (f.verified?' ✓':'') + ' · квартира ' + id + '</b><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">' + (last ? (last.me?'Вы: ':'') + esc(last.t) : 'Нет сообщений') + '</span></span>' +
+      return '<button class="list-row" data-act="chat" data-v="' + id + '"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>' + f.owner + (f.verified?' ✓':'') + ' · ' + f.short + '</b><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">' + (last ? (last.me?'Вы: ':'') + esc(last.t) : 'Нет сообщений') + '</span></span>' +
         (b && b.status==='wait' ? '<span class="chip" style="font-size:10px">⏳</span>' : b && b.status==='ok' ? '<span class="chip on" style="font-size:10px">✓</span>' : '<span class="muted">›</span>') + '</button>'; }).join('')
       : '<div class="muted" style="font-size:14px;line-height:20px">Здесь будут переписки с собственниками. Откройте квартиру и нажмите «Написать».</div>') + '</div>' + tabs();
 };
@@ -520,10 +569,10 @@ V.map = () => {
 '' : '') +
     Object.entries(SADS).map(([n,[x,y]]) => '<span class="poi" style="left:' + x + '%;top:' + y + '%' + (sp && sel.sadName===n ? ';border-color:var(--ink);color:var(--ink);background:var(--soft);z-index:2' : '') + '">◉ ' + n + '</span>').join('') +
     [['✚ Поликлиника',58,30],['▣ Школа № 45',50,87]].map(([t,x,y]) => '<span class="poi" style="left:' + x + '%;top:' + y + '%">' + t + '</span>').join('') +
-    r.map(f => '<button class="pin' + (sel&&sel.id===f.id?' sel':'') + '" style="left:' + f.x + '%;top:' + f.y + '%" data-act="pin" data-v="' + f.id + '" aria-label="Квартира ' + f.id + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>').join('') +
+    r.map(f => '<button class="pin' + (sel&&sel.id===f.id?' sel':'') + '" style="left:' + f.x + '%;top:' + f.y + '%" data-act="pin" data-v="' + f.id + '" aria-label="' + f.short + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>').join('') +
     (r.length ? '' : '<div style="position:absolute;inset:auto 12px 12px 12px" class="box small" >Под фильтры квартир нет. Ослабьте фильтр в списке.</div>') +
     '</div>' +
-    (sel ? '<div class="box"><div class="row"><b>' + rub(sel.rent) + '/мес</b>' + heart(sel) + '</div><div class="small">Въезд ' + rub(sel.entry) + ' · ' + sel.sadName + ' пешком ' + sel.sad + ' мин</div><button class="btn p" style="height:40px" data-act="open" data-v="' + sel.id + '">Открыть квартиру</button></div>'
+    (sel ? '<div class="box"><div class="small" style="font-weight:700">' + sel.short + '</div><div class="row"><b>' + rub(sel.rent) + '/мес</b>' + heart(sel) + '</div><div class="small">Въезд ' + rub(sel.entry) + ' · ' + sel.sadName + ' пешком ' + sel.sad + ' мин</div><button class="btn p" style="height:40px" data-act="open" data-v="' + sel.id + '">Открыть квартиру</button></div>'
          : '<div class="small muted" style="text-align:center">' + kv(r.length) + ' на карте. Нажмите на цену, чтобы увидеть путь до сада</div>') +
     '<button class="btn s" style="height:40px" data-act="tab" data-v="search">Списком</button></div>' + tabs();
 };
@@ -574,14 +623,22 @@ SH.district = () => {
   if(!out) out = '<div class="small muted">Ничего не нашли по запросу «' + esc(S.placeQ) + '». Попробуйте название города или района.</div>';
   return sheet('<div class="h1" style="font-size:17px">Где ищем</div><input class="field" id="placesearch" type="search" autocomplete="off" placeholder="⌕ Город или район" value="' + esc(S.placeQ) + '">' + out);
 };
-SH.why = () => { const v = verdict(S.fav.map(byId)); return sheet('<div class="h1" style="font-size:17px">Почему такой вывод</div><div style="font-size:14px;line-height:20px">Помощник взял приоритеты из вашей анкеты: сад пешком до ' + S.anketa.sadMax + ' минут, сумму въезда и лифт. Ближе всех к саду ' + v.best.id + ', поэтому она первая. Если важнее деньги, смотрите строку «Въезд»: там серым выделен самый дешёвый въезд.</div><div class="small muted">Помощник не знает того, чего нет в анкете и объявлениях. Решение за вами.</div><button class="btn p" data-act="close-sheet">Понятно</button>'); };
+SH.why = () => { const v = verdict(S.fav.map(byId)); return sheet('<div class="h1" style="font-size:17px">Почему такой вывод</div><div style="font-size:14px;line-height:20px">Помощник взял приоритеты из вашей анкеты: сад пешком до ' + S.anketa.sadMax + ' минут, сумму въезда и лифт. Ближе всех к саду квартира на ' + v.best.short + ', поэтому она первая. Если важнее деньги, смотрите строку «Въезд»: там серым выделен самый дешёвый въезд.</div><div class="small muted">Помощник не знает того, чего нет в анкете и объявлениях. Решение за вами.</div><button class="btn p" data-act="close-sheet">Понятно</button>'); };
 SH.book = () => {
   const f = byId(S.cur), d = S.bookDraft;
-  return sheet('<div class="h1" style="font-size:17px">Просмотр квартиры ' + f.id + '</div><div class="small muted">' + f.owner + ' получит запрос и подтвердит время в чате</div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">День</div><div class="chips">' + DAYS.map(x => '<button class="chip' + (d.day===x?' on':'') + '" data-act="bd-day" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Время</div><div class="chips">' + TIMES.map(x => '<button class="chip' + (d.time===x?' on':'') + '" data-act="bd-time" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>' +
+  return sheet('<div class="h1" style="font-size:17px">Просмотр · ' + f.short + '</div><div class="small muted">' + f.owner + ' получит запрос и подтвердит время в чате</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">День</div><div class="chips">' + DAYS.map(x => '<button class="chip' + (!d.ownDay&&d.day===x?' on':'') + '" data-act="bd-day" data-v="' + x + '">' + x + '</button>').join('') +
+      '<button class="chip' + (d.ownDay?' on':'') + '" data-act="bd-own-day">Другой день</button></div>' +
+      (d.ownDay ? '<input class="field" id="bookdate" type="date" min="2026-10-16" max="2027-03-31" value="' + (d.dayRaw||'') + '" aria-label="Дата просмотра">' : '') + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Время</div><div class="chips">' + TIMES.map(x => '<button class="chip' + (!d.ownTime&&d.time===x?' on':'') + '" data-act="bd-time" data-v="' + x + '">' + x + '</button>').join('') +
+      '<button class="chip' + (d.ownTime?' on':'') + '" data-act="bd-own-time">Другое время</button></div>' +
+      (d.ownTime ? '<input class="field" id="booktime" type="time" min="08:00" max="21:00" step="900" value="' + (d.ownTime && d.time ? d.time : '') + '" aria-label="Время просмотра"><span class="small muted">С 8:00 до 21:00</span>' : '') + '</div>' +
     '<button class="btn p" data-act="bd-send"' + (d.day&&d.time?'':' disabled') + '>' + (d.day&&d.time ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : 'Выберите день и время') + '</button>');
 };
+SH.pickbook = () => { const list = S.fav.map(byId).sort((a,b)=>a.id.localeCompare(b.id)), best = verdict(list).best;
+  return sheet('<div class="h1" style="font-size:17px">Какую квартиру посмотреть?</div><div class="small muted">Можно записаться на несколько, по очереди</div>' +
+    list.map(f => '<button class="list-row" data-act="book-from-compare" data-v="' + f.id + '"><span><b>' + f.short + '</b>' + (f.id===best.id ? ' <span class="chip" style="font-size:10px;padding:2px 8px">советует помощник</span>' : '') +
+      '<div class="small muted">Въезд ' + rub(f.entry) + ' · сад пешком ' + f.sad + ' мин' + (S.booking[f.id] && S.booking[f.id].status !== 'cancel' ? ' · просмотр ' + S.booking[f.id].day : '') + '</div></span><span>›</span></button>').join('')); };
 SH.cancel = () => { const f = byId(S.cur), b = S.booking[f.id]; return sheet('<div class="h1" style="font-size:17px">Отменить просмотр?</div><div style="font-size:14px;line-height:20px">' + b.day + ' · ' + b.time + '. ' + f.owner + ' получит уведомление об отмене.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" data-act="close-sheet">Не отменять</button><button class="btn p" data-act="cancel-do">Отменить</button></div>'); };
 
 /* ---------- render ---------- */
@@ -611,17 +668,17 @@ function send(text){
   const list = S.chats[f.id] = S.chats[f.id] || [];
   if(M.offline){ list.push({me:true, t:text, failed:true}); S.chatBottom = true; render(); return; }
   list.push({me:true, t:text}); S.chatBottom = true; render();
-  ownerReply(f, REPLIES[text] ? REPLIES[text](f) : 'Хорошо, подробнее расскажу на просмотре.');
+  ownerReply(f, answer(f, text));
 }
 function flushOffline(){
-  Object.entries(S.chats).forEach(([id, list]) => list.forEach(m => { if(m.failed){ m.failed = false; if(id === S.cur) ownerReply(byId(id), REPLIES[m.t] ? REPLIES[m.t](byId(id)) : 'Хорошо, подробнее расскажу на просмотре.'); } }));
+  Object.entries(S.chats).forEach(([id, list]) => list.forEach(m => { if(m.failed){ m.failed = false; if(id === S.cur) ownerReply(byId(id), answer(byId(id), m.t)); } }));
 }
 function confirmBooking(id){
   const b = S.booking[id]; if(!b || b.status !== 'wait') return;
   const f = byId(id);
   b.status = 'ok';
-  (S.chats[id] = S.chats[id] || []).push({me:false, t:'Подтверждаю просмотр ' + DAYW[b.day] + ' в ' + b.time + '. Буду ждать у подъезда.'});
-  S.push = {title: f.owner + ' подтвердил' + (f.ownerG==='f'?'а':'') + ' просмотр', text: b.day + ', ' + b.time + ' · квартира ' + id, id};
+  (S.chats[id] = S.chats[id] || []).push({me:false, t:'Подтверждаю просмотр ' + dayW(b.day) + ' в ' + b.time + '. Буду ждать у подъезда.'});
+  S.push = {title: f.owner + ' подтвердил' + (f.ownerG==='f'?'а':'') + ' просмотр', text: b.day + ', ' + b.time + ' · ' + f.short, id};
   S.chatBottom = true; render();
   later(4500, () => { S.push = null; render(); });
 }
@@ -629,6 +686,7 @@ function confirmBooking(id){
 /* ---------- actions ---------- */
 const A = {
   back, tab: v => tab(v),
+  home(){ tab('search'); },
   start(){ S.step = 1; go('anketa'); },
   'to-welcome'(){ if(S.stack.length) back(); else { S.screen = 'welcome'; render(); } },
   'step-prev'(){ S.step--; render(true); },
@@ -646,6 +704,8 @@ const A = {
     if(g === 'city'){ S.district = v === HAS.city ? HAS.district : ''; S.cityQ = ''; }
     S.anketa[g] = v; render();
   },
+  commute(v){ const c = S.anketa.commute, i = c.indexOf(v); if(i < 0) c.push(v); else if(c.length > 1) c.splice(i,1); render(); },
+  sadmax(v){ S.anketa.sadMax = +v; render(); },
   near(v){ const n = S.anketa.near; const i = n.indexOf(v); i<0 ? n.push(v) : n.splice(i,1); render(); },
   'ank-toggle'(v){ S.anketa[v] = !S.anketa[v]; render(); },
   'edit-anketa'(){ S.step = 1; go('anketa'); },
@@ -661,7 +721,7 @@ const A = {
   'place-d'(v){ S.anketa.city = HAS.city; S.district = v; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
   'place-c'(v){ S.anketa.city = v; S.district = v === HAS.city ? HAS.district : ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
   'to-has'(){ S.anketa.city = HAS.city; S.district = HAS.district; S.mapSel = null; render(); },
-  'relax-sad'(){ S.filters.sad = 15; render(); },
+  'relax-sad'(v){ S.filters.sad = +v || 15; render(); },
   'relax-lift'(){ S.filters.lift = false; render(); },
   'relax-beds'(){ S.filters.beds2 = false; render(); },
   'relax-park'(){ S.filters.parking = false; render(); },
@@ -674,7 +734,7 @@ const A = {
     else { S.fav.splice(i,1); toast('Убрали из избранного', {act:'unfav-undo', v, label:'Вернуть'}); }
   },
   'unfav-undo'(v){ if(!S.fav.includes(v)){ S.fav.push(v); S.fav.sort(); } S.toast = null; render(); },
-  share(){ try{ navigator.clipboard.writeText('Квартира ' + S.cur + ' в Казани').catch(()=>{}); }catch(e){} toast('Ссылка на квартиру скопирована'); },
+  share(){ try{ navigator.clipboard.writeText('Квартира на ' + byId(S.cur).short + ' в Казани').catch(()=>{}); }catch(e){} toast('Ссылка на квартиру скопирована'); },
   photo(){ S.photo = (S.photo||1) % 12 + 1; render(); },
   compare(){ S.toast = null; go('compare'); },
   'ai-retry'(){ S.aiState = 'loading'; render(); later(1000, () => { S.aiState = 'ok'; render(); }); },
@@ -683,21 +743,24 @@ const A = {
   chat(v){ S.cur = v; S.chatBottom = true; go('chat'); },
   'book-from-compare'(v){ S.cur = v; S.chats[v] = S.chats[v] || []; S.chatBottom = true; go('chat'); A.book(v); },
   book(v){ S.cur = v; const b = S.booking[v]; S.bookDraft = b && b.status !== 'cancel' ? {day:b.day, time:b.time} : {}; S.sheet = 'book'; render(); },
-  'bd-day'(v){ S.bookDraft.day = v; render(); },
-  'bd-time'(v){ S.bookDraft.time = v; render(); },
+  'bd-day'(v){ S.bookDraft.day = v; S.bookDraft.ownDay = false; render(); },
+  'bd-time'(v){ S.bookDraft.time = v; S.bookDraft.ownTime = false; render(); },
+  'bd-own-day'(){ const d = S.bookDraft; d.ownDay = true; d.day = d.dayRaw ? dayOf(d.dayRaw) : null; render(); },
+  'bd-own-time'(){ const d = S.bookDraft; d.ownTime = true; d.time = null; render(); },
   'bd-send'(){
     const f = byId(S.cur), d = S.bookDraft; if(!d.day || !d.time) return;
     const moved = S.booking[f.id] && S.booking[f.id].status !== 'cancel';
     S.booking[f.id] = {day:d.day, time:d.time, status:'wait'};
-    (S.chats[f.id] = S.chats[f.id] || []).push({me:true, t:(moved?'Можно перенести просмотр? Удобно ':'Хочу посмотреть квартиру ') + DAYW[d.day] + ' в ' + d.time + '.'});
+    (S.chats[f.id] = S.chats[f.id] || []).push({me:true, t:(moved?'Можно перенести просмотр? Удобно ':'Хочу посмотреть квартиру ') + dayW(d.day) + ' в ' + d.time + '.'});
     S.sheet = null; S.chatBottom = true; render();
     toast('Запрос отправлен. Ждём ответа ' + gen(f));
     if(M.autoConfirm) later(6000, () => confirmBooking(f.id));
   },
+  'pick-book'(){ S.sheet = 'pickbook'; render(); },
   'cancel-ask'(v){ S.cur = v; S.sheet = 'cancel'; render(); },
   'cancel-do'(){ const b = S.booking[S.cur]; b.status = 'cancel'; S.sheet = null; render(); toast('Просмотр отменён'); },
   quick(v){ send(v); },
-  resend(i){ const m = S.chats[S.cur][+i]; if(M.offline){ toast('Сети пока нет. Сообщение уйдёт само, когда она появится'); return; } m.failed = false; render(); ownerReply(byId(S.cur), REPLIES[m.t] ? REPLIES[m.t](byId(S.cur)) : 'Хорошо, подробнее расскажу на просмотре.'); },
+  resend(i){ const m = S.chats[S.cur][+i]; if(M.offline){ toast('Сети пока нет. Сообщение уйдёт само, когда она появится'); return; } m.failed = false; render(); ownerReply(byId(S.cur), answer(byId(S.cur), m.t)); },
   'push-open'(){ const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
   pin(v){ S.mapSel = v; render(); },
   go(v){ go(v); },
@@ -720,6 +783,8 @@ document.addEventListener('input', e => {
   if(e.target.id === 'sadrange'){ S.anketa.sadMax = +e.target.value; $('#sadval').textContent = 'до ' + e.target.value + ' минут'; }
   if(e.target.id === 'work'){ S.anketa.work = e.target.value; }
   if(e.target.id === 'msg'){ S.draft = e.target.value; }
+  if(e.target.id === 'bookdate' && e.target.value){ S.bookDraft.dayRaw = e.target.value; S.bookDraft.day = dayOf(e.target.value); render(); }
+  if(e.target.id === 'booktime' && e.target.value){ const t = e.target.value; S.bookDraft.time = (t < '08:00' || t > '21:00') ? null : t; render(); }
   if(e.target.id === 'citysearch'){ S.cityQ = e.target.value; render(); }
   if(e.target.id === 'placesearch'){ S.placeQ = e.target.value; render(); }
   if(e.target.id === 'whendate' && e.target.value){ S.whenDate = e.target.value; S.anketa.when = 'к ' + dateTxt(e.target.value); const t = $('#whentxt'); if(t) t.textContent = 'Переезд ' + S.anketa.when; }
@@ -756,7 +821,7 @@ const MA = {
   'm-slow'(){ M.slow = !M.slow; render(); },
   'm-off'(){ M.offline = !M.offline; if(!M.offline) flushOffline(); render(); },
   'm-auto'(){ M.autoConfirm = !M.autoConfirm; render(); },
-  'm-chat'(){ if(!(S.chats.B||[]).length){ S.chats.B = SEED_CHAT.map(m => ({...m})); render(); toast('Добавили переписку с Ириной по квартире B'); } },
+  'm-chat'(){ if(!(S.chats.B||[]).length){ S.chats.B = SEED_CHAT.map(m => ({...m})); render(); toast('Добавили переписку с Ириной по квартире на Амирхана, 21'); } },
   'm-confirm'(){ Object.keys(S.booking).forEach(confirmBooking); },
   'm-close'(){ M.open = false; render(); }
 };
@@ -775,7 +840,7 @@ function renderMod(){
     opt('m-slow','Долгая загрузка «Что рядом»',M.slow,'3а · при следующем открытии карточки') +
     opt('m-off','Нет интернета в чате',M.offline,'5а · сообщения ждут сеть') +
     opt('m-auto','Собственник подтверждает сам',M.autoConfirm,'через 6 секунд после запроса') +
-    '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (квартира B)</button>' +
+    '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (Амирхана, 21)</button>' +
     '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
     '<button class="s" data-act="m-reset">Начать заново</button>';
 }
