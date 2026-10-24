@@ -60,6 +60,11 @@ input.field{cursor:text}
 .prog{height:6px;border-radius:3px;background:var(--fill)}
 .prog div{height:6px;border-radius:3px;background:var(--ink)}
 input[type=range]{width:100%;accent-color:var(--ink)}
+.minbox{width:54px;height:30px;border:1px solid var(--edge);border-radius:8px;text-align:center;font:inherit;font-weight:700;color:var(--ink);background:var(--paper);margin:0 6px;-moz-appearance:textfield}
+.minbox::-webkit-inner-spin-button{opacity:1}
+.grid .pick{display:block;margin:0 auto 4px;width:fit-content;font-size:9px;line-height:12px;font-weight:800;padding:2px 6px;border-radius:6px;background:var(--ink);color:var(--paper)}
+.grid .go{padding:6px 4px}
+.grid .go span{display:block;border:1px solid var(--ink);border-radius:8px;padding:5px 2px;font-size:11px;font-weight:800}
 .field{height:44px;border-radius:12px;border:1px solid var(--edge);display:flex;align-items:center;padding:0 12px;font-size:13px;width:100%;font-family:inherit;color:var(--ink);background:var(--paper)}
 .bubble{max-width:78%;padding:10px 12px;font-size:13px;line-height:18px}
 .me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:var(--ink);color:#FFFFFF}
@@ -399,8 +404,8 @@ V.anketa = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что должно быть рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="sadrange">Сколько идти до сада пешком?</label>' +
-      '<input id="sadrange" type="range" min="5" max="30" step="5" value="' + a.sadMax + '" data-act="range">' +
-      '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700" id="sadval">до ' + a.sadMax + ' минут</span><span>30 мин</span></div></div>' +
+      '<input id="sadrange" type="range" min="1" max="30" step="1" value="' + a.sadMax + '" aria-label="Минут до сада">' +
+      '<div class="row small muted"><span>1 мин</span><span style="color:var(--ink);font-weight:700">до<input class="minbox" id="sadnum" type="number" inputmode="numeric" min="1" max="30" value="' + a.sadMax + '" aria-label="Минут до сада, вписать">мин</span><span>30 мин</span></div></div>' +
     '<div class="box small muted">Адрес работы добавим на следующем шаге, чтобы считать дорогу.</div>' + stepFoot(2);
   }
   if(n === 3) return stepTop(3) +
@@ -538,12 +543,13 @@ V.compare = () => {
     ['Лифт', f=>f.lift?1:0, f=>f.lift?'да':'нет', null],
     ['Собственник', f=>f.verified?1:0, f=>f.verified?'✓':'—', null]
   ];
-  let g = '<div class="grid" style="--n:' + list.length + '"><div class="hd"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '" style="font-size:11px;line-height:14px">' + f.short.replace(', ', '<br>') + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
+  const best = verdict(list).best;
+  let g = '<div class="grid" style="--n:' + list.length + '"><div class="hd"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '" style="font-size:11px;line-height:14px">' + (f.id === best.id ? '<span class="pick">советует Дворецкий</span>' : '') + f.short.replace(', ', '<br>') + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
   rows.forEach(([l,val,show,best]) => {
     const vals = list.map(val), b = best ? Math.min(...vals) : null;
     g += '<div>' + l + '</div>' + list.map((f,i) => '<div class="c' + (best && vals[i]===b ? ' best' : '') + '">' + show(f) + '</div>').join('');
   });
-  g += '</div>';
+  g += '<div></div>' + list.map(f => '<button class="c go" data-act="open" data-v="' + f.id + '" aria-label="Открыть объявление ' + f.short + '"><span>Открыть</span></button>').join('') + '</div>';
   const v = verdict(list);
   let ai;
   if(S.aiState === 'fail') ai = '<div class="err"><div style="font-weight:800">Дворецкий не смог загрузить вывод</div><div>Таблица на месте: выбрать квартиру можно и без вывода.</div><div class="row"><button class="btn s" style="height:38px;width:auto;padding:0 16px" data-act="ai-retry">Повторить</button><span class="small muted">Выбранные квартиры сохранены</span></div></div>';
@@ -552,7 +558,7 @@ V.compare = () => {
     '<div class="small muted">Учёл: минуты до сада, сумму въезда, лифт</div>' +
     '<div class="small muted">Подсказал, решение за вами · <button class="link" data-act="why">Почему такой вывод?</button></div></div>';
   return head + '<div class="body" style="gap:12px"><div class="small muted">По приоритетам вашей анкеты · обновлено 2 мин назад</div>' + g +
-    '<div class="small muted">Зелёным выделено лучшее значение в строке. Нажмите на адрес, чтобы открыть квартиру</div>' + ai +
+    '<div class="small muted">Зелёным выделено лучшее значение в строке</div>' + ai +
     '</div><div class="foot one"><button class="btn p" data-act="pick-book">Записаться на просмотр</button></div>';
 };
 
@@ -668,8 +674,8 @@ SH.more = () => {
   return sheet('<div class="h1" style="font-size:17px">Фильтры</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сад пешком</div><div class="chips">' + [[5,'до 5 мин'],[10,'до 10 мин'],[15,'до 15 мин'],[0,'не важно']].map(([v,l]) =>
       '<button class="chip' + ((d.sad||0)===v?' on':'') + '" data-act="draft-sad" data-v="' + v + '">' + l + '</button>').join('') + '</div>' +
-      '<input id="fsadrange" type="range" min="5" max="30" step="5" value="' + (d.sad||30) + '" aria-label="Сад пешком, минут">' +
-      '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700" id="fsadval">' + (d.sad ? 'до ' + d.sad + ' минут' : 'не важно') + '</span><span>30 мин</span></div></div>' +
+      '<input id="fsadrange" type="range" min="1" max="30" step="1" value="' + (d.sad||30) + '" aria-label="Сад пешком, минут">' +
+      '<div class="row small muted"><span>1 мин</span><span style="color:var(--ink);font-weight:700">до<input class="minbox" id="fsadnum" type="number" inputmode="numeric" min="1" max="30" placeholder="—" value="' + (d.sad||'') + '" aria-label="Сад пешком, вписать минуты">мин</span><span>30 мин</span></div></div>' +
     '<div>' + t('beds2','2 спальни') + t('lift','Лифт') + t('parking','Парковка во дворе') + t('kids','Можно с детьми') + t('verified','Собственник проверен') + '</div>' +
     '<button class="btn p" id="applymore" data-act="apply-more">Показать ' + kv(results(d).length) + '</button>');
 };
@@ -694,8 +700,9 @@ SH.book = () => {
       (d.ownDay ? '<input class="field" id="bookdate" type="date" min="2026-10-16" max="2027-03-31" value="' + (d.dayRaw||'') + '" aria-label="Дата просмотра">' : '') + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Время</div><div class="chips">' + TIMES.map(x => '<button class="chip' + (!d.ownTime&&d.time===x?' on':'') + '" data-act="bd-time" data-v="' + x + '">' + x + '</button>').join('') +
       '<button class="chip' + (d.ownTime?' on':'') + '" data-act="bd-own-time">Другое время</button></div>' +
-      (d.ownTime ? '<input class="field" id="booktime" type="time" min="08:00" max="21:00" step="900" value="' + (d.ownTime && d.time ? d.time : '') + '" aria-label="Время просмотра"><span class="small muted">С 8:00 до 21:00</span>' : '') + '</div>' +
-    '<button class="btn p" data-act="bd-send"' + (d.day&&d.time?'':' disabled') + '>' + (d.day&&d.time ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : 'Выберите день и время') + '</button>');
+      (d.ownTime ? '<input id="bookrange" type="range" min="480" max="1260" step="5" value="' + tToMin(d.time || '19:00') + '" aria-label="Время просмотра">' +
+        '<div class="row small muted"><span>8:00</span><input class="field" id="booktime" type="time" min="08:00" max="21:00" value="' + (d.time || '19:00') + '" aria-label="Время просмотра, вписать" style="width:120px;height:36px;text-align:center;font-weight:700"><span>21:00</span></div>' : '') + '</div>' +
+    '<button class="btn p" id="bdsend" data-act="bd-send"' + (d.day&&d.time?'':' disabled') + '>' + (d.day&&d.time ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : 'Выберите день и время') + '</button>');
 };
 SH.pickbook = () => { const list = S.fav.map(byId).sort((a,b)=>a.id.localeCompare(b.id)), best = verdict(list).best;
   return sheet('<div class="h1" style="font-size:17px">Какую квартиру посмотреть?</div><div class="small muted">Можно записаться на несколько, по очереди</div>' +
@@ -808,7 +815,7 @@ const A = {
   'bd-day'(v){ S.bookDraft.day = v; S.bookDraft.ownDay = false; render(); },
   'bd-time'(v){ S.bookDraft.time = v; S.bookDraft.ownTime = false; render(); },
   'bd-own-day'(){ const d = S.bookDraft; d.ownDay = true; d.day = d.dayRaw ? dayOf(d.dayRaw) : null; render(); },
-  'bd-own-time'(){ const d = S.bookDraft; d.ownTime = true; d.time = null; render(); },
+  'bd-own-time'(){ const d = S.bookDraft; d.ownTime = true; d.time = '19:00'; render(); },
   'bd-send'(){
     const f = byId(S.cur), d = S.bookDraft; if(!d.day || !d.time) return;
     const moved = S.booking[f.id] && S.booking[f.id].status !== 'cancel';
@@ -842,13 +849,26 @@ document.addEventListener('click', e => {
   f(el.dataset.v, el);
 });
 document.addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.matches('span[data-act]')){ e.preventDefault(); e.target.click(); } });
+const clampMin = v => { v = Math.round(+v); return v >= 1 ? Math.min(v, 30) : 0; };
+const minToT = m => String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
+const tToMin = t => +t.slice(0,2)*60 + +t.slice(3,5);
+function bdSync(){ const d = S.bookDraft, b = $('#bdsend'); if(!b) return; const ok = d.day && d.time; b.disabled = !ok;
+  b.textContent = ok ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : (d.ownTime && !d.time ? 'Время просмотра с 8:00 до 21:00' : 'Выберите день и время'); }
+document.addEventListener('change', e => {
+  if(e.target.id === 'sadnum') e.target.value = S.anketa.sadMax;
+  if(e.target.id === 'fsadnum') e.target.value = S.sheetDraft.sad || '';
+});
 document.addEventListener('input', e => {
-  if(e.target.id === 'fsadrange'){ const v = +e.target.value; S.sheetDraft.sad = v; $('#fsadval').textContent = 'до ' + v + ' минут'; document.querySelectorAll('[data-act=draft-sad]').forEach(c => c.classList.toggle('on', +c.dataset.v === v)); $('#applymore').textContent = 'Показать ' + kv(results(S.sheetDraft).length); }
-  if(e.target.id === 'sadrange'){ S.anketa.sadMax = +e.target.value; $('#sadval').textContent = 'до ' + e.target.value + ' минут'; }
+  if(e.target.id === 'fsadrange' || e.target.id === 'fsadnum'){ const v = clampMin(e.target.value); if(!v) return; S.sheetDraft.sad = v;
+    if(e.target.id === 'fsadrange') $('#fsadnum').value = v; else $('#fsadrange').value = v;
+    document.querySelectorAll('[data-act=draft-sad]').forEach(c => c.classList.toggle('on', +c.dataset.v === v)); $('#applymore').textContent = 'Показать ' + kv(results(S.sheetDraft).length); }
+  if(e.target.id === 'sadrange' || e.target.id === 'sadnum'){ const v = clampMin(e.target.value); if(!v) return; S.anketa.sadMax = v;
+    if(e.target.id === 'sadrange') $('#sadnum').value = v; else $('#sadrange').value = v; }
+  if(e.target.id === 'bookrange'){ S.bookDraft.time = minToT(+e.target.value); $('#booktime').value = S.bookDraft.time; bdSync(); }
   if(e.target.id === 'work'){ S.anketa.work = e.target.value; }
   if(e.target.id === 'msg'){ S.draft = e.target.value; }
-  if(e.target.id === 'bookdate' && e.target.value){ S.bookDraft.dayRaw = e.target.value; S.bookDraft.day = dayOf(e.target.value); render(); }
-  if(e.target.id === 'booktime' && e.target.value){ const t = e.target.value; S.bookDraft.time = (t < '08:00' || t > '21:00') ? null : t; render(); }
+  if(e.target.id === 'bookdate' && e.target.value){ S.bookDraft.dayRaw = e.target.value; S.bookDraft.day = dayOf(e.target.value); bdSync(); }
+  if(e.target.id === 'booktime' && e.target.value){ const t = e.target.value; S.bookDraft.time = (t < '08:00' || t > '21:00') ? null : t; if(S.bookDraft.time) $('#bookrange').value = tToMin(t); bdSync(); }
   if(e.target.id === 'citysearch'){ S.cityQ = e.target.value; render(); }
   if(e.target.id === 'placesearch'){ S.placeQ = e.target.value; render(); }
   if(e.target.id === 'whendate' && e.target.value){ S.whenDate = e.target.value; S.anketa.when = 'к ' + dateTxt(e.target.value); const t = $('#whentxt'); if(t) t.textContent = 'Переезд ' + S.anketa.when; }
