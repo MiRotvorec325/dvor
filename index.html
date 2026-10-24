@@ -226,8 +226,8 @@ const MONTHS = ['января','февраля','марта','апреля','м�
 /* ---------- state ---------- */
 function fresh(){
   return {
-    screen:'welcome', stack:[], tab:'search', cur:'B', step:1, user:null, reg:{name:'', phone:'', code:'', sent:false},
-    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', near:['sad','clinic','park','liftc'], sadMax:10, schoolMax:15, clinicMax:15, work:'ул. Баумана, 1', commute:['авто'], kids:true, verified:true},
+    screen:'welcome', stack:[], tab:'search', cur:'B', step:1, user:null, reg:{name:'', surname:'', phone:'', code:'', sent:false},
+    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', children:['1–3 года'], near:['sad','clinic','park','liftc'], sadMax:10, schoolMax:15, clinicMax:15, work:'ул. Баумана, 1', commute:['авто'], kids:true, verified:true},
     filters:{sad:10, lift:true, kids:true, verified:true, beds2:false, parking:false}, anketaDone:true,
     sort:'sad', fav:[], scroll:{}, cityQ:'', placeQ:'', whenDate:'',
     chats:{},
@@ -299,7 +299,7 @@ function topBack(title, right, extra){
   return '<div class="top"><button data-act="back" aria-label="Назад">←</button><span class="t">' + title + '</span>' + (right||'') + homeBtn() + '</div>' + (extra||'');
 }
 const homeBtn = () => '';
-const DIST = {sad:['сада','Сад'], school:['школы','Школа'], clinic:['поликлиники','Поликлиника']};
+const DIST = {sad:['сада','Сад','Детский сад'], school:['школы','Школа','Школа'], clinic:['поликлиники','Поликлиника','Поликлиника']};
 function distPick(p, k, v, label, chips){
   const id = p + '-' + k;
   return '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">' + label + '</div>' +
@@ -325,7 +325,15 @@ function ownerLine(f){
 
 /* ---------- screens ---------- */
 const V = {};
-const regOk = () => { const r = S.reg; return {send: r.name.trim().length > 1 && r.phone.replace(/\D/g,'').length >= 10, done: /^\d{4}$/.test(r.code)}; };
+const famGen = s => { s = s.trim(); const l = s.toLowerCase();
+  if(/(ов|ев|ёв|ин|ын)$/.test(l)) return s + 'ых';
+  if(/(ова|ева|ёва|ина|ына)$/.test(l)) return s.slice(0,-1) + 'ых';
+  if(/(ский|цкий|ская|цкая)$/.test(l)) return s.slice(0,-2) + 'их';
+  return s; };
+const AGES = ['до 1 года','1–3 года','3–7 лет','7+ лет'];
+const kidsTxt = () => { const c = S.anketa.children; return (c.length === 1 ? 'Ребёнок ' : 'Дети: ') + c.join(', '); };
+const DEMO_USER = {name:'Никита', surname:'Вохмянин', phone:'+7 900 123-45-67'};
+const regOk = () => { const r = S.reg; return {send: r.name.trim().length > 1 && r.surname.trim().length > 1 && r.phone.replace(/\D/g,'').length >= 10, done: /^\d{4}$/.test(r.code)}; };
 function regSync(){ const ok = regOk(), s = $('#regsend'), d = $('#regdone'); if(s) s.disabled = !ok.send; if(d) d.disabled = !ok.done; }
 V.reg = () => { const r = S.reg, ok = regOk();
   return topBack('Вход') + '<div class="body">' +
@@ -335,8 +343,9 @@ V.reg = () => { const r = S.reg, ok = regOk();
         '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="regcode">Код</label><input id="regcode" class="field" type="text" inputmode="numeric" maxlength="4" autocomplete="one-time-code" placeholder="4 цифры" value="' + esc(r.code) + '" style="font-size:20px;letter-spacing:8px;text-align:center;height:52px"></div>' +
         '<div class="box small muted">В прототипе подойдёт любой код из 4 цифр.</div>' +
         '<button class="link small" style="align-self:flex-start" data-act="reg-send">Отправить код ещё раз</button>'
-      : '<div class="muted" style="font-size:14px;line-height:20px">Имя увидят собственники в чате. Телефон нужен, чтобы войти и записываться на просмотры. Собственникам его не показываем.</div>' +
+      : '<div class="muted" style="font-size:14px;line-height:20px">Имя и фамилию увидят собственники в чате. Телефон нужен, чтобы войти и записываться на просмотры. Собственникам его не показываем.</div>' +
         '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="regname">Имя</label><input id="regname" class="field" type="text" autocomplete="given-name" placeholder="Например, Анна" value="' + esc(r.name) + '"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="regsurname">Фамилия</label><input id="regsurname" class="field" type="text" autocomplete="family-name" placeholder="Например, Иванова" value="' + esc(r.surname) + '"></div>' +
         '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="regphone">Телефон</label><input id="regphone" class="field" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 000-00-00" value="' + esc(r.phone) + '"></div>') +
     '</div><div class="foot one">' + (r.sent
       ? '<button class="btn p" id="regdone" data-act="reg-done"' + (ok.done ? '' : ' disabled') + '>Войти</button>'
@@ -380,13 +389,19 @@ V.anketa = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Когда нужна квартира?</div>' + whenPick() + '</div>' +
     '<div class="box small muted">В прототипе квартиры есть в Казани, в Ново-Савиновском районе.</div>' + stepFoot(1);
   if(n === 2){
-    const nearOpts = [['sad','Детский сад'],['school','Школа'],['clinic','Поликлиника'],['park','Парк'],['liftc','Лифт для коляски'],['parking','Парковка']];
+    const nearOpts = [['park','Парк'],['liftc','Лифт для коляски'],['parking','Парковка']];
     return stepTop(2) +
-    '<div class="h1">Расскажите о ребёнке, и мы покажем только подходящие квартиры</div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько лет ребёнку?</div>' + choice('age', ['до 1 года','1–3 года','3–7 лет','7+ лет'], a.age) + '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что должно быть рядом?</div><div class="chips">' +
+    '<div class="h1">Расскажите о детях, и мы покажем только подходящие квартиры</div>' +
+    a.children.map((age, i) => '<div style="display:flex;flex-direction:column;gap:8px"><div class="row"><div class="lbl">' + (a.children.length > 1 ? (i+1) + '-й ребёнок, возраст' : 'Сколько лет ребёнку?') + '</div>' +
+      (a.children.length > 1 ? '<button class="link small" data-act="kid-del" data-v="' + i + '" aria-label="Убрать ' + (i+1) + '-го ребёнка">Убрать</button>' : '') + '</div><div class="chips">' +
+      AGES.map(o => '<button class="chip' + (o === age ? ' on' : '') + '" data-act="kid-age" data-v="' + i + ':' + o + '">' + o + '</button>').join('') + '</div></div>').join('') +
+    (a.children.length < 4 ? '<button class="btn s" style="height:40px;flex:none" data-act="kid-add">+ Добавить ребёнка</button>' : '') +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что ещё важно рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
-    Object.keys(DIST).filter(k => a.near.includes(k)).map(k => distPick('a', k, a[k + 'Max'], 'Сколько идти до ' + DIST[k][0] + ' пешком?')).join('') +
+    '<div style="display:flex;flex-direction:column;gap:10px"><div class="lbl">Что должно быть в шаговой доступности?</div>' +
+    Object.keys(DIST).map(k => { const on = a.near.includes(k);
+      return '<div class="box" style="gap:10px' + (on ? '' : ';opacity:.75') + '"><button class="list-row" style="border:0;padding:0" data-act="near" data-v="' + k + '" aria-pressed="' + on + '"><span><b>' + DIST[k][2] + '</b><div class="small muted" style="font-weight:500">' + (on ? 'Ищем квартиры не дальше этого времени' : 'Не учитываем в поиске') + '</div></span><span class="tgl' + (on ? ' on' : '') + '"></span></button>' +
+        (on ? distPick('a', k, a[k + 'Max'], 'Сколько идти до ' + DIST[k][0] + ' пешком?') : '') + '</div>'; }).join('') + '</div>' +
     '<div class="box small muted">Адрес работы добавим на следующем шаге, чтобы считать дорогу.</div>' + stepFoot(2);
   }
   if(n === 3) return stepTop(3) +
@@ -622,13 +637,13 @@ V.map = () => {
 };
 V.profile = () => '<div class="top"><span class="t">Профиль</span></div><div class="body" style="gap:0">' +
   '<div style="display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)"><div class="img" style="width:52px;height:52px;border-radius:50%">фото</div>' + (S.user
-      ? '<div><b>' + esc(S.user.name) + '</b><div class="small muted">' + esc(S.user.phone) + '</div><div class="small muted">Переезд в ' + inCity(S.anketa.city) + ' ' + S.anketa.when + '</div></div></div>'
+      ? '<div><b>Семья ' + esc(famGen(S.user.surname)) + '</b><div class="small muted">' + esc(S.user.name) + ' · ' + esc(S.user.phone) + '</div><div class="small muted">' + kidsTxt() + '</div><div class="small muted">Переезд в ' + inCity(S.anketa.city) + ' ' + S.anketa.when + '</div></div></div>'
       : '<div style="flex:1"><b>Вы не вошли</b><div class="small muted">Войдите, чтобы писать собственникам и записываться на просмотры</div></div></div><button class="btn p" style="margin-top:14px" data-act="sign-in">Войти или зарегистрироваться</button>') +
   '<button class="list-row" data-act="edit-anketa"><span>Анкета семьи</span><span class="muted">›</span></button>' +
   '<button class="list-row" data-act="go" data-v="notif"><span>Уведомления</span><span class="muted">›</span></button>' +
-  (S.user ? '<button class="list-row" data-act="me-edit"><span>Имя и телефон</span><span class="muted">›</span></button>' : '') +
+  (S.user ? '<button class="list-row" data-act="me-edit"><span>Имя, фамилия и телефон</span><span class="muted">›</span></button>' : '') +
   '<button class="list-row" data-act="go" data-v="help"><span>Помощь</span><span class="muted">›</span></button>' +
-  (S.user ? '<button class="list-row" data-act="sign-out-ask"><span>Выйти</span><span></span></button>' : '') +
+  (S.user ? '<button class="list-row" data-act="sign-out-ask" style="color:#E5484D;font-weight:700"><span>Выйти из аккаунта</span><span></span></button>' : '') +
   '</div>' + tabs();
 V.notif = () => topBack('Уведомления') + '<div class="body" style="gap:0">' +
   [['flats','Новые квартиры под анкету'],['owners','Ответы собственников и просмотры']].map(([k,l]) =>
@@ -647,11 +662,12 @@ V.help = () => topBack('Помощь') + '<div class="body" style="gap:0">' + FA
 /* ---------- sheets ---------- */
 function sheet(inner){ return '<div class="scrim" data-act="close-sheet"><div class="sheet" data-stop="1" role="dialog"><div class="grab"></div>' + inner + '</div></div>'; }
 const SH = {};
-SH.me = () => sheet('<div class="h1" style="font-size:17px">Имя и телефон</div>' +
+SH.me = () => sheet('<div class="h1" style="font-size:17px">Имя, фамилия и телефон</div>' +
   '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="mename">Имя</label><input id="mename" class="field" type="text" value="' + esc(S.user.name) + '"></div>' +
+  '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="mesurname">Фамилия</label><input id="mesurname" class="field" type="text" value="' + esc(S.user.surname) + '"></div>' +
   '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="mephone">Телефон</label><input id="mephone" class="field" type="tel" inputmode="tel" value="' + esc(S.user.phone) + '"></div>' +
   '<button class="btn p" data-act="me-save">Сохранить</button>');
-SH.signout = () => sheet('<div class="h1" style="font-size:17px">Выйти из аккаунта?</div><div style="font-size:14px;line-height:20px">Избранное, переписки и анкета в прототипе сбросятся, приложение откроется с начала.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" data-act="close-sheet">Остаться</button><button class="btn p" data-act="sign-out">Выйти</button></div>');
+SH.signout = () => sheet('<div class="h1" style="font-size:17px">Выйти из аккаунта?</div><div style="font-size:14px;line-height:20px">Избранное, переписки и анкета в прототипе сбросятся, приложение откроется с начала.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" data-act="close-sheet">Остаться</button><button class="btn p" data-act="sign-out" style="background:#E5484D;border-color:#E5484D;color:#FFFFFF">Выйти</button></div>');
 SH.kids = () => sheet('<div class="h1" style="font-size:17px">Можно с детьми</div><div style="font-size:14px;line-height:20px">Собственник отметил при размещении, что сдаёт семьям с ребёнком. Модератор подтвердил это при проверке объявления. Квартиры, где семьям отказывают, фильтр убирает ещё до звонка.</div><button class="btn p" data-act="close-sheet">Понятно</button>');
 SH.sort = () => sheet('<div class="h1" style="font-size:17px">Сортировка</div>' + Object.entries(SORTS).map(([k,l]) =>
   '<button class="list-row" data-act="set-sort" data-v="' + k + '"><span>' + l + '</span><span>' + (S.sort===k?'✓':'') + '</span></button>').join(''));
@@ -742,14 +758,17 @@ const A = {
   back, tab: v => tab(v),
   home(){ tab('search'); },
   start(){ if(S.user){ S.step = 1; go('anketa'); } else { S.regNext = 'anketa'; go('reg'); } },
-  'sign-in'(){ S.regNext = 'back'; S.reg = {name:'', phone:'', code:'', sent:false}; go('reg'); },
+  'kid-age'(v){ const i = v.indexOf(':'); S.anketa.children[+v.slice(0,i)] = v.slice(i+1); render(); },
+  'kid-add'(){ S.anketa.children.push('3–7 лет'); render(); },
+  'kid-del'(v){ S.anketa.children.splice(+v, 1); render(); },
+  'sign-in'(){ S.regNext = 'back'; S.reg = {name:'', surname:'', phone:'', code:'', sent:false}; go('reg'); },
   'reg-send'(){ const r = S.reg; if(!regOk().send) return; r.sent = true; r.code = ''; render(); toast('Код отправлен на ' + r.phone); },
   'reg-edit'(){ S.reg.sent = false; render(); },
-  'reg-done'(){ const r = S.reg; if(!regOk().done) return; S.user = {name:r.name.trim(), phone:r.phone.trim()};
+  'reg-done'(){ const r = S.reg; if(!regOk().done) return; S.user = {name:r.name.trim(), surname:r.surname.trim(), phone:r.phone.trim()};
     if(S.regNext === 'anketa'){ S.step = 1; S.screen = 'anketa'; render(true); } else back();
     toast('Вы вошли как ' + S.user.name); },
   'me-edit'(){ S.sheet = 'me'; render(); },
-  'me-save'(){ const n = $('#mename').value.trim(), p = $('#mephone').value.trim(); if(!n || p.replace(/\D/g,'').length < 10){ toast('Проверьте имя и телефон'); return; } S.user = {name:n, phone:p}; S.sheet = null; render(); toast('Сохранили'); },
+  'me-save'(){ const n = $('#mename').value.trim(), sn = $('#mesurname').value.trim(), p = $('#mephone').value.trim(); if(!n || !sn || p.replace(/\D/g,'').length < 10){ toast('Проверьте имя, фамилию и телефон'); return; } S.user = {name:n, surname:sn, phone:p}; S.sheet = null; render(); toast('Сохранили'); },
   'sign-out-ask'(){ S.sheet = 'signout'; render(); },
   'sign-out'(){ clearTimers(); S = fresh(); render(); },
   'to-welcome'(){ if(S.stack.length) back(); else { S.screen = 'welcome'; render(); } },
@@ -870,6 +889,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   if(e.target.id === 'regname'){ S.reg.name = e.target.value; regSync(); }
+  if(e.target.id === 'regsurname'){ S.reg.surname = e.target.value; regSync(); }
   if(e.target.id === 'regphone'){ S.reg.phone = e.target.value; regSync(); }
   if(e.target.id === 'regcode'){ e.target.value = e.target.value.replace(/\D/g,'').slice(0,4); S.reg.code = e.target.value; regSync(); }
   const dm = /^(rng|num)-(a|f)-(sad|school|clinic)$/.exec(e.target.id);
@@ -903,7 +923,7 @@ const TASKS = [
   ['Т5','«Найди двухкомнатную квартиру с лифтом не дальше 10 минут от сада.»','t5']
 ];
 function setupTask(t){
-  const u = S.user; clearTimers(); S = fresh(); if(t !== 't1') S.user = u;
+  const u = S.user; clearTimers(); S = fresh(); if(t !== 't1') S.user = u || {...DEMO_USER};
   if(t === 't1'){ render(); return; }
   S.screen = 'results'; S.tab = 'search';
   if(t === 't2'){ S.stack = ['results']; S.screen = 'card'; S.cur = 'B'; S.nearLoading = M.slow; if(M.slow) later(4000, () => { S.nearLoading = false; render(); }); }
