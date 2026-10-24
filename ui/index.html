@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Прототип «Двор» · UI</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: wireframe v2 phone (390x844) in the middle of a quiet desk, moderator panel beside it; on a phone the app fills the screen */
+:root{
+  --desk:#EEF0F3; --paper:#FFFFFF; --ink:#16181D; --mute:#5B606B; --line:#D9DCE1; --edge:#C3C8D2;
+  --fill:#E4E6EA; --soft:#F1F2F5; --mark:#9D1DFD;
+  --font:Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--desk);color:var(--ink);font-family:var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+button:focus-visible,input:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+.desk{min-height:100%;display:flex;gap:40px;align-items:flex-start;justify-content:center;padding:56px 0 40px}
+/* phone */
+.ph{width:390px;height:844px;flex:none;border:2px solid var(--ink);border-radius:40px;background:var(--paper);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.top{min-height:56px;flex:none;display:flex;align-items:center;gap:10px;padding:0 18px;border-bottom:1px solid var(--line);font-size:15px;font-weight:700}
+.top .t{flex:1;min-width:0}
+.body{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.body::-webkit-scrollbar{display:none}
+.img{background:var(--fill);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#7A808C;font-size:12px;flex:none}
+.box{border:1px solid var(--edge);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:13px;line-height:18px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border:1px solid #9AA0AC;border-radius:999px;font-size:12px;line-height:16px;white-space:nowrap;background:var(--paper)}
+.chip.on{background:var(--ink);color:#FFFFFF;border-color:var(--ink)}
+.chip .x{opacity:.8;padding-left:2px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.btn{height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;width:100%;text-align:center}
+.btn.p{background:var(--ink);color:#FFFFFF}
+.btn.s{border:1.5px solid var(--ink);color:var(--ink)}
+.btn[disabled]{background:var(--fill);color:#8A8F99;cursor:not-allowed}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.muted{color:var(--mute)}
+.small{font-size:12px;line-height:16px}
+.h1{font-size:20px;line-height:26px;font-weight:800}
+.lbl{font-size:13px;font-weight:700}
+.tabs{height:64px;flex:none;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));font-size:11px;color:var(--mute);background:var(--paper)}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+.tabs i{width:22px;height:22px;border-radius:6px;background:var(--edge);display:block}
+.tabs .cur{color:var(--ink);font-weight:800}
+.tabs .cur i{background:var(--ink)}
+.foot{flex:none;padding:12px 18px 18px;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;background:var(--paper)}
+.foot.one{grid-template-columns:1fr}
+.cmpbar{flex:none;margin:0 12px 10px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--ink);display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;background:var(--paper)}
+.flat{border:1px solid var(--edge);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:none;text-align:left;width:100%}
+.flat .in{padding:12px;display:flex;flex-direction:column;gap:6px}
+span[data-act],.heart,label[for],input[type=date]{cursor:pointer}
+input.field{cursor:text}
+.heart{user-select:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:-6px -6px -6px 0}
+.link{text-decoration:underline;text-underline-offset:2px}
+.prog{height:6px;border-radius:3px;background:var(--fill)}
+.prog div{height:6px;border-radius:3px;background:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ink)}
+.field{height:44px;border-radius:12px;border:1px solid var(--edge);display:flex;align-items:center;padding:0 12px;font-size:13px;width:100%;font-family:inherit;color:var(--ink);background:var(--paper)}
+.bubble{max-width:78%;padding:10px 12px;font-size:13px;line-height:18px}
+.me{align-self:flex-end;border-radius:14px 14px 4px 14px;background:var(--ink);color:#FFFFFF}
+.they{align-self:flex-start;border-radius:14px 14px 14px 4px;background:var(--fill)}
+.err{border:1.5px solid var(--ink);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:18px}
+.sk{background:var(--fill);border-radius:6px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}
+.grid{display:grid;grid-template-columns:1.3fr repeat(var(--n),minmax(0,1fr));border:1px solid var(--edge);border-radius:12px;overflow:hidden;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums}
+.grid > *{padding:8px;border-top:1px solid var(--line)}
+.grid .hd{background:var(--soft);border-top:0;font-weight:800;text-align:center}
+.grid .c{text-align:center}
+.grid .best{font-weight:800;background:var(--fill)}
+/* overlays inside the phone */
+.scrim{position:absolute;inset:0;background:rgba(22,24,29,.35);display:flex;align-items:flex-end;z-index:20}
+.sheet{width:100%;max-height:82%;overflow-y:auto;background:var(--paper);border-radius:20px 20px 0 0;padding:10px 18px 20px;display:flex;flex-direction:column;gap:14px}
+.sheet > *{flex-shrink:0}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--edge);align-self:center}
+.toast{position:absolute;left:16px;right:16px;bottom:82px;z-index:30;background:var(--ink);color:#FFFFFF;border-radius:12px;padding:12px 14px;font-size:13px;line-height:18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.toast button{font-weight:800;text-decoration:underline}
+.push{position:absolute;left:10px;right:10px;top:10px;z-index:30;background:var(--paper);border:1.5px solid var(--ink);border-radius:16px;padding:10px 12px;font-size:13px;line-height:18px;box-shadow:0 8px 24px rgba(0,0,0,.18);text-align:left;width:auto}
+.map{position:relative;height:100%;min-height:520px;background:var(--fill);border-radius:12px;overflow:hidden;flex:1}
+.map svg{position:absolute;inset:0;width:100%;height:100%}
+.mlbl{position:absolute;transform:translate(-50%,-50%);font-size:10px;line-height:12px;font-weight:700;color:var(--mute);white-space:nowrap;pointer-events:none;letter-spacing:.02em}
+.mlbl.v{transform:translate(-50%,-50%) rotate(-90deg)}
+.walk{position:absolute;transform:translate(-50%,-50%);background:var(--paper);border:1px solid var(--ink);border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800;white-space:nowrap;pointer-events:none}
+.legend{position:absolute;left:8px;top:8px;background:var(--paper);border-radius:8px;padding:5px 8px;font-size:10px;line-height:14px;color:var(--mute);display:flex;gap:8px}
+.pin{position:absolute;transform:translate(-50%,-100%);padding:4px 8px;border-radius:999px;background:var(--ink);color:#FFFFFF;font-size:12px;font-weight:800;white-space:nowrap}
+.pin.sel{background:var(--paper);color:var(--ink);border:2px solid var(--ink)}
+.poi{position:absolute;transform:translate(-50%,-50%);height:20px;padding:0 6px;border-radius:999px;border:1.5px solid var(--mute);background:var(--paper);font-size:10px;font-weight:800;display:flex;align-items:center;gap:3px;white-space:nowrap;color:var(--mute);pointer-events:none}
+.tgl{width:44px;height:26px;border-radius:13px;background:var(--edge);position:relative;flex:none}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#FFFFFF;transition:left .15s}
+.tgl.on{background:var(--ink)}
+.tgl.on::after{left:21px}
+.list-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;width:100%;text-align:left}
+/* moderator panel */
+.mod{width:360px;flex:none;background:var(--paper);border:1px solid var(--edge);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:16px;font-size:13px;line-height:18px}
+.mod[hidden]{display:none}
+.mod h2{margin:0;font-size:16px;font-weight:800}
+.mod h3{margin:0;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.mod .task{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:12px;width:100%;text-align:left}
+.mod .task b.n{flex:none;width:30px;height:24px;border-radius:7px;background:var(--ink);color:#FFFFFF;display:flex;align-items:center;justify-content:center;font-size:12px}
+.mod .opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left}
+.mod .s{border:1px solid var(--edge);border-radius:10px;padding:8px 10px;font-weight:700;text-align:center}
+.modbtn{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--ink);color:#FFFFFF;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700}
+@media (max-width:820px){
+  .desk{padding:40px 0 24px;gap:0}
+  .mod{position:fixed;inset:auto 0 0 0;width:auto;max-height:70%;overflow-y:auto;border-radius:20px 20px 0 0;z-index:60;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:500px){
+  body{padding-left:0;padding-right:0;background:var(--paper)}
+  .desk{display:block;height:100%}
+  .ph{width:100%;height:100%;border:0;border-radius:0}
+  .modbtn{display:none}
+  .modmode .modbtn{display:block;top:calc(8px + env(safe-area-inset-top,0px));bottom:auto;padding:6px 12px;font-size:11px}
+}
+
+/* ---------- UI: palette of slide 07 «Двор и Дворецкий» ---------- */
+body{--desk:#E9E2D8}
+.ph{--paper:#171512;--ink:#F6F1EA;--mute:#B3AA9E;--line:#3D3832;--edge:#3D3832;--fill:#312D28;--soft:#24211D;--mark:#FF6F73;--cta:#FF6F73;--cta-tx:#24080B;--mint:#7EE2A8;--dark:#1A1714;
+  color-scheme:dark;color:var(--ink);border:8px solid #2A2621;border-radius:50px;box-shadow:0 30px 60px rgba(40,20,0,.22)}
+.ph .top{border-bottom-color:transparent}
+.ph .chip{border:0;background:var(--fill);font-weight:700;padding:7px 12px}
+.ph .chip.on{background:var(--ink);color:var(--dark)}
+.ph .btn{border-radius:26px;height:52px;font-size:15px;font-weight:800}
+.ph .btn.p{background:var(--cta);color:var(--cta-tx)}
+.ph .btn.s{border:0;background:var(--fill);color:var(--ink)}
+.ph .btn[disabled]{background:var(--fill);color:#7A7268}
+.ph .box{border:0;background:var(--soft);border-radius:20px;padding:12px 14px}
+.ph .flat{border:0;background:var(--soft);border-radius:20px;padding:10px}
+.ph .flat .img{border-radius:18px !important}
+.ph .flat .in{padding:10px 4px 4px}
+.ph .img{position:relative;overflow:hidden;align-items:flex-start;justify-content:flex-start;padding:10px;color:var(--ink);border-radius:18px;
+  background:linear-gradient(140deg,#3B3F4A 0%,#5A5E68 45%,#2E3440 100%)}
+.ph .img.room::before{content:"";position:absolute;left:14%;top:12%;width:30%;height:44%;border:5px solid #F3E8D8;border-radius:4px;background:linear-gradient(180deg,#9EC3DA,#DCEAF1)}
+.ph .img.room::after{content:"";position:absolute;left:52%;bottom:22%;width:36%;height:22%;border-radius:12px 12px 6px 6px;background:#5F7F6E;box-shadow:-150px 6px 0 -14px #4E7A52}
+.ph .img.ill{background:var(--soft);align-items:center;justify-content:center}
+.ph .img.ava{background:linear-gradient(135deg,#C99A76,#8A5E40);color:transparent}
+.cnt{position:relative;z-index:1;padding:2px 9px;border-radius:999px;background:rgba(23,21,18,.75);font-size:11px;font-weight:800}
+.bdg{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:11px;line-height:16px;font-weight:800;white-space:nowrap;background:var(--fill);color:var(--mute)}
+.bdg.g{background:rgba(126,226,168,.15);color:var(--mint)}
+.bdgs{display:flex;gap:6px;flex-wrap:wrap}
+.ph .tabs{border-top-color:var(--line)}
+.ph .tabs i{background:none;width:auto;height:22px;font-style:normal;font-size:19px;line-height:22px}
+.ph .tabs .cur i{background:none}
+.ph .me{background:var(--ink);color:var(--dark);border-radius:18px 18px 4px 18px}
+.ph .they{background:var(--soft);border-radius:18px 18px 18px 4px}
+.ph .cmpbar{border:0;border-radius:25px;background:var(--cta);color:var(--cta-tx);padding:6px 6px 6px 16px;font-weight:800;box-shadow:0 10px 24px rgba(0,0,0,.45)}
+.ph .cmpbar button:last-child{background:#1F0E07;color:var(--ink);border-radius:19px;padding:9px 14px}
+.ph .tgl{background:var(--fill)}
+.ph .tgl.on{background:var(--ink)}
+.ph .tgl.on::after{background:var(--dark)}
+.ph .grid{border-color:var(--line);background:var(--soft)}
+.ph .grid .hd{background:var(--fill)}
+.ph .grid .best{background:rgba(126,226,168,.15);color:var(--mint)}
+.ph .err{border:0;background:rgba(255,111,115,.12);color:#FFD0D1;border-radius:20px}
+.ph .toast{background:var(--ink);color:var(--dark)}
+.ph .push{background:var(--soft);border-color:var(--line);color:var(--ink)}
+.ph .scrim{background:rgba(0,0,0,.55)}
+.ph .sheet{background:#1F1C18}
+.ph .field{background:var(--soft);border-color:var(--line);color:var(--ink);border-radius:22px}
+.ph .prog div{background:var(--cta)}
+.ph .pin{background:var(--ink);color:var(--dark)}
+.ph .pin.sel{background:var(--cta);color:var(--cta-tx);border:0}
+.ph .poi{background:var(--soft);border-color:#6E675E;color:var(--mute)}
+.ph .poi.sad{border-color:var(--mint);color:var(--mint)}
+.butler{width:26px;height:26px;flex:none;border-radius:50%;background:var(--ink);display:inline-flex;align-items:center;justify-content:center}
+.bhint{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:20px;background:var(--fill);font-size:12px;line-height:16px;text-align:left;width:100%}
+.bhint .go{display:block;margin-top:4px;color:var(--cta);font-weight:800}
+.logo{display:inline-flex;align-items:center;gap:6px;font-size:16px;font-weight:800;flex:none}
+</style>
+
+<div class="desk">
+  <div class="ph" id="phone" aria-live="polite"></div>
+  <aside class="mod" id="mod" hidden></aside>
+</div>
+<button class="modbtn" id="modbtn" type="button">Модератор</button>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const rub = n => n.toLocaleString('ru-RU').replace(/ /g,' ') + ' ₽';
+const tys = n => (Math.round(n/100)/10).toString().replace('.', ',') + ' т';
+function plural(n, a, b, c){ const m10=n%10, m100=n%100; if(m10===1&&m100!==11) return a; if(m10>=2&&m10<=4&&(m100<12||m100>14)) return b; return c; }
+const kv = n => n + ' ' + plural(n,'квартира','квартиры','квартир');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- data: Казань, Ново-Савиновский; залог = аренда, комиссия 0 ---------- */
+const CITIES = [['Казань','Казани'],['Москва','Москве'],['Санкт-Петербург','Санкт-Петербурге'],['Екатеринбург','Екатеринбурге'],['Новосибирск','Новосибирске'],['Нижний Новгород','Нижнем Новгороде'],['Самара','Самаре'],['Уфа','Уфе'],['Краснодар','Краснодаре'],['Пермь','Перми'],['Воронеж','Воронеже'],['Ростов-на-Дону','Ростове-на-Дону'],['Челябинск','Челябинске'],['Омск','Омске'],['Тюмень','Тюмени'],['Иннополис','Иннополисе']];
+const inCity = c => (CITIES.find(x=>x[0]===c) || [c,c])[1];
+const DISTRICTS = ['Ново-Савиновский','Вахитовский','Советский','Приволжский','Московский','Кировский','Авиастроительный'];
+const HAS = {city:'Казань', district:'Ново-Савиновский'};
+const DISTG = {'Ново-Савиновский':'Ново-Савиновском','Вахитовский':'Вахитовском','Советский':'Советском','Приволжский':'Приволжском','Московский':'Московском','Кировский':'Кировском','Авиастроительный':'Авиастроительном'};
+const area = () => S.anketa.city === HAS.city && S.district === HAS.district;
+const findTxt = s => s.toLowerCase().replace(/ё/g,'е').trim();
+const SADS = {'Сад № 87':[24,50], 'Сад № 123':[47,53], 'Сад № 41':[70,39]};
+const UTIL = 8000;
+const FLATS = [
+  {id:'A', rent:38500, params:'2-комн. · 50 м² · 2/5 эт.', lift:false, beds2:false, parking:true, sad:14, sadName:'Сад № 87', school:11, schoolName:'Школа № 12', clinic:20, park:5, stop:4, work:'30 мин на авто', kids:true, verified:true, owner:'Олег', ownerG:'m', docs:'10.10', x:22, y:30},
+  {id:'B', rent:42000, params:'2-комн. · 54 м² · 5/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:6, sadName:'Сад № 123', school:9, schoolName:'Школа № 45', clinic:12, park:4, stop:3, work:'25 мин на авто', kids:true, verified:true, owner:'Ирина', ownerG:'f', docs:'12.10', x:48, y:44},
+  {id:'C', rent:47500, params:'2-комн. · 61 м² · 8/16 эт. · лифт', lift:true, beds2:false, parking:true, sad:9, sadName:'Сад № 41', school:12, schoolName:'Школа № 45', clinic:7, park:6, stop:2, work:'20 мин на авто', kids:true, verified:false, owner:'Марина', ownerG:'f', docs:null, x:70, y:26},
+  {id:'D', rent:39000, params:'2-комн. · 48 м² · 4/10 эт. · лифт', lift:true, beds2:false, parking:false, sad:8, sadName:'Сад № 123', school:10, schoolName:'Школа № 45', clinic:15, park:3, stop:5, work:'28 мин на авто', kids:true, verified:true, owner:'Айдар', ownerG:'m', docs:'09.10', x:38, y:62},
+  {id:'E', rent:44000, params:'2-комн. · 57 м² · 7/12 эт. · лифт', lift:true, beds2:false, parking:true, sad:9, sadName:'Сад № 41', school:6, schoolName:'Школа № 19', clinic:10, park:7, stop:4, work:'22 мин на авто', kids:true, verified:true, owner:'Гульнара', ownerG:'f', docs:'11.10', x:62, y:58},
+  {id:'F', rent:52000, params:'3-комн. · 74 м² · 6/9 эт. · лифт', lift:true, beds2:true, parking:true, sad:13, sadName:'Сад № 87', school:8, schoolName:'Школа № 12', clinic:9, park:5, stop:3, work:'26 мин на авто', kids:true, verified:true, owner:'Рустем', ownerG:'m', docs:'08.10', x:28, y:78},
+  {id:'G', rent:49000, params:'3-комн. · 70 м² · 3/5 эт.', lift:false, beds2:true, parking:false, sad:7, sadName:'Сад № 123', school:9, schoolName:'Школа № 45', clinic:13, park:4, stop:6, work:'27 мин на авто', kids:true, verified:true, owner:'Светлана', ownerG:'f', docs:'12.10', x:56, y:76},
+  {id:'H', rent:50500, params:'3-комн. · 72 м² · 11/14 эт. · лифт', lift:true, beds2:true, parking:true, sad:15, sadName:'Сад № 41', school:14, schoolName:'Школа № 19', clinic:8, park:9, stop:3, work:'19 мин на авто', kids:true, verified:true, owner:'Динар', ownerG:'m', docs:'07.10', x:80, y:48},
+  {id:'I', rent:41000, params:'2-комн. · 52 м² · 2/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:11, sadName:'Сад № 87', school:10, schoolName:'Школа № 12', clinic:14, park:6, stop:4, work:'29 мин на авто', kids:false, verified:true, owner:'Ольга', ownerG:'f', docs:'10.10', x:16, y:54}
+];
+FLATS.forEach(f => f.entry = f.rent*2 + UTIL);
+const byId = id => FLATS.find(f => f.id === id);
+const REPLIES = {
+  'Можно оформить временную регистрацию для школы?': f => 'Да, временную регистрацию оформим, это бесплатно.',
+  'Какой залог?': f => 'Залог ' + rub(f.rent) + ', как месяц аренды. Можно внести в два платежа.',
+  'Можно с животными?': () => 'Небольшую собаку или кошку можно, крупных животных нет.',
+  'Есть ли кондиционер?': () => 'Да, в спальне. В детской стоит вентилятор.'
+};
+const DAYS = ['Пт, 16 октября','Сб, 17 октября','Вс, 18 октября'];
+const DAYW = {'Пт, 16 октября':'в пятницу, 16 октября','Сб, 17 октября':'в субботу, 17 октября','Вс, 18 октября':'в воскресенье, 18 октября'};
+function gen(f){ const n = f.owner; if(f.ownerG === 'm') return n + 'а'; if(/[гкхжшчщ]а$/.test(n)) return n.slice(0,-1) + 'и'; return n.replace(/а$/,'ы'); }
+const TIMES = ['10:00','12:00','15:00','18:00'];
+
+/* ---------- state ---------- */
+function fresh(){
+  return {
+    screen:'welcome', stack:[], tab:'search', cur:'B', step:1,
+    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', near:['sad','clinic','park','liftc'], sadMax:10, work:'ул. Баумана, 1', commute:'авто', kids:true, verified:true},
+    filters:{sad:10, lift:true, kids:true, verified:true, beds2:false, parking:false}, anketaDone:true,
+    sort:'sad', fav:[], scroll:{}, cityQ:'', placeQ:'', whenDate:'',
+    chats:{},
+    booking:{}, draft:'', sheet:null, toast:null, push:null,
+    loading:null, nearLoading:false, aiState:'ok', notif:{flats:true, owners:true}, faq:-1,
+    district:'Ново-Савиновский', mapSel:null, subscribed:false
+  };
+}
+let S = fresh();
+const M = {ai:false, slow:false, offline:false, autoConfirm:true, open:false};
+let timers = [];
+function later(ms, fn){ const t = setTimeout(() => { timers = timers.filter(x => x!==t); fn(); }, ms); timers.push(t); }
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+/* ---------- search ---------- */
+function match(f, flt){
+  if(flt.sad && f.sad > flt.sad) return false;
+  if(flt.lift && !f.lift) return false;
+  if(flt.kids && !f.kids) return false;
+  if(flt.verified && !f.verified) return false;
+  if(flt.beds2 && !f.beds2) return false;
+  if(flt.parking && !f.parking) return false;
+  return true;
+}
+function results(flt){
+  if(!area()) return [];
+  const r = FLATS.filter(f => match(f, flt || S.filters));
+  const key = {sad:f=>f.sad, entry:f=>f.entry, new:f=>FLATS.indexOf(f)*-1}[S.sort];
+  return r.sort((a,b) => key(a)-key(b));
+}
+function relaxOptions(){
+  const out = [];
+  const f = S.filters;
+  if(f.sad && f.sad < 15){ const n = results({...f, sad:15}).length; if(n) out.push({label:'Сад до 15 минут', n, act:'relax-sad'}); }
+  if(f.lift){ const n = results({...f, lift:false}).length; if(n) out.push({label:'Без лифта', n, act:'relax-lift'}); }
+  if(f.beds2){ const n = results({...f, beds2:false}).length; if(n) out.push({label:'Любое число спален', n, act:'relax-beds'}); }
+  if(f.parking){ const n = results({...f, parking:false}).length; if(n) out.push({label:'Без парковки', n, act:'relax-park'}); }
+  return out.slice(0,2);
+}
+
+/* ---------- navigation ---------- */
+function go(screen, opts){
+  saveScroll();
+  if(opts && opts.root){ S.stack = []; }
+  else S.stack.push(S.screen);
+  S.screen = screen; S.sheet = null;
+  if(screen === 'card'){ S.nearLoading = M.slow; if(M.slow) later(4000, () => { S.nearLoading = false; render(); }); }
+  if(screen === 'compare'){ S.aiState = M.ai ? 'fail' : 'ok'; }
+  render(true);
+}
+function back(){
+  saveScroll();
+  S.sheet = null;
+  S.screen = S.stack.pop() || (S.tab === 'search' ? 'results' : S.tab);
+  render();
+}
+function tab(t){
+  S.tab = t;
+  const map = {search:'results', map:'map', fav:'fav', chats:'chats', profile:'profile'};
+  saveScroll(); S.stack = []; S.screen = map[t]; S.sheet = null; render();
+}
+function saveScroll(){ const b = $('#phone .body'); if(b) S.scroll[S.screen + (S.screen==='card'||S.screen==='chat' ? S.cur : '')] = b.scrollTop; }
+function toast(text, action){ S.toast = {text, action}; render(); const id = Math.random(); S.toast.id = id; later(2600, () => { if(S.toast && S.toast.id === id){ S.toast = null; render(); } }); }
+
+/* ---------- pieces ---------- */
+function topBack(title, right, extra){
+  return '<div class="top"><button data-act="back" aria-label="Назад">←</button><span class="t">' + title + '</span>' + (right||'') + '</div>' + (extra||'');
+}
+function tabs(){
+  const items = [['search','Поиск'],['map','Карта'],['fav','Избранное'],['chats','Чаты'],['profile','Профиль']];
+  return '<nav class="tabs">' + items.map(([k,l]) => '<button data-act="tab" data-v="' + k + '" class="' + (S.tab===k?'cur':'') + '"><i>' + {search:'⌕',map:'◎',fav:'♡',chats:'✉',profile:'☺'}[k] + '</i>' + l + '</button>').join('') + '</nav>';
+}
+function heart(f){ const on = S.fav.includes(f.id); return '<span class="heart" role="button" tabindex="0" data-act="fav" data-v="' + f.id + '" aria-label="' + (on?'Убрать из избранного':'В избранное') + '">' + (on?'♥':'♡') + '</span>'; }
+function cmpBar(){
+  const n = S.fav.length;
+  if(n < 2) return '';
+  return '<div class="cmpbar"><button data-act="tab" data-v="fav">♡ ' + n + ' в избранном</button><button data-act="compare">Сравнить ' + kv(n) + ' →</button></div>';
+}
+function ownerLine(f){
+  if(!f.verified) return '<b>' + f.owner + ', собственник</b> · документы ещё не проверены. Не переводите предоплату';
+  return '<b>' + f.owner + ', собственник ✓</b> · документы сверены ' + f.docs + (f.kids ? '<br>Можно с детьми: собственник отметил при размещении, модератор проверил' : '<br>Собственник не сдаёт семьям с детьми');
+}
+
+/* ---------- screens ---------- */
+const V = {};
+V.welcome = () => '<div class="body" style="justify-content:center;gap:18px">' +
+  '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:14px"><div style="width:96px;height:96px;border-radius:22px;background:linear-gradient(160deg,#2E2924 0%,#171512 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center"><svg width="62" height="62" viewBox="0 0 40 40" fill="none" stroke="#FF6F73" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L20 6 L33 17"/><path d="M11 15 V30"/><path d="M29 15 V30"/><path d="M5 30 H35"/><path d="M5 30 V35"/><path d="M35 30 V35"/></svg></div><div style="font-size:34px;line-height:1;font-weight:800;letter-spacing:-.01em">Двор</div></div>' +
+  '<div class="h1" style="font-size:24px;line-height:30px">Квартира и всё, что рядом с ребёнком</div>' +
+  '<div class="muted" style="font-size:14px;line-height:20px">Сад, школа и поликлиника в минутах пешком прямо в карточке. Сумма въезда видна до звонка. Собственники проверены, для арендатора без комиссии.</div>' +
+  '<div style="flex:1"></div><button class="btn p" data-act="start">Начать</button></div>';
+
+function stepTop(n){
+  return '<div class="top"><button data-act="' + (n===1?'to-welcome':'step-prev') + '" aria-label="Назад">←</button><span class="t">Анкета семьи</span></div>' +
+    '<div class="body"><div style="display:flex;flex-direction:column;gap:6px"><div class="row small"><span>Шаг ' + n + ' из 4</span><span class="muted">≈ 1 минута</span></div><div class="prog"><div style="width:' + (n*25) + '%"></div></div></div>';
+}
+function choice(group, opts, val){ return '<div class="chips">' + opts.map(o => '<button class="chip' + (o===val?' on':'') + '" data-act="pick" data-g="' + group + '" data-v="' + o + '">' + o + '</button>').join('') + '</div>'; }
+function stepFoot(n){
+  return '<div style="flex:1"></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">' +
+    '<button class="btn s" data-act="' + (n===1?'to-welcome':'step-prev') + '">Назад</button><button class="btn p" data-act="step-next">' + (n===4?'Показать квартиры':'Далее') + '</button></div>' +
+    '<button class="small muted link" style="text-align:center;margin-top:-4px" data-act="skip">Заполню позже</button></div>';
+}
+function citySearch(){
+  const a = S.anketa, q = findTxt(S.cityQ);
+  let list = q ? CITIES.map(c=>c[0]).filter(c => findTxt(c).includes(q)) : ['Казань','Москва','Санкт-Петербург','Екатеринбург'];
+  if(!q && !list.includes(a.city)) list = [a.city, ...list.slice(0,3)];
+  return '<input class="field" id="citysearch" type="search" autocomplete="off" placeholder="⌕ Найти город" value="' + esc(S.cityQ) + '">' +
+    (list.length ? choice('city', list.slice(0,8), a.city) : '<div class="small muted">Такого города нет в списке. Проверьте написание.</div>');
+}
+const WHENS = ['через 2 недели','через месяц','через 2–3 месяца'];
+const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const dateTxt = v => { const [y,m,d] = v.split('-').map(Number); return d + ' ' + MONTHS[m-1] + (y !== 2026 ? ' ' + y : ''); };
+function whenPick(){
+  const a = S.anketa, own = !WHENS.includes(a.when);
+  return choice('when', [...WHENS, 'Своя дата'], own ? 'Своя дата' : a.when) +
+    (own ? '<label class="small" style="display:flex;flex-direction:column;gap:6px">Въехать к дате<input class="field" id="whendate" type="date" min="2026-10-16" max="2027-12-31" value="' + S.whenDate + '"><span class="muted" id="whentxt">Переезд ' + esc(a.when) + '</span></label>' : '');
+}
+V.anketa = () => {
+  const a = S.anketa, n = S.step;
+  if(n === 1) return stepTop(1) +
+    '<div class="h1">Куда и когда переезжаете?</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Город</div>' + citySearch() + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Когда нужна квартира?</div>' + whenPick() + '</div>' +
+    '<div class="box small muted">В прототипе квартиры есть в Казани, в Ново-Савиновском районе.</div>' + stepFoot(1);
+  if(n === 2){
+    const nearOpts = [['sad','Детский сад'],['school','Школа'],['clinic','Поликлиника'],['park','Парк'],['liftc','Лифт для коляски'],['parking','Парковка']];
+    return stepTop(2) +
+    '<div class="h1">Расскажите о ребёнке, и мы покажем только подходящие квартиры</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько лет ребёнку?</div>' + choice('age', ['до 1 года','1–3 года','3–7 лет','7+ лет'], a.age) + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что должно быть рядом?</div><div class="chips">' +
+      nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="sadrange">Сколько идти до сада пешком?</label>' +
+      '<input id="sadrange" type="range" min="5" max="30" step="5" value="' + a.sadMax + '" data-act="range">' +
+      '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700" id="sadval">до ' + a.sadMax + ' минут</span><span>30 мин</span></div></div>' +
+    '<div class="box small muted">Адрес работы добавим на следующем шаге, чтобы считать дорогу.</div>' + stepFoot(2);
+  }
+  if(n === 3) return stepTop(3) +
+    '<div class="h1">Где будет работа?</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="work">Адрес работы</label><input id="work" class="field" value="' + esc(a.work) + '" data-act="work" autocomplete="off"></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Как будете добираться?</div>' + choice('commute', ['авто','транспорт','пешком'], a.commute) + '</div>' +
+    '<div class="box small muted">Время до работы покажем в карточке каждой квартиры.</div>' + stepFoot(3);
+  return stepTop(4) +
+    '<div class="h1">Что ещё важно?</div>' +
+    [['kids','Собственник согласен на ребёнка'],['verified','Только проверенные собственники']].map(([k,l]) =>
+      '<button class="list-row" data-act="ank-toggle" data-v="' + k + '" aria-pressed="' + a[k] + '"><span>' + l + '</span><span class="tgl' + (a[k]?' on':'') + '"></span></button>').join('') +
+    '<div class="box small muted">Это станет фильтрами в выдаче. Любой фильтр потом можно снять крестиком.</div>' + stepFoot(4);
+};
+
+function filterChips(){
+  const f = S.filters, c = [];
+  if(f.sad) c.push(['sad','Сад ≤ ' + f.sad + ' мин']);
+  if(f.lift) c.push(['lift','Лифт']);
+  if(f.kids) c.push(['kids','Можно с детьми']);
+  if(f.verified) c.push(['verified','Собственник проверен']);
+  if(f.beds2) c.push(['beds2','2 спальни']);
+  if(f.parking) c.push(['parking','Парковка']);
+  return '<div style="display:flex;gap:6px;flex-wrap:wrap">' + c.map(([k,l]) =>
+    '<span class="chip on">' + (k==='kids' ? '<button data-act="info-kids" aria-label="Что значит «Можно с детьми»">' + l + ' ⓘ</button>' : l) +
+    '<button class="x" data-act="unfilter" data-v="' + k + '" aria-label="Снять фильтр ' + l + '">×</button></span>').join('') +
+    '<button class="chip" data-act="more">+ Ещё</button></div>';
+}
+function searchTop(){
+  return '<div class="top" style="gap:8px"><span class="logo"><svg width="22" height="22" viewBox="0 0 40 40" fill="none" stroke="#FF6F73" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L20 6 L33 17"/><path d="M11 15 V30"/><path d="M29 15 V30"/><path d="M5 30 H35"/><path d="M5 30 V35"/><path d="M35 30 V35"/></svg></span><button data-act="district" style="flex:1;height:38px;border-radius:19px;background:var(--soft);display:flex;align-items:center;padding:0 12px;font-size:13px;font-weight:500;color:var(--mute)">⌕ ' + S.anketa.city + (S.district ? ', ' + S.district : '') + '</button>' +
+    '<button class="small" style="font-weight:700" data-act="tab" data-v="map">Карта</button></div>';
+}
+const bdg = (l, m) => '<span class="bdg' + (m <= 10 ? ' g' : '') + '">' + l + ' ' + m + ' мин</span>';
+function flatCard(f, big){
+  return '<div class="flat"><button data-act="open" data-v="' + f.id + '" class="img room" style="height:' + (big?150:110) + 'px;border-radius:0;width:100%" aria-label="Фото квартиры"><span class="cnt">1 / 12</span></button>' +
+    '<div class="in"><div class="row"><button data-act="open" data-v="' + f.id + '" style="font-size:17px;font-weight:800">' + rub(f.rent) + '/мес</button>' + heart(f) + '</div>' +
+    '<div class="small">Въезд: <b>' + rub(f.entry) + '</b> · без комиссии</div>' +
+    '<div class="small muted">' + f.params + '</div>' +
+    '<div class="bdgs">' + bdg('Сад пешком', f.sad) + bdg('Школа', f.school) + bdg('Поликлиника', f.clinic) + '</div>' +
+    (f.verified ? '<div><span class="chip" style="font-size:11px">✓ Собственник проверен</span></div>' : '<div class="small muted">Собственник ещё не проверен</div>') +
+    '</div></div>';
+}
+const SORTS = {sad:'Сначала ближе к саду', entry:'Сначала дешевле въезд', new:'Сначала новые'};
+V.results = () => {
+  if(S.loading === 'results') return searchTop() +
+    '<div class="body"><div class="small muted">Собираем сады и поликлиники рядом…</div>' +
+    [1,2].map(() => '<div class="flat"><div class="sk" style="height:150px;border-radius:0"></div><div class="in"><div class="sk" style="height:18px;width:55%"></div><div class="sk" style="height:12px;width:80%"></div><div class="sk" style="height:12px;width:70%"></div></div></div>').join('') + '</div>' + tabs();
+  const r = results();
+  if(!area()){
+    const where = S.district ? 'в ' + DISTG[S.district] + ' районе' : 'в ' + inCity(S.anketa.city);
+    return searchTop() + '<div class="body">' +
+      '<div class="img ill" style="width:120px;height:120px;border-radius:50%;align-self:center"><svg width="56" height="56" viewBox="0 0 40 40" fill="none" stroke="#B3AA9E" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L20 6 L33 17"/><path d="M11 15 V30"/><path d="M29 15 V30"/><path d="M5 30 H35"/><path d="M5 30 V35"/><path d="M35 30 V35"/></svg></div>' +
+      '<div style="font-size:19px;line-height:25px;font-weight:800">' + where[0].toUpperCase() + where.slice(1) + ' пока нет квартир</div>' +
+      '<div class="muted" style="font-size:14px;line-height:20px">В прототипе квартиры есть только в Казани, в Ново-Савиновском районе. Анкета и фильтры сохранены.</div>' +
+      '<button class="btn s" data-act="district">Выбрать другое место</button>' +
+      '<div style="flex:1"></div><button class="btn p" data-act="to-has">Искать в Ново-Савиновском районе</button></div>' + tabs();
+  }
+  if(!r.length){
+    const opts = relaxOptions();
+    return searchTop() + '<div class="body">' + filterChips() +
+      '<div class="img ill" style="width:120px;height:120px;border-radius:50%;align-self:center"><svg width="56" height="56" viewBox="0 0 40 40" fill="none" stroke="#B3AA9E" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L20 6 L33 17"/><path d="M11 15 V30"/><path d="M29 15 V30"/><path d="M5 30 H35"/><path d="M5 30 V35"/><path d="M35 30 V35"/></svg></div>' +
+      '<div style="font-size:19px;line-height:25px;font-weight:800">Под эти фильтры квартир пока нет</div>' +
+      '<div class="muted" style="font-size:14px;line-height:20px">В этом районе мало квартир' + (S.filters.beds2?' с двумя спальнями':'') + (S.filters.lift?' и лифтом':'') + ' у сада. Анкета и фильтры сохранены.</div>' +
+      (opts.length ? '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Попробуйте ослабить один фильтр:</div>' +
+        opts.map(o => '<button class="btn s" style="justify-content:space-between;padding:0 14px" data-act="' + o.act + '"><span>' + o.label + '</span><span class="small">ещё ' + kv(o.n) + '</span></button>').join('') + '</div>'
+        : '<button class="btn s" data-act="reset-filters">Снять все фильтры</button>') +
+      '<div style="flex:1"></div>' +
+      (S.subscribed ? '<div class="box small" style="text-align:center">✓ Пришлём пуш, когда появится подходящая квартира</div>'
+                    : '<button class="btn p" data-act="subscribe">Сообщить, когда появится</button>') +
+      '</div>' + tabs();
+  }
+  return searchTop() + '<div class="body" style="gap:12px">' + filterChips() +
+    '<div class="row small"><span>' + kv(r.length) + (S.anketaDone ? ' под вашу анкету' : ' в районе') + '</span><button class="muted" data-act="sort">' + SORTS[S.sort] + ' ▾</button></div>' +
+    r.map((f,i) => flatCard(f, i===0)).join('') + '</div>' + cmpBar() + tabs();
+};
+
+V.card = () => {
+  const f = byId(S.cur), on = S.fav.includes(f.id);
+  const near = S.nearLoading
+    ? '<div class="box"><div style="font-weight:800">Что рядом для ребёнка</div><div class="small muted">Считаем маршруты до садов и поликлиник… обычно до 5 секунд</div>' +
+      '<div class="sk" style="height:14px"></div><div class="sk" style="height:14px;width:85%"></div><div class="sk" style="height:14px;width:70%"></div>' +
+      '<div class="small muted">Пока считаем, можно листать фото и добавить квартиру в избранное</div></div>'
+    : '<div class="box"><div style="font-weight:800">Что рядом для ребёнка</div>' +
+      '<div class="row"><span>' + f.sadName + ' <span class="muted">· закреплён</span></span>' + bdg('пешком', f.sad) + '</div>' +
+      '<div class="row"><span>' + f.schoolName + ' <span class="muted">· закреплена</span></span>' + bdg('пешком', f.school) + '</div>' +
+      '<div class="row"><span>Детская поликлиника</span>' + bdg('пешком', f.clinic) + '</div>' +
+      '<div class="row"><span>Парк · Остановка</span><b>' + f.park + ' · ' + f.stop + ' мин</b></div>' +
+      '<div class="row muted"><span>До работы (из анкеты)</span><span>' + f.work + '</span></div></div>';
+  const from = {results:'К выдаче', fav:'К избранному', compare:'К сравнению', map:'К карте', chat:'К чату'}[S.stack[S.stack.length-1]] || 'Назад';
+  return '<div class="top"><button data-act="back">← ' + from + '</button><span class="t"></span>' +
+      '<button data-act="fav" data-v="' + f.id + '" aria-label="' + (on?'Убрать из избранного':'В избранное') + '" style="font-size:17px">' + (on?'♥':'♡') + '</button><button data-act="share" aria-label="Поделиться">↗</button></div>' +
+    '<div class="body" style="gap:12px">' +
+    '<button class="img room" style="height:150px;width:100%" data-act="photo" aria-label="Следующее фото"><span class="cnt">' + (S.photo||1) + ' / 12</span></button>' +
+    '<div class="row"><b style="font-size:19px">' + rub(f.rent) + '/мес</b><span class="small muted">' + f.params.split(' · ').slice(0,2).join(' · ') + '</span></div>' +
+    '<div class="row" style="margin-top:-4px"><b>Въезд ' + rub(f.entry) + '</b><span class="small muted">без комиссии</span></div>' +
+    '<div class="box"><div style="font-weight:800">Сумма въезда</div>' +
+      '<div class="row muted"><span>Аренда за 1 месяц</span><span>' + rub(f.rent) + '</span></div>' +
+      '<div class="row muted"><span>Залог</span><span>' + rub(f.rent) + '</span></div>' +
+      '<div class="row muted"><span>Коммуналка, в среднем</span><span>≈ ' + rub(UTIL) + '</span></div>' +
+      '<div class="row muted"><span>Комиссия</span><span>0 ₽</span></div>' +
+      '<div class="row" style="font-weight:800;border-top:1px solid var(--line);padding-top:8px"><span>Итого при въезде</span><span>' + rub(f.entry) + '</span></div></div>' +
+    near + (S.nearLoading ? '' : butlerHint(f)) +
+    '<div class="box small"><span>' + ownerLine(f) + '</span></div>' +
+    '</div><div class="foot"><button class="btn s" data-act="fav" data-v="' + f.id + '">' + (on?'В избранном ♥':'В избранное') + '</button><button class="btn p" data-act="write" data-v="' + f.id + '">Написать</button></div>';
+};
+
+const acc = f => f.ownerG === 'm' ? f.owner + 'а' : f.owner.replace(/а$/, 'у');
+function butlerHint(f){ return '<button class="bhint" data-act="butler-ask" data-v="' + f.id + '"><span class="butler"><svg width="16" height="9" viewBox="0 0 24 14" fill="#1A1714" aria-hidden="true"><path d="M1 1 L11 6 V8 L1 13 Z"/><path d="M23 1 L13 6 V8 L23 13 Z"/><rect x="10" y="5" width="4" height="4" rx="1.5"/></svg></span><span><b>Дворецкий:</b> ' + f.schoolName.toLowerCase() + ' берёт детей по прописке. Спросить ' + acc(f) + ' про регистрацию?<span class="go">Спросить в чате →</span></span></button>'; }
+function verdict(list){
+  const bySad = [...list].sort((a,b)=>a.sad-b.sad)[0];
+  const cheap = [...list].sort((a,b)=>a.entry-b.entry)[0];
+  let t = bySad.id + ' ближе всех к саду (' + bySad.sad + ' ' + plural(bySad.sad,'минута','минуты','минут') + ')' + (bySad.lift ? ' и с лифтом' : ', но без лифта');
+  if(cheap.id !== bySad.id) t += ', но въезд на ' + rub(bySad.entry - cheap.entry) + ' дороже ' + cheap.id + '.';
+  else t += ' и с самым дешёвым въездом.';
+  const unv = list.filter(f => !f.verified).map(f=>f.id);
+  if(unv.length) t += ' У ' + unv.join(' и ') + ' собственник ещё не проверен.';
+  return {text:t, best:bySad};
+}
+V.compare = () => {
+  const list = S.fav.map(byId).sort((a,b)=>a.id.localeCompare(b.id));
+  const head = topBack('Сравнение · ' + kv(list.length), '<button class="small muted" data-act="tab" data-v="fav">Изменить</button>');
+  if(list.length < 2) return head + '<div class="body"><div class="h1">Для сравнения нужны две квартиры</div><div class="muted" style="font-size:14px;line-height:20px">Добавьте в избранное ещё ' + (2-list.length) + ', нажав ♡ в выдаче или в карточке.</div><div style="flex:1"></div><button class="btn p" data-act="tab" data-v="search">К выдаче</button></div>';
+  const rows = [
+    ['Въезд', f=>f.entry, f=>tys(f.entry), 'min'],
+    ['Сад пешком', f=>f.sad, f=>f.sad+' мин', 'min'],
+    ['Поликлиника', f=>f.clinic, f=>f.clinic+' мин', 'min'],
+    ['Лифт', f=>f.lift?1:0, f=>f.lift?'да':'нет', null],
+    ['Собственник', f=>f.verified?1:0, f=>f.verified?'✓':'—', null]
+  ];
+  let g = '<div class="grid" style="--n:' + list.length + '"><div class="hd"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '">' + f.id + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
+  rows.forEach(([l,val,show,best]) => {
+    const vals = list.map(val), b = best ? Math.min(...vals) : null;
+    g += '<div>' + l + '</div>' + list.map((f,i) => '<div class="c' + (best && vals[i]===b ? ' best' : '') + '">' + show(f) + '</div>').join('');
+  });
+  g += '</div>';
+  const v = verdict(list);
+  let ai;
+  if(S.aiState === 'fail') ai = '<div class="err"><div style="font-weight:800">Дворецкий не смог загрузить вывод</div><div>Таблица на месте: выбрать квартиру можно и без вывода.</div><div class="row"><button class="btn s" style="height:38px;width:auto;padding:0 16px" data-act="ai-retry">Повторить</button><span class="small muted">Выбранные квартиры сохранены</span></div></div>';
+  else if(S.aiState === 'loading') ai = '<div class="box" style="background:var(--fill)"><div style="display:flex;align-items:center;gap:8px;font-weight:800"><span class="butler"><svg width="16" height="9" viewBox="0 0 24 14" fill="#1A1714" aria-hidden="true"><path d="M1 1 L11 6 V8 L1 13 Z"/><path d="M23 1 L13 6 V8 L23 13 Z"/><rect x="10" y="5" width="4" height="4" rx="1.5"/></svg></span>Дворецкий</div><div class="sk" style="height:14px"></div><div class="sk" style="height:14px;width:80%"></div></div>';
+  else ai = '<div class="box" style="background:var(--fill)"><div style="display:flex;align-items:center;gap:8px;font-weight:800"><span class="butler"><svg width="16" height="9" viewBox="0 0 24 14" fill="#1A1714" aria-hidden="true"><path d="M1 1 L11 6 V8 L1 13 Z"/><path d="M23 1 L13 6 V8 L23 13 Z"/><rect x="10" y="5" width="4" height="4" rx="1.5"/></svg></span>Дворецкий</div><div>' + v.text + '</div>' +
+    '<div class="small muted">Учёл: минуты до сада, сумму въезда, лифт</div>' +
+    '<div class="small muted">Подсказал, решение за вами · <button class="link" data-act="why">Почему такой вывод?</button></div></div>';
+  return head + '<div class="body" style="gap:12px"><div class="small muted">По приоритетам вашей анкеты · обновлено 2 мин назад</div>' + g +
+    '<div class="small muted">Зелёным выделено лучшее значение в строке. Нажмите на букву, чтобы открыть квартиру</div>' + ai +
+    '</div><div class="foot one"><button class="btn p" data-act="book-from-compare" data-v="' + v.best.id + '">Записаться на просмотр ' + v.best.id + '</button></div>';
+};
+
+function bookingBox(f){
+  const b = S.booking[f.id];
+  if(!b) return '<div class="box" style="background:var(--paper);border:1px solid var(--line)"><div style="font-weight:800">Просмотр</div><div class="small muted">Пока не назначен</div><button class="btn s" style="height:40px" data-act="book" data-v="' + f.id + '">Выбрать день и время</button></div>';
+  const st = {wait:'<span class="chip" style="font-size:11px">⏳ Ждём ответа</span>', ok:'<span class="chip on" style="font-size:11px">✓ Подтверждён</span>', cancel:'<span class="chip" style="font-size:11px">Отменён</span>'}[b.status];
+  const note = {wait: f.owner + ' обычно отвечает за час. Пришлём пуш, когда подтвердит, и чек-лист просмотра',
+                ok: 'Напомним за 2 часа и пришлём чек-лист просмотра', cancel: 'Просмотр отменён, ' + f.owner + ' получит уведомление'}[b.status];
+  return '<div class="box" style="background:var(--paper);border:1px solid var(--line)"><div style="font-weight:800">Просмотр</div><div class="row"><span' + (b.status==='cancel'?' class="muted" style="text-decoration:line-through"':'') + '>' + b.day + ' · ' + b.time + '</span>' + st + '</div>' +
+    '<div class="small muted">' + note + '</div>' +
+    (b.status === 'cancel' ? '<button class="btn s" style="height:40px" data-act="book" data-v="' + f.id + '">Записаться снова</button>'
+      : '<div class="row small"><button class="link" data-act="book" data-v="' + f.id + '">Перенести</button><button class="link" data-act="cancel-ask" data-v="' + f.id + '">Отменить</button></div>') + '</div>';
+}
+V.chat = () => {
+  const f = byId(S.cur), msgs = S.chats[f.id] || [];
+  const asked = msgs.filter(m=>m.me).map(m=>m.t);
+  const quick = Object.keys(REPLIES).filter(q => !asked.includes(q));
+  return '<div class="top"><button data-act="back" aria-label="Назад">←</button><div class="t" style="display:flex;flex-direction:column"><span>' + f.owner + (f.verified?' ✓':'') + '</span><span class="small muted" style="font-weight:500">собственник · отвечает за час</span></div>' +
+      '<button class="small muted link" data-act="open" data-v="' + f.id + '">Квартира ' + f.id + '</button></div>' +
+    (M.offline ? '<div class="small" style="flex:none;padding:8px 18px;border-bottom:1px solid var(--ink);background:var(--soft)"><b>Нет подключения к интернету.</b> Сообщения сохранены и уйдут сами, когда появится сеть.</div>' : '') +
+    '<div class="body" style="gap:10px;background:var(--paper)">' +
+    '<div class="box small" style="background:rgba(255,111,115,.12);color:#FFB3B5;flex-direction:row;gap:8px"><b>!</b><span>Номер и чат бесплатны. Не переводите деньги до просмотра.</span></div>' +
+    msgs.map((m,i) => '<div class="bubble ' + (m.me?'me':'they') + '">' + esc(m.t) + '</div>' +
+      (m.failed ? '<div class="small" style="align-self:flex-end;margin-top:-6px">Не отправлено · <button class="link" data-act="resend" data-v="' + i + '">Повторить</button></div>' : '')).join('') +
+    (S.typing ? '<div class="bubble they muted">' + f.owner + ' печатает…</div>' : '') +
+    bookingBox(f) + '</div>' +
+    '<div style="flex:none;padding:10px 18px 14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:var(--paper)">' +
+    (quick.length ? '<div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--mute)"><span class="butler" style="width:20px;height:20px"><svg width="12" height="7" viewBox="0 0 24 14" fill="#1A1714" aria-hidden="true"><path d="M1 1 L11 6 V8 L1 13 Z"/><path d="M23 1 L13 6 V8 L23 13 Z"/><rect x="10" y="5" width="4" height="4" rx="1.5"/></svg></span>Дворецкий советует спросить:</div><div style="display:flex;gap:6px;flex-wrap:wrap">' + quick.map(q => '<button class="chip" data-act="quick" data-v="' + q + '">' + q + '</button>').join('') + '</div>' : '') +
+    '<form class="row" style="gap:8px" data-form="send"><input id="msg" class="field" placeholder="Сообщение…" value="' + esc(S.draft) + '" autocomplete="off" aria-label="Сообщение"><button class="btn p" style="width:44px;height:44px;flex:none" aria-label="Отправить">↑</button></form></div>';
+};
+
+V.fav = () => {
+  const list = S.fav.map(byId);
+  return '<div class="top"><span class="t">Избранное</span></div><div class="body" style="gap:12px">' +
+    (list.length ? list.map(f => flatCard(f, false)).join('') + '<div class="small muted">Сохранённые квартиры можно сравнить по саду, сумме въезда и лифту.</div>'
+      : '<div class="h1">Пока ничего не сохранено</div><div class="muted" style="font-size:14px;line-height:20px">Нажмите ♡ на квартире в выдаче, и она появится здесь.</div><button class="btn s" data-act="tab" data-v="search">К выдаче</button>') +
+    '</div>' + (list.length >= 2 ? '<div class="foot one" style="border-top:1px solid var(--line)"><button class="btn p" data-act="compare">Сравнить ' + kv(list.length) + '</button></div>' : '') + tabs();
+};
+V.chats = () => {
+  const ids = Object.keys(S.chats).filter(id => S.chats[id].length);
+  return '<div class="top"><span class="t">Чаты</span></div><div class="body" style="gap:0">' +
+    (ids.length ? ids.map(id => { const f = byId(id), m = S.chats[id], last = m[m.length-1]; const b = S.booking[id];
+      return '<button class="list-row" data-act="chat" data-v="' + id + '"><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><b>' + f.owner + (f.verified?' ✓':'') + ' · квартира ' + id + '</b><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">' + (last ? (last.me?'Вы: ':'') + esc(last.t) : 'Нет сообщений') + '</span></span>' +
+        (b && b.status==='wait' ? '<span class="chip" style="font-size:10px">⏳</span>' : b && b.status==='ok' ? '<span class="chip on" style="font-size:10px">✓</span>' : '<span class="muted">›</span>') + '</button>'; }).join('')
+      : '<div class="muted" style="font-size:14px;line-height:20px">Здесь будут переписки с собственниками. Откройте квартиру и нажмите «Написать».</div>') + '</div>' + tabs();
+};
+function mapSvg(){
+  const blk = [];
+  const xs = [[3,31],[37,63],[69,97]], ys = [[16,33],[39,65],[71,97]];
+  xs.forEach(([x0,x1]) => ys.forEach(([y0,y1]) => {
+    const mx = (x0+x1)/2, my = (y0+y1)/2;
+    [[x0,y0,mx-1.5,my-1.2],[mx+1.5,y0,x1,my-1.2],[x0,my+1.2,mx-1.5,y1],[mx+1.5,my+1.2,x1,y1]].forEach(([a,b,c,d]) =>
+      blk.push('<rect x="' + a + '" y="' + b + '" width="' + (c-a) + '" height="' + (d-b) + '" rx="1" fill="#24211D"/>'));
+  }));
+  return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
+    '<rect width="100" height="100" fill="#2B2A25"/>' +
+    blk.join('') +
+    '<path d="M0 3 C25 10 45 2 70 8 S95 11 100 9 L100 15 C80 17 70 12 50 13 S20 15 0 11 Z" fill="#2F4656"/>' +
+    '<rect x="82" y="72" width="16" height="24" rx="2" fill="#33483A"/>' +
+    '<g fill="#45413A"><rect x="0" y="34" width="100" height="4.4"/><rect x="0" y="66" width="100" height="3.6"/><rect x="32" y="13" width="4.2" height="87"/><rect x="64" y="13" width="3.6" height="87"/></g>' +
+    '</svg>' +
+    [['р. Казанка',18,9.5,''],['пр. Ямашева',14,36.2,''],['ул. Чистопольская',84,67.8,''],['ул. Адоратского',34.1,80,' v'],['ул. Амирхана',65.8,24,' v'],['Парк',90,84,'']].map(([t,x,y,c]) =>
+      '<span class="mlbl' + c + '" style="left:' + x + '%;top:' + y + '%">' + t + '</span>').join('');
+}
+V.map = () => {
+  const r = results(), sel = S.mapSel && r.find(f=>f.id===S.mapSel);
+  const head = searchTop() + '<div class="body" style="padding:10px;gap:10px">' + (area() ? filterChips() : '');
+  if(!area()) return head + '<div class="map">' + mapSvg() + '<div style="position:absolute;inset:auto 12px 12px 12px;display:flex;flex-direction:column;gap:8px" class="box small">В прототипе квартиры есть только в Ново-Савиновском районе Казани.<button class="btn p" style="height:40px" data-act="to-has">Показать Ново-Савиновский</button></div></div></div>' + tabs();
+  const sp = sel && SADS[sel.sadName];
+  return head +
+    '<div class="map">' + mapSvg() +
+    (sp ? '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="' + sel.x + '" y1="' + sel.y + '" x2="' + sp[0] + '" y2="' + sp[1] + '" stroke="#7EE2A8" stroke-dasharray="5 4" vector-effect="non-scaling-stroke" style="stroke-width:2.5px"/></svg>' +
+'' : '') +
+    Object.entries(SADS).map(([n,[x,y]]) => '<span class="poi sad" style="left:' + x + '%;top:' + y + '%' + (sp && sel.sadName===n ? ';background:var(--mint);color:var(--dark);z-index:2' : '') + '">◉ ' + n + '</span>').join('') +
+    [['✚ Поликлиника',58,30],['▣ Школа № 45',50,87]].map(([t,x,y]) => '<span class="poi" style="left:' + x + '%;top:' + y + '%">' + t + '</span>').join('') +
+    r.map(f => '<button class="pin' + (sel&&sel.id===f.id?' sel':'') + '" style="left:' + f.x + '%;top:' + f.y + '%" data-act="pin" data-v="' + f.id + '" aria-label="Квартира ' + f.id + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>').join('') +
+    (r.length ? '' : '<div style="position:absolute;inset:auto 12px 12px 12px" class="box small" >Под фильтры квартир нет. Ослабьте фильтр в списке.</div>') +
+    '</div>' +
+    (sel ? '<div class="box"><div class="row"><b>' + rub(sel.rent) + '/мес</b>' + heart(sel) + '</div><div class="small">Въезд ' + rub(sel.entry) + ' · ' + sel.sadName + ' пешком ' + sel.sad + ' мин</div><button class="btn p" style="height:40px" data-act="open" data-v="' + sel.id + '">Открыть квартиру</button></div>'
+         : '<div class="small muted" style="text-align:center">' + kv(r.length) + ' на карте. Нажмите на цену, чтобы увидеть путь до сада</div>') +
+    '<button class="btn s" style="height:40px" data-act="tab" data-v="search">Списком</button></div>' + tabs();
+};
+V.profile = () => '<div class="top"><span class="t">Профиль</span></div><div class="body" style="gap:0">' +
+  '<div style="display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)"><div class="img ava" style="width:52px;height:52px;border-radius:50%"></div><div><b>Семья Вохмяниных</b><div class="small muted">Переезд в ' + inCity(S.anketa.city) + ' ' + S.anketa.when + '</div></div></div>' +
+  '<button class="list-row" data-act="edit-anketa"><span>Анкета семьи</span><span class="muted">›</span></button>' +
+  '<button class="list-row" data-act="go" data-v="notif"><span>Уведомления</span><span class="muted">›</span></button>' +
+  '<button class="list-row" data-act="go" data-v="help"><span>Помощь</span><span class="muted">›</span></button>' +
+  '</div>' + tabs();
+V.notif = () => topBack('Уведомления') + '<div class="body" style="gap:0">' +
+  [['flats','Новые квартиры под анкету'],['owners','Ответы собственников и просмотры']].map(([k,l]) =>
+    '<button class="list-row" data-act="notif" data-v="' + k + '" aria-pressed="' + S.notif[k] + '"><span>' + l + '</span><span class="tgl' + (S.notif[k]?' on':'') + '"></span></button>').join('') +
+  '<div class="small muted" style="padding-top:12px">Хорошие квартиры у сада быстро сдают, поэтому пуш о новых лучше не выключать.</div></div>';
+const FAQ = [
+  ['Что значит «собственник проверен»?','Мы сверили выписку ЕГРН и паспорт: квартиру сдаёт её владелец, а не посредник.'],
+  ['Из чего складывается сумма въезда?','Аренда за первый месяц, залог и средняя коммуналка. Комиссии для арендатора нет.'],
+  ['Что значит «сад закреплён»?','Дом входит в территорию, закреплённую за этим садом, поэтому туда проще попасть.'],
+  ['Как работает Дворецкий?','Дворецкий сравнивает избранное по вашей анкете и объясняет компромисс. Решение остаётся за вами.']
+];
+V.help = () => topBack('Помощь') + '<div class="body" style="gap:0">' + FAQ.map(([q,a],i) =>
+  '<button class="list-row" data-act="faq" data-v="' + i + '" aria-expanded="' + (S.faq===i) + '" style="flex-direction:column;align-items:stretch;gap:6px"><span class="row"><b style="font-size:14px">' + q + '</b><span class="muted">' + (S.faq===i?'−':'+') + '</span></span>' +
+  (S.faq===i ? '<span class="small muted">' + a + '</span>' : '') + '</button>').join('') + '</div>';
+
+/* ---------- sheets ---------- */
+function sheet(inner){ return '<div class="scrim" data-act="close-sheet"><div class="sheet" data-stop="1" role="dialog"><div class="grab"></div>' + inner + '</div></div>'; }
+const SH = {};
+SH.kids = () => sheet('<div class="h1" style="font-size:17px">Можно с детьми</div><div style="font-size:14px;line-height:20px">Собственник отметил при размещении, что сдаёт семьям с ребёнком. Модератор подтвердил это при проверке объявления. Квартиры, где семьям отказывают, фильтр убирает ещё до звонка.</div><button class="btn p" data-act="close-sheet">Понятно</button>');
+SH.sort = () => sheet('<div class="h1" style="font-size:17px">Сортировка</div>' + Object.entries(SORTS).map(([k,l]) =>
+  '<button class="list-row" data-act="set-sort" data-v="' + k + '"><span>' + l + '</span><span>' + (S.sort===k?'✓':'') + '</span></button>').join(''));
+SH.more = () => {
+  const d = S.sheetDraft;
+  const t = (k,l) => '<button class="list-row" data-act="draft-toggle" data-v="' + k + '" aria-pressed="' + !!d[k] + '"><span>' + l + '</span><span class="tgl' + (d[k]?' on':'') + '"></span></button>';
+  return sheet('<div class="h1" style="font-size:17px">Фильтры</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сад пешком</div><div class="chips">' + [[5,'до 5 мин'],[10,'до 10 мин'],[15,'до 15 мин'],[0,'не важно']].map(([v,l]) =>
+      '<button class="chip' + ((d.sad||0)===v?' on':'') + '" data-act="draft-sad" data-v="' + v + '">' + l + '</button>').join('') + '</div></div>' +
+    '<div>' + t('beds2','2 спальни') + t('lift','Лифт') + t('parking','Парковка во дворе') + t('kids','Можно с детьми') + t('verified','Собственник проверен') + '</div>' +
+    '<button class="btn p" data-act="apply-more">Показать ' + kv(results(d).length) + '</button>');
+};
+SH.district = () => {
+  const q = findTxt(S.placeQ), cur = S.anketa.city;
+  const row = (act, v, title, sub, on) => '<button class="list-row" data-act="' + act + '" data-v="' + esc(v) + '"><span>' + title + (sub ? '<div class="small muted">' + sub + '</div>' : '') + '</span><span>' + (on ? '✓' : '›') + '</span></button>';
+  const dists = DISTRICTS.filter(d => !q || findTxt(d).includes(q) || findTxt(d + ' район').includes(q));
+  const cities = CITIES.map(c=>c[0]).filter(c => q ? findTxt(c).includes(q) : c !== cur).slice(0, q ? 8 : 4);
+  const dOn = d => cur === HAS.city && S.district === d;
+  let out = '';
+  if(dists.length && (q || cur === HAS.city)) out += '<div class="lbl">Районы Казани</div>' + dists.map(d => row('place-d', d, d + ' район', d === HAS.district ? kv(FLATS.length) + ' в прототипе' : 'в прототипе пока нет квартир', dOn(d))).join('');
+  if(cities.length) out += '<div class="lbl">' + (q ? 'Города' : 'Другой город') + '</div>' + cities.map(c => row('place-c', c, c, c === HAS.city ? '' : 'в прототипе пока нет квартир', c === cur && !S.district)).join('');
+  if(!out) out = '<div class="small muted">Ничего не нашли по запросу «' + esc(S.placeQ) + '». Попробуйте название города или района.</div>';
+  return sheet('<div class="h1" style="font-size:17px">Где ищем</div><input class="field" id="placesearch" type="search" autocomplete="off" placeholder="⌕ Город или район" value="' + esc(S.placeQ) + '">' + out);
+};
+SH.why = () => { const v = verdict(S.fav.map(byId)); return sheet('<div class="h1" style="font-size:17px">Почему такой вывод</div><div style="font-size:14px;line-height:20px">Дворецкий взял приоритеты из вашей анкеты: сад пешком до ' + S.anketa.sadMax + ' минут, сумму въезда и лифт. Ближе всех к саду ' + v.best.id + ', поэтому она первая. Если важнее деньги, смотрите строку «Въезд»: там серым выделен самый дешёвый въезд.</div><div class="small muted">Дворецкий не знает того, чего нет в анкете и объявлениях. Решение за вами.</div><button class="btn p" data-act="close-sheet">Понятно</button>'); };
+SH.book = () => {
+  const f = byId(S.cur), d = S.bookDraft;
+  return sheet('<div class="h1" style="font-size:17px">Просмотр квартиры ' + f.id + '</div><div class="small muted">' + f.owner + ' получит запрос и подтвердит время в чате</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">День</div><div class="chips">' + DAYS.map(x => '<button class="chip' + (d.day===x?' on':'') + '" data-act="bd-day" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Время</div><div class="chips">' + TIMES.map(x => '<button class="chip' + (d.time===x?' on':'') + '" data-act="bd-time" data-v="' + x + '">' + x + '</button>').join('') + '</div></div>' +
+    '<button class="btn p" data-act="bd-send"' + (d.day&&d.time?'':' disabled') + '>' + (d.day&&d.time ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : 'Выберите день и время') + '</button>');
+};
+SH.cancel = () => { const f = byId(S.cur), b = S.booking[f.id]; return sheet('<div class="h1" style="font-size:17px">Отменить просмотр?</div><div style="font-size:14px;line-height:20px">' + b.day + ' · ' + b.time + '. ' + f.owner + ' получит уведомление об отмене.</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" data-act="close-sheet">Не отменять</button><button class="btn p" data-act="cancel-do">Отменить</button></div>'); };
+
+/* ---------- render ---------- */
+function render(resetScroll){
+  const ph = $('#phone');
+  const k = S.screen + (S.screen==='card'||S.screen==='chat' ? S.cur : '');
+  const focused = document.activeElement && document.activeElement.id;
+  let html = V[S.screen]();
+  if(S.sheet) html += SH[S.sheet]();
+  if(S.push) html += '<button class="push" data-act="push-open"><b>' + S.push.title + '</b><div class="small">' + S.push.text + '</div></button>';
+  if(S.toast) html += '<div class="toast"><span>' + S.toast.text + '</span>' + (S.toast.action ? '<button data-act="' + S.toast.action.act + '" data-v="' + (S.toast.action.v||'') + '">' + S.toast.action.label + '</button>' : '') + '</div>';
+  ph.innerHTML = html;
+  const b = ph.querySelector('.body');
+  if(b) b.scrollTop = resetScroll && !(k in S.scroll) ? 0 : (S.scroll[k] || 0);
+  if(S.screen === 'chat' && b && S.chatBottom){ b.scrollTop = b.scrollHeight; S.chatBottom = false; }
+  if(focused){ const el = document.getElementById(focused); if(el && el.tagName === 'INPUT'){ el.focus(); if(el.type === 'text' || el.type === 'search') el.setSelectionRange(el.value.length, el.value.length); } }
+  renderMod();
+}
+
+/* ---------- chat logic ---------- */
+function ownerReply(f, text, delay){
+  later(800, () => { S.typing = true; if(S.screen==='chat') { S.chatBottom = true; render(); } });
+  later(delay || 1800, () => { S.typing = false; (S.chats[f.id] = S.chats[f.id] || []).push({me:false, t:text}); S.chatBottom = true; render(); });
+}
+function send(text){
+  const f = byId(S.cur);
+  const list = S.chats[f.id] = S.chats[f.id] || [];
+  if(M.offline){ list.push({me:true, t:text, failed:true}); S.chatBottom = true; render(); return; }
+  list.push({me:true, t:text}); S.chatBottom = true; render();
+  ownerReply(f, REPLIES[text] ? REPLIES[text](f) : 'Хорошо, подробнее расскажу на просмотре.');
+}
+function flushOffline(){
+  Object.entries(S.chats).forEach(([id, list]) => list.forEach(m => { if(m.failed){ m.failed = false; if(id === S.cur) ownerReply(byId(id), REPLIES[m.t] ? REPLIES[m.t](byId(id)) : 'Хорошо, подробнее расскажу на просмотре.'); } }));
+}
+function confirmBooking(id){
+  const b = S.booking[id]; if(!b || b.status !== 'wait') return;
+  const f = byId(id);
+  b.status = 'ok';
+  (S.chats[id] = S.chats[id] || []).push({me:false, t:'Подтверждаю просмотр ' + DAYW[b.day] + ' в ' + b.time + '. Буду ждать у подъезда.'});
+  S.push = {title: f.owner + ' подтвердил' + (f.ownerG==='f'?'а':'') + ' просмотр', text: b.day + ', ' + b.time + ' · квартира ' + id, id};
+  S.chatBottom = true; render();
+  later(4500, () => { S.push = null; render(); });
+}
+
+/* ---------- actions ---------- */
+const A = {
+  back, tab: v => tab(v),
+  start(){ S.step = 1; go('anketa'); },
+  'to-welcome'(){ if(S.stack.length) back(); else { S.screen = 'welcome'; render(); } },
+  'step-prev'(){ S.step--; render(true); },
+  'step-next'(){
+    if(S.step < 4){ S.step++; S.scroll['anketa'] = 0; render(); return; }
+    const a = S.anketa; S.anketaDone = true;
+    S.filters = {sad: a.near.includes('sad') ? a.sadMax : 0, lift: a.near.includes('liftc'), kids: a.kids, verified: a.verified, beds2:false, parking: a.near.includes('parking')};
+    S.tab = 'search'; S.stack = []; S.screen = 'results'; S.loading = 'results'; S.scroll.results = 0; render();
+    later(1200, () => { S.loading = null; render(); });
+  },
+  skip(){ S.filters = {sad:0, lift:false, kids:false, verified:false, beds2:false, parking:false}; S.anketaDone = false; S.tab='search'; S.stack=[]; S.screen='results'; S.scroll.results = 0; render(); toast('Показываем все квартиры. Анкету можно заполнить в профиле'); },
+  pick(v, el){
+    const g = el.dataset.g;
+    if(g === 'when' && v === 'Своя дата'){ if(!S.whenDate) S.whenDate = '2026-11-15'; v = 'к ' + dateTxt(S.whenDate); }
+    if(g === 'city'){ S.district = v === HAS.city ? HAS.district : ''; S.cityQ = ''; }
+    S.anketa[g] = v; render();
+  },
+  near(v){ const n = S.anketa.near; const i = n.indexOf(v); i<0 ? n.push(v) : n.splice(i,1); render(); },
+  'ank-toggle'(v){ S.anketa[v] = !S.anketa[v]; render(); },
+  'edit-anketa'(){ S.step = 1; go('anketa'); },
+  unfilter(v){ S.filters[v] = v==='sad' ? 0 : false; render(); },
+  'info-kids'(){ S.sheet = 'kids'; render(); },
+  more(){ S.sheetDraft = {...S.filters}; S.sheet = 'more'; render(); },
+  'draft-toggle'(v){ S.sheetDraft[v] = !S.sheetDraft[v]; render(); },
+  'draft-sad'(v){ S.sheetDraft.sad = +v; render(); },
+  'apply-more'(){ S.filters = {...S.sheetDraft}; S.sheet = null; S.scroll.results = 0; if(S.screen !== 'results' && S.screen !== 'map') tab('search'); else render(); },
+  sort(){ S.sheet = 'sort'; render(); },
+  'set-sort'(v){ S.sort = v; S.sheet = null; S.scroll.results = 0; render(); },
+  district(){ S.sheet = 'district'; S.placeQ = ''; render(); },
+  'place-d'(v){ S.anketa.city = HAS.city; S.district = v; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
+  'place-c'(v){ S.anketa.city = v; S.district = v === HAS.city ? HAS.district : ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
+  'to-has'(){ S.anketa.city = HAS.city; S.district = HAS.district; S.mapSel = null; render(); },
+  'relax-sad'(){ S.filters.sad = 15; render(); },
+  'relax-lift'(){ S.filters.lift = false; render(); },
+  'relax-beds'(){ S.filters.beds2 = false; render(); },
+  'relax-park'(){ S.filters.parking = false; render(); },
+  'reset-filters'(){ S.filters = {sad:0, lift:false, kids:false, verified:false, beds2:false, parking:false}; render(); },
+  subscribe(){ S.subscribed = true; toast('Готово. Пришлём пуш, когда появится подходящая квартира'); },
+  open(v){ S.cur = v; S.photo = 1; go('card'); },
+  fav(v){
+    const i = S.fav.indexOf(v);
+    if(i < 0){ S.fav.push(v); S.fav.sort(); render(); if(S.fav.length >= 2) toast('Квартира в избранном. Можно сравнить ' + kv(S.fav.length), {act:'compare', label:'Сравнить'}); else toast('Квартира в избранном'); }
+    else { S.fav.splice(i,1); toast('Убрали из избранного', {act:'unfav-undo', v, label:'Вернуть'}); }
+  },
+  'unfav-undo'(v){ if(!S.fav.includes(v)){ S.fav.push(v); S.fav.sort(); } S.toast = null; render(); },
+  share(){ try{ navigator.clipboard.writeText('Квартира ' + S.cur + ' в Казани').catch(()=>{}); }catch(e){} toast('Ссылка на квартиру скопирована'); },
+  photo(){ S.photo = (S.photo||1) % 12 + 1; render(); },
+  compare(){ S.toast = null; go('compare'); },
+  'ai-retry'(){ S.aiState = 'loading'; render(); later(1000, () => { S.aiState = 'ok'; render(); }); },
+  why(){ S.sheet = 'why'; render(); },
+  write(v){ S.cur = v; S.chats[v] = S.chats[v] || []; S.chatBottom = true; go('chat'); },
+  chat(v){ S.cur = v; S.chatBottom = true; go('chat'); },
+  'book-from-compare'(v){ S.cur = v; S.chats[v] = S.chats[v] || []; S.chatBottom = true; go('chat'); A.book(v); },
+  book(v){ S.cur = v; const b = S.booking[v]; S.bookDraft = b && b.status !== 'cancel' ? {day:b.day, time:b.time} : {}; S.sheet = 'book'; render(); },
+  'bd-day'(v){ S.bookDraft.day = v; render(); },
+  'bd-time'(v){ S.bookDraft.time = v; render(); },
+  'bd-send'(){
+    const f = byId(S.cur), d = S.bookDraft; if(!d.day || !d.time) return;
+    const moved = S.booking[f.id] && S.booking[f.id].status !== 'cancel';
+    S.booking[f.id] = {day:d.day, time:d.time, status:'wait'};
+    (S.chats[f.id] = S.chats[f.id] || []).push({me:true, t:(moved?'Можно перенести просмотр? Удобно ':'Хочу посмотреть квартиру ') + DAYW[d.day] + ' в ' + d.time + '.'});
+    S.sheet = null; S.chatBottom = true; render();
+    toast('Запрос отправлен. Ждём ответа ' + gen(f));
+    if(M.autoConfirm) later(6000, () => confirmBooking(f.id));
+  },
+  'cancel-ask'(v){ S.cur = v; S.sheet = 'cancel'; render(); },
+  'cancel-do'(){ const b = S.booking[S.cur]; b.status = 'cancel'; S.sheet = null; render(); toast('Просмотр отменён'); },
+  quick(v){ send(v); },
+  'butler-ask'(v){ A.write(v); if(!(S.chats[v]||[]).some(m => m.t === 'Можно оформить временную регистрацию для школы?')) send('Можно оформить временную регистрацию для школы?'); },
+  resend(i){ const m = S.chats[S.cur][+i]; if(M.offline){ toast('Сети пока нет. Сообщение уйдёт само, когда она появится'); return; } m.failed = false; render(); ownerReply(byId(S.cur), REPLIES[m.t] ? REPLIES[m.t](byId(S.cur)) : 'Хорошо, подробнее расскажу на просмотре.'); },
+  'push-open'(){ const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
+  pin(v){ S.mapSel = v; render(); },
+  go(v){ go(v); },
+  notif(v){ S.notif[v] = !S.notif[v]; render(); },
+  faq(v){ S.faq = S.faq === +v ? -1 : +v; render(); },
+  'close-sheet'(){ S.sheet = null; render(); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  if(el.dataset.act === 'close-sheet' && e.target.closest('[data-stop]') && el.classList.contains('scrim')) return;
+  const f = A[el.dataset.act] || MA[el.dataset.act];
+  if(!f) return;
+  e.preventDefault();
+  f(el.dataset.v, el);
+});
+document.addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.matches('span[data-act]')){ e.preventDefault(); e.target.click(); } });
+document.addEventListener('input', e => {
+  if(e.target.id === 'sadrange'){ S.anketa.sadMax = +e.target.value; $('#sadval').textContent = 'до ' + e.target.value + ' минут'; }
+  if(e.target.id === 'work'){ S.anketa.work = e.target.value; }
+  if(e.target.id === 'msg'){ S.draft = e.target.value; }
+  if(e.target.id === 'citysearch'){ S.cityQ = e.target.value; render(); }
+  if(e.target.id === 'placesearch'){ S.placeQ = e.target.value; render(); }
+  if(e.target.id === 'whendate' && e.target.value){ S.whenDate = e.target.value; S.anketa.when = 'к ' + dateTxt(e.target.value); const t = $('#whentxt'); if(t) t.textContent = 'Переезд ' + S.anketa.when; }
+});
+document.addEventListener('submit', e => {
+  if(e.target.dataset.form !== 'send') return;
+  e.preventDefault();
+  const t = S.draft.trim(); if(!t) return;
+  S.draft = ''; send(t);
+});
+
+/* ---------- moderator panel ---------- */
+const SEED_CHAT = [{me:true,t:'Здравствуйте! Можно с ребёнком 2 лет?'},{me:false,t:'Да, конечно. Сад во дворе соседнего дома.'}];
+const TASKS = [
+  ['Т1','«Найди квартиру, откуда ребёнка удобно водить в сад пешком.»','t1'],
+  ['Т2','«Узнай, сколько денег понадобится в день въезда.»','t2'],
+  ['Т3','«Ты сохранил три квартиры. Выбери ту, что лучше подходит вашей семье.»','t3'],
+  ['Т4','«Договорись посмотреть эту квартиру в субботу.»','t4'],
+  ['Т5','«Найди двухкомнатную квартиру с лифтом не дальше 10 минут от сада.»','t5']
+];
+function setupTask(t){
+  clearTimers(); S = fresh();
+  if(t === 't1'){ render(); return; }
+  S.screen = 'results'; S.tab = 'search';
+  if(t === 't2'){ S.stack = ['results']; S.screen = 'card'; S.cur = 'B'; S.nearLoading = M.slow; if(M.slow) later(4000, () => { S.nearLoading = false; render(); }); }
+  if(t === 't3'){ S.fav = ['A','B','C']; }
+  if(t === 't4'){ S.stack = ['results']; S.screen = 'card'; S.cur = 'B'; }
+  render(true);
+}
+const MA = {
+  'm-task'(v){ setupTask(v); },
+  'm-reset'(){ setupTask('t1'); },
+  'm-ai'(){ M.ai = !M.ai; if(S.screen === 'compare') S.aiState = M.ai ? 'fail' : 'ok'; render(); },
+  'm-slow'(){ M.slow = !M.slow; render(); },
+  'm-off'(){ M.offline = !M.offline; if(!M.offline) flushOffline(); render(); },
+  'm-auto'(){ M.autoConfirm = !M.autoConfirm; render(); },
+  'm-chat'(){ if(!(S.chats.B||[]).length){ S.chats.B = SEED_CHAT.map(m => ({...m})); render(); toast('Добавили переписку с Ириной по квартире B'); } },
+  'm-confirm'(){ Object.keys(S.booking).forEach(confirmBooking); },
+  'm-close'(){ M.open = false; render(); }
+};
+function renderMod(){
+  const m = $('#mod'), btn = $('#modbtn');
+  m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор';
+  if(!M.open) return;
+  const opt = (act, label, on, hint) => '<button class="opt" data-act="' + act + '" aria-pressed="' + on + '"><span><b>' + label + '</b>' + (hint?'<br><span class="muted small">' + hint + '</span>':'') + '</span><span class="tgl' + (on?' on':'') + '"></span></button>';
+  const waiting = Object.values(S.booking).some(b => b.status === 'wait');
+  m.innerHTML = '<div class="row"><h2>Панель модератора</h2><button class="small muted link" data-act="m-close">Скрыть</button></div>' +
+    '<div class="muted small">Участник видит только телефон. Перед каждым заданием нажмите его карточку: экран и данные встанут в начальное состояние.</div>' +
+    '<h3>Задания · план теста, слайд 06</h3>' +
+    TASKS.map(([n,t,k]) => '<button class="task" data-act="m-task" data-v="' + k + '"><b class="n">' + n + '</b><span>' + t + '</span></button>').join('') +
+    '<h3>Состояния из wireframe</h3>' +
+    opt('m-ai','Ошибка ИИ в сравнении',M.ai,'4а · в Т3 у двух участников из пяти') +
+    opt('m-slow','Долгая загрузка «Что рядом»',M.slow,'3а · при следующем открытии карточки') +
+    opt('m-off','Нет интернета в чате',M.offline,'5а · сообщения ждут сеть') +
+    opt('m-auto','Собственник подтверждает сам',M.autoConfirm,'через 6 секунд после запроса') +
+    '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (квартира B)</button>' +
+    '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
+    '<button class="s" data-act="m-reset">Начать заново</button>';
+}
+$('#modbtn').addEventListener('click', () => { M.open = !M.open; renderMod(); });
+if(location.hash === '#moderator'){ M.open = true; document.body.classList.add('modmode'); }
+
+render();
+})();
+</script>
+
+</body>
+</html>
