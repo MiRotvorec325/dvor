@@ -60,6 +60,16 @@ input.field{cursor:text}
 .prog{height:6px;border-radius:3px;background:var(--fill)}
 .prog div{height:6px;border-radius:3px;background:var(--ink)}
 input[type=range]{width:100%;accent-color:var(--ink)}
+.wheels{position:relative;display:flex;justify-content:center;gap:6px;height:108px;border-radius:12px;background:var(--soft)}
+.wheels::after{content:'';position:absolute;left:10px;right:10px;top:36px;height:36px;border-top:1px solid var(--edge);border-bottom:1px solid var(--edge);pointer-events:none}
+.wheel{height:108px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;min-width:64px}
+.wheel::-webkit-scrollbar{display:none}
+.wpad{height:36px}
+.sheet > .btn.p:last-child{position:sticky;bottom:0;box-shadow:0 14px 0 14px var(--sheetbg, var(--paper)), 0 -10px 12px 2px var(--sheetbg, var(--paper))}
+.wi{height:36px;line-height:36px;text-align:center;scroll-snap-align:center;color:var(--mute);font-size:16px;cursor:pointer;padding:0 8px;white-space:nowrap}
+.wi.on{color:var(--ink);font-weight:800;font-size:18px}
+#wh-day{min-width:220px}
+.wsep{align-self:center;font-weight:800;font-size:18px}
 .minbox{width:54px;height:30px;border:1px solid var(--edge);border-radius:8px;text-align:center;font:inherit;font-weight:700;color:var(--ink);background:var(--paper);margin:0 6px;-moz-appearance:textfield}
 .minbox::-webkit-inner-spin-button{opacity:1}
 .grid .pick{display:block;margin:0 auto 4px;width:fit-content;font-size:9px;line-height:12px;font-weight:800;padding:2px 6px;border-radius:6px;background:var(--ink);color:var(--paper)}
@@ -135,6 +145,7 @@ const $ = s => document.querySelector(s);
 const rub = n => n.toLocaleString('ru-RU').replace(/ /g,' ') + ' ₽';
 const tys = n => (Math.round(n/100)/10).toString().replace('.', ',') + ' т';
 function plural(n, a, b, c){ const m10=n%10, m100=n%100; if(m10===1&&m100!==11) return a; if(m10>=2&&m10<=4&&(m100<12||m100>14)) return b; return c; }
+const kva = n => n + ' ' + plural(n,'квартиру','квартиры','квартир');
 const kv = n => n + ' ' + plural(n,'квартира','квартиры','квартир');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -159,7 +170,7 @@ const FLATS = [
   {id:'H', short:'Кул Гали, 15', rent:50500, params:'3-комн. · 72 м² · 11/14 эт. · лифт', lift:true, beds2:true, parking:true, sad:15, sadName:'Сад № 41', school:14, schoolName:'Школа № 19', clinic:8, park:9, stop:3, car:19, kids:true, verified:true, owner:'Динар', ownerG:'m', docs:'07.10', x:80, y:48},
   {id:'J', short:'Чуйкова, 33', rent:45500, params:'2-комн. · 55 м² · 4/12 эт. · лифт', lift:true, beds2:false, parking:true, sad:4, sadName:'Сад № 123', school:8, schoolName:'Школа № 45', clinic:11, park:3, stop:2, car:24, kids:true, verified:true, owner:'Альбина', ownerG:'f', docs:'13.10', x:44, y:57},
   {id:'K', short:'Карбышева, 12', rent:40500, params:'2-комн. · 47 м² · 3/5 эт.', lift:false, beds2:false, parking:false, sad:3, sadName:'Сад № 87', school:12, schoolName:'Школа № 12', clinic:16, park:6, stop:4, car:31, kids:true, verified:true, owner:'Ильдар', ownerG:'m', docs:'11.10', x:27, y:45},
-  {id:'L', short:'Адоратского, 27', rent:56000, params:'3-комн. · 76 м² · 5/10 эт. · лифт', lift:true, beds2:true, parking:true, sad:5, sadName:'Сад № 41', school:7, schoolName:'Школа № 19', clinic:9, park:4, stop:3, car:25, kids:true, verified:true, owner:'Марат', ownerG:'m', docs:'14.10', x:64, y:38},
+  {id:'L', short:'Адоратского, 27', rent:56000, params:'3-комн. · 76 м² · 5/10 эт. · лифт', lift:true, beds2:true, parking:true, sad:5, sadName:'Сад № 41', school:5, schoolName:'Школа № 19', clinic:5, park:4, stop:3, car:25, kids:true, verified:true, owner:'Марат', ownerG:'m', docs:'14.10', x:64, y:38},
   {id:'I', short:'Глушко, 6', rent:41000, params:'2-комн. · 52 м² · 2/9 эт. · лифт', lift:true, beds2:false, parking:false, sad:11, sadName:'Сад № 87', school:10, schoolName:'Школа № 12', clinic:14, park:6, stop:4, car:29, kids:false, verified:true, owner:'Ольга', ownerG:'f', docs:'10.10', x:16, y:54}
 ];
 FLATS.forEach(f => { f.entry = f.rent*2 + UTIL; const m = f.params.match(/(\d+)\/(\d+) эт/); f.floor = +m[1]; f.floors = +m[2]; });
@@ -216,7 +227,7 @@ const MONTHS = ['января','февраля','марта','апреля','м�
 function fresh(){
   return {
     screen:'welcome', stack:[], tab:'search', cur:'B', step:1,
-    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', near:['sad','clinic','park','liftc'], sadMax:10, work:'ул. Баумана, 1', commute:['авто'], kids:true, verified:true},
+    anketa:{city:'Казань', when:'через месяц', age:'1–3 года', near:['sad','clinic','park','liftc'], sadMax:10, schoolMax:15, clinicMax:15, work:'ул. Баумана, 1', commute:['авто'], kids:true, verified:true},
     filters:{sad:10, lift:true, kids:true, verified:true, beds2:false, parking:false}, anketaDone:true,
     sort:'sad', fav:[], scroll:{}, cityQ:'', placeQ:'', whenDate:'',
     chats:{},
@@ -234,6 +245,8 @@ function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
 /* ---------- search ---------- */
 function match(f, flt){
   if(flt.sad && f.sad > flt.sad) return false;
+  if(flt.school && f.school > flt.school) return false;
+  if(flt.clinic && f.clinic > flt.clinic) return false;
   if(flt.lift && !f.lift) return false;
   if(flt.kids && !f.kids) return false;
   if(flt.verified && !f.verified) return false;
@@ -250,7 +263,7 @@ function results(flt){
 function relaxOptions(){
   const out = [];
   const f = S.filters;
-  if(f.sad && f.sad < 30){ const nx = f.sad < 10 ? 10 : f.sad < 15 ? 15 : 30, n = results({...f, sad:nx}).length; if(n) out.push({label:'Сад до ' + nx + ' минут', n, act:'relax-sad', v:nx}); }
+  Object.keys(DIST).forEach(k => { if(f[k] && f[k] < 60){ const nx = f[k] < 10 ? 10 : f[k] < 15 ? 15 : f[k] < 30 ? 30 : 60, n = results({...f, [k]:nx}).length; if(n) out.push({label:DIST[k][1] + ' до ' + nx + ' минут', n, act:'relax-dist', v:k + ':' + nx}); } });
   if(f.lift){ const n = results({...f, lift:false}).length; if(n) out.push({label:'Без лифта', n, act:'relax-lift'}); }
   if(f.beds2){ const n = results({...f, beds2:false}).length; if(n) out.push({label:'Любое число спален', n, act:'relax-beds'}); }
   if(f.parking){ const n = results({...f, parking:false}).length; if(n) out.push({label:'Без парковки', n, act:'relax-park'}); }
@@ -285,7 +298,15 @@ function toast(text, action){ S.toast = {text, action}; render(); const id = Mat
 function topBack(title, right, extra){
   return '<div class="top"><button data-act="back" aria-label="Назад">←</button><span class="t">' + title + '</span>' + (right||'') + homeBtn() + '</div>' + (extra||'');
 }
-const homeBtn = () => '<button data-act="home" aria-label="На главную" title="На главную" style="font-size:18px;padding:0 2px">⌂</button>';
+const homeBtn = () => '';
+const DIST = {sad:['сада','Сад'], school:['школы','Школа'], clinic:['поликлиники','Поликлиника']};
+function distPick(p, k, v, label, chips){
+  const id = p + '-' + k;
+  return '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">' + label + '</div>' +
+    (chips ? '<div class="chips">' + [[5,'до 5 мин'],[10,'до 10 мин'],[15,'до 15 мин'],[0,'не важно']].map(([x,l]) => '<button class="chip' + ((v||0)===x?' on':'') + '" data-act="draft-dist" data-v="' + k + ':' + x + '">' + l + '</button>').join('') + '</div>' : '') +
+    '<input id="rng-' + id + '" type="range" min="5" max="60" step="1" value="' + (v || 60) + '" aria-label="' + label + ', минут">' +
+    '<div class="row small muted"><span>5 мин</span><span style="color:var(--ink);font-weight:700">до<input class="minbox" id="num-' + id + '" type="number" inputmode="numeric" min="5" max="60" placeholder="—" value="' + (v || '') + '" aria-label="' + label + ', вписать минуты">мин</span><span>1 час</span></div></div>';
+}
 function tabs(){
   const items = [['search','Поиск'],['map','Карта'],['fav','Избранное'],['chats','Чаты'],['profile','Профиль']];
   return '<nav class="tabs">' + items.map(([k,l]) => '<button data-act="tab" data-v="' + k + '" class="' + (S.tab===k?'cur':'') + '"><i></i>' + l + '</button>').join('') + '</nav>';
@@ -348,9 +369,7 @@ V.anketa = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сколько лет ребёнку?</div>' + choice('age', ['до 1 года','1–3 года','3–7 лет','7+ лет'], a.age) + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что должно быть рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="sadrange">Сколько идти до сада пешком?</label>' +
-      '<input id="sadrange" type="range" min="1" max="30" step="1" value="' + a.sadMax + '" aria-label="Минут до сада">' +
-      '<div class="row small muted"><span>1 мин</span><span style="color:var(--ink);font-weight:700">до<input class="minbox" id="sadnum" type="number" inputmode="numeric" min="1" max="30" value="' + a.sadMax + '" aria-label="Минут до сада, вписать">мин</span><span>30 мин</span></div></div>' +
+    Object.keys(DIST).filter(k => a.near.includes(k)).map(k => distPick('a', k, a[k + 'Max'], 'Сколько идти до ' + DIST[k][0] + ' пешком?')).join('') +
     '<div class="box small muted">Адрес работы добавим на следующем шаге, чтобы считать дорогу.</div>' + stepFoot(2);
   }
   if(n === 3) return stepTop(3) +
@@ -368,7 +387,7 @@ V.anketa = () => {
 
 function filterChips(){
   const f = S.filters, c = [];
-  if(f.sad) c.push(['sad','Сад ≤ ' + f.sad + ' мин']);
+  Object.keys(DIST).forEach(k => { if(f[k]) c.push([k, DIST[k][1] + ' ≤ ' + f[k] + ' мин']); });
   if(f.lift) c.push(['lift','Лифт']);
   if(f.kids) c.push(['kids','Можно с детьми']);
   if(f.verified) c.push(['verified','Собственник проверен']);
@@ -614,12 +633,9 @@ SH.more = () => {
   const d = S.sheetDraft;
   const t = (k,l) => '<button class="list-row" data-act="draft-toggle" data-v="' + k + '" aria-pressed="' + !!d[k] + '"><span>' + l + '</span><span class="tgl' + (d[k]?' on':'') + '"></span></button>';
   return sheet('<div class="h1" style="font-size:17px">Фильтры</div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Сад пешком</div><div class="chips">' + [[5,'до 5 мин'],[10,'до 10 мин'],[15,'до 15 мин'],[0,'не важно']].map(([v,l]) =>
-      '<button class="chip' + ((d.sad||0)===v?' on':'') + '" data-act="draft-sad" data-v="' + v + '">' + l + '</button>').join('') + '</div>' +
-      '<input id="fsadrange" type="range" min="1" max="30" step="1" value="' + (d.sad||30) + '" aria-label="Сад пешком, минут">' +
-      '<div class="row small muted"><span>1 мин</span><span style="color:var(--ink);font-weight:700">до<input class="minbox" id="fsadnum" type="number" inputmode="numeric" min="1" max="30" placeholder="—" value="' + (d.sad||'') + '" aria-label="Сад пешком, вписать минуты">мин</span><span>30 мин</span></div></div>' +
+    Object.keys(DIST).map(k => distPick('f', k, d[k] || 0, DIST[k][1] + ' пешком', true)).join('') +
     '<div>' + t('beds2','2 спальни') + t('lift','Лифт') + t('parking','Парковка во дворе') + t('kids','Можно с детьми') + t('verified','Собственник проверен') + '</div>' +
-    '<button class="btn p" id="applymore" data-act="apply-more">Показать ' + kv(results(d).length) + '</button>');
+    '<button class="btn p" id="applymore" data-act="apply-more">Показать ' + kva(results(d).length) + '</button>');
 };
 SH.district = () => {
   const q = findTxt(S.placeQ), cur = S.anketa.city;
@@ -639,11 +655,10 @@ SH.book = () => {
   return sheet('<div class="h1" style="font-size:17px">Просмотр · ' + f.short + '</div><div class="small muted">' + f.owner + ' получит запрос и подтвердит время в чате</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">День</div><div class="chips">' + DAYS.map(x => '<button class="chip' + (!d.ownDay&&d.day===x?' on':'') + '" data-act="bd-day" data-v="' + x + '">' + x + '</button>').join('') +
       '<button class="chip' + (d.ownDay?' on':'') + '" data-act="bd-own-day">Другой день</button></div>' +
-      (d.ownDay ? '<input class="field" id="bookdate" type="date" min="2026-10-16" max="2027-03-31" value="' + (d.dayRaw||'') + '" aria-label="Дата просмотра">' : '') + '</div>' +
+      (d.ownDay ? '<div class="wheels">' + wheel('wh-day', OWN_DAYS.map(r => [r, dayOf(r)]), d.dayRaw) + '</div>' : '') + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Время</div><div class="chips">' + TIMES.map(x => '<button class="chip' + (!d.ownTime&&d.time===x?' on':'') + '" data-act="bd-time" data-v="' + x + '">' + x + '</button>').join('') +
       '<button class="chip' + (d.ownTime?' on':'') + '" data-act="bd-own-time">Другое время</button></div>' +
-      (d.ownTime ? '<input id="bookrange" type="range" min="480" max="1260" step="5" value="' + tToMin(d.time || '19:00') + '" aria-label="Время просмотра">' +
-        '<div class="row small muted"><span>8:00</span><input class="field" id="booktime" type="time" min="08:00" max="21:00" value="' + (d.time || '19:00') + '" aria-label="Время просмотра, вписать" style="width:120px;height:36px;text-align:center;font-weight:700"><span>21:00</span></div>' : '') + '</div>' +
+      (d.ownTime ? '<div class="wheels">' + wheel('wh-h', HOURS.map(h => [h, h]), (d.time || '19:00').slice(0,2)) + '<div class="wsep">:</div>' + wheel('wh-m', MINS.map(m => [m, m]), (d.time || '19:00').slice(3,5)) + '</div><span class="small muted">С 8:00 до 21:00</span>' : '') + '</div>' +
     '<button class="btn p" id="bdsend" data-act="bd-send"' + (d.day&&d.time?'':' disabled') + '>' + (d.day&&d.time ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : 'Выберите день и время') + '</button>');
 };
 SH.pickbook = () => { const list = S.fav.map(byId).sort((a,b)=>a.id.localeCompare(b.id)), best = verdict(list).best;
@@ -658,10 +673,12 @@ function render(resetScroll){
   const k = S.screen + (S.screen==='card'||S.screen==='chat' ? S.cur : '');
   const focused = document.activeElement && document.activeElement.id;
   let html = V[S.screen]();
+  if(['card','compare','chat','notif','help'].includes(S.screen)) html += tabs();
   if(S.sheet) html += SH[S.sheet]();
   if(S.push) html += '<button class="push" data-act="push-open"><b>' + S.push.title + '</b><div class="small">' + S.push.text + '</div></button>';
   if(S.toast) html += '<div class="toast"><span>' + S.toast.text + '</span>' + (S.toast.action ? '<button data-act="' + S.toast.action.act + '" data-v="' + (S.toast.action.v||'') + '">' + S.toast.action.label + '</button>' : '') + '</div>';
   ph.innerHTML = html;
+  ph.querySelectorAll('.wheel').forEach(w => { w.scrollTop = +w.dataset.sel * WH; });
   const b = ph.querySelector('.body');
   if(b) b.scrollTop = resetScroll && !(k in S.scroll) ? 0 : (S.scroll[k] || 0);
   if(S.screen === 'chat' && b && S.chatBottom){ b.scrollTop = b.scrollHeight; S.chatBottom = false; }
@@ -704,7 +721,7 @@ const A = {
   'step-next'(){
     if(S.step < 4){ S.step++; S.scroll['anketa'] = 0; render(); return; }
     const a = S.anketa; S.anketaDone = true;
-    S.filters = {sad: a.near.includes('sad') ? a.sadMax : 0, lift: a.near.includes('liftc'), kids: a.kids, verified: a.verified, beds2:false, parking: a.near.includes('parking')};
+    S.filters = {sad: a.near.includes('sad') ? a.sadMax : 0, school: a.near.includes('school') ? a.schoolMax : 0, clinic: a.near.includes('clinic') ? a.clinicMax : 0, lift: a.near.includes('liftc'), kids: a.kids, verified: a.verified, beds2:false, parking: a.near.includes('parking')};
     S.tab = 'search'; S.stack = []; S.screen = 'results'; S.loading = 'results'; S.scroll.results = 0; render();
     later(1200, () => { S.loading = null; render(); });
   },
@@ -720,11 +737,11 @@ const A = {
   near(v){ const n = S.anketa.near; const i = n.indexOf(v); i<0 ? n.push(v) : n.splice(i,1); render(); },
   'ank-toggle'(v){ S.anketa[v] = !S.anketa[v]; render(); },
   'edit-anketa'(){ S.step = 1; go('anketa'); },
-  unfilter(v){ S.filters[v] = v==='sad' ? 0 : false; render(); },
+  unfilter(v){ S.filters[v] = v in DIST ? 0 : false; render(); },
   'info-kids'(){ S.sheet = 'kids'; render(); },
   more(){ S.sheetDraft = {...S.filters}; S.sheet = 'more'; render(); },
   'draft-toggle'(v){ S.sheetDraft[v] = !S.sheetDraft[v]; render(); },
-  'draft-sad'(v){ S.sheetDraft.sad = +v; render(); },
+  'draft-dist'(v){ const [k, m] = v.split(':'); S.sheetDraft[k] = +m; render(); },
   'apply-more'(){ S.filters = {...S.sheetDraft}; S.sheet = null; S.scroll.results = 0; if(S.screen !== 'results' && S.screen !== 'map') tab('search'); else render(); },
   sort(){ S.sheet = 'sort'; render(); },
   'set-sort'(v){ S.sort = v; S.sheet = null; S.scroll.results = 0; render(); },
@@ -732,7 +749,7 @@ const A = {
   'place-d'(v){ S.anketa.city = HAS.city; S.district = v; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
   'place-c'(v){ S.anketa.city = v; S.district = v === HAS.city ? HAS.district : ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
   'to-has'(){ S.anketa.city = HAS.city; S.district = HAS.district; S.mapSel = null; render(); },
-  'relax-sad'(v){ S.filters.sad = +v || 15; render(); },
+  'relax-dist'(v){ const [k, m] = v.split(':'); S.filters[k] = +m; render(); },
   'relax-lift'(){ S.filters.lift = false; render(); },
   'relax-beds'(){ S.filters.beds2 = false; render(); },
   'relax-park'(){ S.filters.parking = false; render(); },
@@ -756,8 +773,8 @@ const A = {
   book(v){ S.cur = v; const b = S.booking[v]; S.bookDraft = b && b.status !== 'cancel' ? {day:b.day, time:b.time} : {}; S.sheet = 'book'; render(); },
   'bd-day'(v){ S.bookDraft.day = v; S.bookDraft.ownDay = false; render(); },
   'bd-time'(v){ S.bookDraft.time = v; S.bookDraft.ownTime = false; render(); },
-  'bd-own-day'(){ const d = S.bookDraft; d.ownDay = true; d.day = d.dayRaw ? dayOf(d.dayRaw) : null; render(); },
-  'bd-own-time'(){ const d = S.bookDraft; d.ownTime = true; d.time = '19:00'; render(); },
+  'bd-own-day'(){ const d = S.bookDraft; d.ownDay = true; d.dayRaw = d.dayRaw || OWN_DAYS[3]; d.day = dayOf(d.dayRaw); render(); },
+  'bd-own-time'(){ const d = S.bookDraft; d.ownTime = true; d.time = d.wantT && d.wantT <= '21:00' ? d.wantT : '19:00'; render(); },
   'bd-send'(){
     const f = byId(S.cur), d = S.bookDraft; if(!d.day || !d.time) return;
     const moved = S.booking[f.id] && S.booking[f.id].status !== 'cancel';
@@ -790,21 +807,37 @@ document.addEventListener('click', e => {
   f(el.dataset.v, el);
 });
 document.addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.matches('span[data-act]')){ e.preventDefault(); e.target.click(); } });
-const clampMin = v => { v = Math.round(+v); return v >= 1 ? Math.min(v, 30) : 0; };
+const clampMin = v => { v = Math.round(+v); return v >= 5 ? Math.min(v, 60) : 0; };
 const minToT = m => String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
 const tToMin = t => +t.slice(0,2)*60 + +t.slice(3,5);
+const OWN_DAYS = Array.from({length:60}, (_, i) => { const t = new Date(2026, 9, 16 + i); return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0'); });
+const HOURS = Array.from({length:14}, (_, i) => String(8 + i).padStart(2,'0'));
+const MINS = Array.from({length:12}, (_, i) => String(i*5).padStart(2,'0'));
+const WH = 36;
+const wheel = (id, items, sel) => '<div class="wheel" id="' + id + '" data-sel="' + Math.max(0, items.findIndex(([v]) => v === sel)) + '"><div class="wpad"></div>' +
+  items.map(([v,l]) => '<div class="wi' + (v === sel ? ' on' : '') + '" data-wv="' + v + '">' + l + '</div>').join('') + '<div class="wpad"></div></div>';
+function wheelPicked(w){
+  const items = w.querySelectorAll('.wi'), i = Math.max(0, Math.min(items.length - 1, Math.round(w.scrollTop / WH))), v = items[i].dataset.wv, d = S.bookDraft;
+  items.forEach((el, j) => el.classList.toggle('on', j === i));
+  if(w.id === 'wh-day'){ d.dayRaw = v; d.day = dayOf(v); }
+  else { const h = w.id === 'wh-h' ? v : (d.time || '19:00').slice(0,2), m = w.id === 'wh-m' ? v : (d.time || '19:00').slice(3,5), t = h + ':' + m; d.time = t > '21:00' ? null : t; d.wantT = t; }
+  bdSync();
+}
+let wheelT = null;
+document.addEventListener('scroll', e => { const w = e.target; if(!w.classList || !w.classList.contains('wheel')) return; clearTimeout(wheelT); wheelT = setTimeout(() => wheelPicked(w), 90); }, true);
+document.addEventListener('click', e => { const it = e.target.closest && e.target.closest('.wi'); if(!it) return; const w = it.parentNode; w.scrollTo({top: [...w.querySelectorAll('.wi')].indexOf(it) * WH, behavior:'smooth'}); });
 function bdSync(){ const d = S.bookDraft, b = $('#bdsend'); if(!b) return; const ok = d.day && d.time; b.disabled = !ok;
   b.textContent = ok ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : (d.ownTime && !d.time ? 'Время просмотра с 8:00 до 21:00' : 'Выберите день и время'); }
 document.addEventListener('change', e => {
-  if(e.target.id === 'sadnum') e.target.value = S.anketa.sadMax;
-  if(e.target.id === 'fsadnum') e.target.value = S.sheetDraft.sad || '';
+  const dm = /^num-(a|f)-(sad|school|clinic)$/.exec(e.target.id);
+  if(dm) e.target.value = dm[1] === 'a' ? S.anketa[dm[2] + 'Max'] : (S.sheetDraft[dm[2]] || '');
 });
 document.addEventListener('input', e => {
-  if(e.target.id === 'fsadrange' || e.target.id === 'fsadnum'){ const v = clampMin(e.target.value); if(!v) return; S.sheetDraft.sad = v;
-    if(e.target.id === 'fsadrange') $('#fsadnum').value = v; else $('#fsadrange').value = v;
-    document.querySelectorAll('[data-act=draft-sad]').forEach(c => c.classList.toggle('on', +c.dataset.v === v)); $('#applymore').textContent = 'Показать ' + kv(results(S.sheetDraft).length); }
-  if(e.target.id === 'sadrange' || e.target.id === 'sadnum'){ const v = clampMin(e.target.value); if(!v) return; S.anketa.sadMax = v;
-    if(e.target.id === 'sadrange') $('#sadnum').value = v; else $('#sadrange').value = v; }
+  const dm = /^(rng|num)-(a|f)-(sad|school|clinic)$/.exec(e.target.id);
+  if(dm){ const [, kind, p, k] = dm, v = clampMin(e.target.value); if(!v) return;
+    if(p === 'a') S.anketa[k + 'Max'] = v; else S.sheetDraft[k] = v;
+    const other = $('#' + (kind === 'rng' ? 'num-' : 'rng-') + p + '-' + k); if(other) other.value = v;
+    if(p === 'f'){ document.querySelectorAll('[data-act=draft-dist][data-v^="' + k + ':"]').forEach(c => c.classList.toggle('on', +c.dataset.v.split(':')[1] === v)); $('#applymore').textContent = 'Показать ' + kva(results(S.sheetDraft).length); } }
   if(e.target.id === 'bookrange'){ S.bookDraft.time = minToT(+e.target.value); $('#booktime').value = S.bookDraft.time; bdSync(); }
   if(e.target.id === 'work'){ S.anketa.work = e.target.value; }
   if(e.target.id === 'msg'){ S.draft = e.target.value; }
