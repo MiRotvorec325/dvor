@@ -988,6 +988,15 @@ body{--desk:#E9E2D8}
 .ph .tip{background:var(--fill);border-radius:18px;padding:12px 14px}
 .ph .istrip{background:var(--fill);border-bottom-color:transparent}
 .ph .dcard{background:var(--soft)}
+
+/* iteration 8: move-in steps */
+.stepn{width:24px;height:24px;flex:none;border-radius:50%;border:1.5px solid var(--edge);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--mute)}
+.stepn.now{border-color:var(--ink);color:var(--ink)}
+.stepn.done{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.okring{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:var(--fill);color:var(--ink);font-size:40px;font-weight:800}
+
+.ph .stepn.done{background:var(--cta);border-color:var(--cta);color:var(--cta-tx)}
+.ph .okring{background:rgba(126,226,168,.15);color:var(--mint)}
 </style>
 
 <div class="desk">
@@ -1580,7 +1589,7 @@ const famGen = s => { s = s.trim(); const l = s.toLowerCase();
   if(/(ский|цкий|ская|цкая)$/.test(l)) return s.slice(0,-2) + 'их';
   return s; };
 const AGES = ['до 1 года','1–3 года','3–7 лет','7+ лет'];
-const kidsTxt = () => { const c = S.anketa.children.filter(Boolean), nk = S.anketa.noKids; return !c.length ? (nk === 'expecting' ? 'Ждём ребёнка' : nk === 'none' ? 'Детей пока нет' : 'Дети не указаны') : (c.length === 1 ? 'Ребёнок ' : 'Дети: ') + c.join(', '); };
+const kidsTxt = () => { const c = S.anketa.children.filter(Boolean), nk = S.anketa.noKids; return !c.length ? (nk === 'expecting' ? 'Ждём ребёнка' : nk === 'none' ? 'Детей пока нет' : 'Дети не указаны') : (c.length === 1 ? 'Ребёнок ' : 'Дети: ') + c.join(', ') + (S.anketa.expecting ? ', ждём ещё ребёнка' : ''); };
 const kidsOk = () => S.anketa.children.length ? S.anketa.children.every(Boolean) : !!S.anketa.noKids;
 const DEMO_USER = {name:'Никита', surname:'Вохмянин', phone:'+7 (900) 123-45-67', role:'rent'};
 const phoneDigits = v => { let d = v.replace(/\D/g, ''); if(v.trim().startsWith('+7') || d[0] === '8' || (d[0] === '7' && d.length === 11)) d = d.slice(1); return d.slice(0, 10); };
@@ -1677,6 +1686,7 @@ V.anketa = () => {
     a.children.map((age, i) => '<div style="display:flex;flex-direction:column;gap:8px"><div class="row"><div class="lbl">' + (a.children.length > 1 ? (i+1) + '-й ребёнок, возраст' : 'Сколько лет ребёнку?') + '</div>' +
       (a.children.length ? '<button class="link small" data-act="kid-del" data-v="' + i + '" aria-label="Убрать ' + (i+1) + '-го ребёнка">Убрать</button>' : '') + '</div><div class="chips">' +
       AGES.map(o => '<button class="chip' + (o === age ? ' on' : '') + '" data-act="kid-age" data-v="' + i + ':' + o + '">' + o + '</button>').join('') + '</div></div>').join('') +
+    (a.children.length ? '<button class="ckrow" data-act="ank-toggle" data-v="expecting" aria-pressed="' + !!a.expecting + '"><span class="ck' + (a.expecting ? ' on' : '') + '">✓</span><span>Ждём ещё ребёнка</span></button>' : '') +
     (a.children.length < 4 ? '<button class="btn s" style="height:40px;flex:none" data-act="kid-add">' + (a.children.length ? '+ Добавить ещё ребёнка' : '+ Добавить ребёнка') + '</button>' + (S.kidErr && !kidsOk() ? '<div class="small" style="color:#E5484D;font-weight:700">' + (a.children.length ? 'Выберите возраст каждого ребёнка' : 'Добавьте ребёнка или отметьте, что детей пока нет') + '</div>' : '') : '') +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что ещё важно рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
@@ -1813,7 +1823,7 @@ V.card = () => {
       '<details class="more"><summary class="small" style="cursor:pointer;font-weight:700">Коммуналка и ЖКУ за первый месяц</summary><div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">' +
       '<div class="row small" style="align-items:flex-start;gap:12px"><span>Коммуналка<div class="muted">свет, вода, отопление</div></span><b style="white-space:nowrap">≈ ' + rub(f.comm) + '</b></div>' +
       '<div class="row small" style="align-items:flex-start;gap:12px"><span>ЖКУ<div class="muted">' + f.zhkuWhat + '</div></span><b style="white-space:nowrap">≈ ' + rub(f.zhku) + '</b></div><div class="small muted">Счета придут в конце месяца</div></div></details></div>' +
-    affBox(f) + houseBox(f) + insideBox(f) +
+    dealBox(f) + affBox(f) + houseBox(f) + insideBox(f) +
     near + (S.nearLoading ? '' : butlerHint(f)) +
     '<div class="box small"><span>' + ownerLine(f) + '</span></div>' +
     '<div class="box"><div class="row"><b>Отзывы о квартире</b><span class="small" style="font-weight:700">' + rateTxt(f) + '</span></div>' + revBox(f, 2) + '<button class="link small" style="align-self:flex-start;font-weight:700" data-act="reviews" data-v="flat:' + f.id + '">Все отзывы о квартире ›</button></div>' +
@@ -1927,9 +1937,9 @@ V.chat = () => {
   return '<div class="top"><button data-act="back" aria-label="Назад">' + ic('back', 22) + '</button><button class="t" data-act="owner" data-v="' + f.id + '" style="display:flex;flex-direction:column" aria-label="Профиль собственника"><span>' + f.owner + (f.verified?' ✓':'') + '</span><span class="small muted" style="font-weight:500">собственник · отвечает за час</span></button>' +
       '<button class="small muted link" data-act="show-map" data-v="' + f.id + '" aria-label="' + f.short + ' на карте">◎ ' + f.short + '</button>' + homeBtn() + '</div>' +
     (M.offline ? '<div class="small" style="flex:none;padding:8px 18px;border-bottom:1px solid var(--ink);background:var(--soft)"><b>Нет подключения к интернету.</b> Сообщения сохранены и уйдут сами, когда появится сеть.</div>' : '') +
-    bookStrip(f) + inspStrip(f) +
+    bookStrip(f) + inspStrip(f) + dealStrip(f) +
     '<div class="body" style="gap:10px;background:var(--paper)">' +
-    '<div class="box small" style="background:rgba(230,176,74,.14);color:#F0CD86;flex-direction:row;gap:8px"><b>!</b><span>Номер и чат бесплатны. Не переводите деньги напрямую, это может быть опасно: бронь и оплата через «Двор» защищены.</span>' + (S.live ? '' : '<button class="link" style="align-self:flex-start;font-weight:700" data-act="live-ask" data-v="' + f.id + '">Договорились? Отметить «Снимаем»</button>') + '</div>' +
+    '<div class="box small" style="background:rgba(230,176,74,.14);color:#F0CD86;flex-direction:row;gap:8px"><b>!</b><span>Номер и чат бесплатны. Не переводите деньги напрямую, это может быть опасно: бронь и оплата через «Двор» защищены.</span>' + (S.live ? '' : dealLinks(f)) + '</div>' +
     msgs.map((m,i) => m.kind ? chatCard(m, i) : (m.sys ? '<div class="small muted" style="align-self:center;text-align:center;max-width:90%">' + esc(m.t) + '</div>' : '<div class="bubble ' + (m.me?'me':'they') + (m.bot?' bot':'') + '">' + (m.bot ? '<div class="small bothd" style="font-weight:800;margin-bottom:2px">Дворецкий · по объявлению</div>' : '') + esc(m.t) + '</div>') +
       (m.failed ? '<div class="small" style="align-self:flex-end;margin-top:-6px">Не отправлено · <button class="link" data-act="resend" data-v="' + i + '">Повторить</button></div>' : '')).join('') +
     (S.typing ? '<div class="bubble they muted">' + f.owner + ' печатает…</div>' : '') +
@@ -1972,7 +1982,7 @@ V.home = () => { const f = byId(S.live.id), d = dos(f), L = S.live;
     '<div class="box"><div style="font-weight:800">Счётчики</div><div class="small muted">' + (L.meters ? '✓ Показания за этот месяц отправлены ' + datv(f) : 'Передайте показания воды и света до 25 числа, ' + f.owner + ' посчитает коммуналку') + '</div>' +
       '<button class="btn s" style="height:40px" data-act="live-meters">' + (L.meters ? 'Изменить показания' : 'Передать показания') + '</button></div>' +
     '<div class="box"><div style="font-weight:800">Договор и залог</div>' +
-      '<div class="row muted"><span>Залог</span><span>' + rub(f.rent) + '</span></div><div class="small muted">' + d.early + ' ' + d.fix + '</div></div>' +
+      depRow(f) + '<div class="small muted">' + d.early + ' ' + d.fix + '</div></div>' +
     (S.revHold && S.revHold[f.id] ? '<div class="box small"><b>Отзыв на проверке</b><span class="muted">В тексте есть нецензурные слова. Модератор проверит отзыв в течение дня. Пока его не видят другие семьи.</span><button class="link" style="align-self:flex-start;font-weight:700" data-act="live-rev">Исправить отзыв</button></div>'
       : '<button class="btn s" data-act="live-rev">' + (S.myRev[f.id] ? 'Изменить отзыв о квартире' : 'Оставить отзыв о квартире') + '</button>') +
     '<button class="link small" style="align-self:center;color:#E5484D;font-weight:700" data-act="live-end-ask">Мы съехали, вернуться к поиску</button></div>' + tabs(); };
@@ -2105,7 +2115,7 @@ V.oreq = () => { const o = S.own;
     (o.reqs.length ? '' : '<div class="muted" style="font-size:14px;line-height:20px">Заявок пока нет. Когда семья выберет время, она появится здесь, а Дворецкий напомнит.</div>') +
     o.reqs.map((x, i) => '<div class="box" style="gap:6px"><div class="row"><b>' + x.who + '</b>' + OST[x.status] + '</div>' + fiTitle(x.fi) + '<div class="small">' + x.day + ' · ' + x.time + ' · ' + x.kids + '</div>' +
       (x.status === 'wait' ? '<div class="row small"><button class="link" style="font-weight:700" data-act="oreq-ok" data-v="' + i + '">Принять</button><button class="link" data-act="oreq-move" data-v="' + i + '">Другое время</button><button class="link" style="color:#E5484D" data-act="oreq-no" data-v="' + i + '">Отклонить</button></div>'
-        : (x.status === 'ok' || x.status === 'moved') && !o.list[x.fi].tenant ? '<div class="small muted">Договорились после просмотра?</div><button class="btn s" style="height:40px" data-act="oreq-rent" data-v="' + i + '">Сдал этой семье</button>' : '') + '</div>').join('') + '</div>' + tabs(); };
+        : (x.status === 'ok' || x.status === 'moved') && !o.list[x.fi].tenant ? odealBtn(i) : '') + '</div>').join('') + '</div>' + tabs(); };
 V.omsg = () => { const o = S.own, ten = o.ochTab === 'ten', bl = o.but[o.but.length - 1];
   const list = o.threads.map((t, i) => [t, i]).filter(([t]) => !!t.tenant === ten);
   return '<div class="top"><span class="t">Чаты</span></div><div class="body" style="gap:0">' +
@@ -2124,7 +2134,7 @@ V.otenants = () => { const o = S.own, l = o.list.map((L, i) => [L, i]).filter(([
     (l.length ? l.map(([L, i]) => { const T = L.tenant, F = L.form;
       return '<div class="box"><div class="row"><b style="font-size:15px">' + T.who + '</b><span class="chip on" style="font-size:11px">живут</span></div><div class="small muted">' + esc(titleOf(L)) + '</div>' +
         '<div class="row muted"><span>Заехали</span><span>' + T.since + '</span></div><div class="row muted"><span>Договор</span><span>до ' + T.till + '</span></div><div class="row muted"><span>Семья</span><span>' + T.kids + '</span></div>' +
-        oPayRows(L, i) +
+        oPayRows(L, i) + oDepRow(T) +
         '<div class="row"><span>Показания счётчиков</span><b>' + (T.meters ? '✓ переданы' : 'ещё нет') + '</b></div>' +
         '<div class="row small"><button class="link" style="font-weight:700" data-act="oten-chat" data-v="' + i + '">Написать</button><button class="link" data-act="oten-info" data-v="' + i + '">Подробнее о жильцах</button>' + (T.meters ? '' : '<button class="link" data-act="oten-remind" data-v="' + i + '">Напомнить</button>') + '</div></div>'; }).join('')
       : '<div class="h1">Пока никто не заехал</div><div class="muted" style="font-size:14px;line-height:20px">Когда договоритесь с семьёй после просмотра, нажмите «Сдал этой семье» во вкладке «Просмотры». Здесь появятся жильцы: оплата, счётчики, договор и чат.</div><button class="btn s" data-act="tab" data-v="oreq">К просмотрам</button>') + '</div>' + tabs(); };
@@ -2221,7 +2231,7 @@ V.profile = () => S.mode === 'owner' && S.own && S.user ? ownerProfile() : '<div
   '<button class="list-row" data-act="go" data-v="family"><span>Анкета семьи<div class="small muted">' + kidsTxt() + ' · ' + S.anketa.city + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   (S.user ? '<button class="list-row" data-act="me-edit"><span>Имя, фамилия и телефон</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' : '') +
   ((S.live ? '<button class="list-row" data-act="tab" data-v="home"><span>Мой дом<div class="small muted">' + byId(S.live.id).short + ' · живёте с ' + S.live.since + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'
-      : '<button class="list-row" data-act="live-pick"><span>Сняли, заехали, живём<div class="small muted">Оплата, коммуналка и договор в одном месте</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>') +
+      : dealRow()) +
       '<button class="list-row" data-act="own-start"><span>' + (ownOk() ? 'Перейти в режим «Сдаю»' : 'Сдаю квартиру') + '<div class="small muted">' + (!S.own ? 'Кабинет собственника: объявления, просмотры, жильцы' : ownOk() ? 'Объявления, просмотры, жильцы и чаты' : S.own.status === 'review' ? 'Документы на проверке у модератора' : 'Продолжить: шаг ' + ownStep() + ' из 4') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>') +
   walletRow() + '<button class="list-row" data-act="go" data-v="settings"><span>Настройки</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="support"><span>Чат с поддержкой' + (S.support.length > 1 ? '<div class="small muted">' + esc(S.support[S.support.length-1].t).slice(0, 40) + '…</div>' : '') + '</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
@@ -2268,6 +2278,7 @@ const SUP_Q = ['Собственник не отвечает', 'Пожалова
 const SUP_QO = ['Жилец не платит', 'Как настроить ответы Дворецкого?', 'Как снять объявление с публикации?'];
 function supAns(t){ const q = findTxt(t) + ' ' + fixTypos(findTxt(t));
   if(MAT.test(findTxt(t))) return 'Понимаю, что ситуация неприятная. Расскажите, что случилось, и я помогу.';
+  const sd = supAnsDeal(q); if(sd) return sd;
   if(S.mode === 'owner' && /не плат|не заплат|задерж|долг|просроч/.test(q)) return 'Сначала Дворецкий напомнит жильцам об оплате от имени «Двора». Если денег нет через 5 дней после срока, поможем написать претензию по договору. Залог можно оставить в счёт долга, это записано в договоре.';
   if(/дворецк|ответ\w* (за меня|семьям)|формулир/.test(q)) return 'Откройте Чаты → Дворецкий и нажмите «Настройка ответов». Выберите объявление и тему, потом готовую формулировку или напишите свою. Можно добавить свой вопрос, например про курение, и проверить, как Дворецкий его поймёт.';
   if(/снять|пауз|скрыть|убрать объявл|удалить объявл/.test(q)) return 'Объявления → под карточкой квартиры «Поставить на паузу». Объявление пропадёт из поиска, переписки и заявки останутся. Вернуть можно той же кнопкой.';
@@ -2282,9 +2293,9 @@ function supAns(t){ const q = findTxt(t) + ' ' + fixTypos(findTxt(t));
   if(/спасиб/.test(q)) return 'Пожалуйста! Хорошего переезда.';
   if(/^(здравствуйте|привет|добрый день|добрый вечер)/.test(q)) return 'Здравствуйте! Чем помочь?';
   return 'Передала вопрос специалисту, он ответит здесь в течение 15 минут.'; }
-V.support = () => { const asked = S.support.filter(m => m.me).map(m => m.t), quick = (S.mode === 'owner' ? SUP_QO : SUP_Q).filter(q => !asked.includes(q));
+V.support = () => { const asked = S.support.filter(m => m.me).map(m => m.t), quick = supQuick().filter(q => !asked.includes(q));
   return topBack('Поддержка «Двора»') + '<div class="body" style="gap:10px;background:var(--paper)">' +
-    S.support.map(m => '<div class="bubble ' + (m.me ? 'me' : 'they') + '">' + esc(m.t) + '</div>').join('') + (S.supTyping ? '<div class="bubble they muted">Анна печатает…</div>' : '') + '</div>' +
+    S.support.map(m => m.kind === 'flats' ? supFlats(m) : '<div class="bubble ' + (m.me ? 'me' : 'they') + '">' + esc(m.t) + '</div>').join('') + (S.supTyping ? '<div class="bubble they muted">Анна печатает…</div>' : '') + '</div>' +
     '<div style="flex:none;padding:10px 18px 14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:var(--paper)">' +
     (quick.length ? '<div class="chips" style="gap:6px">' + quick.map(q => '<button class="chip" data-act="sup-quick" data-v="' + q + '">' + q + '</button>').join('') + '</div>' : '') +
     '<form class="row" style="gap:8px" data-form="support"><input id="supmsg" class="field" placeholder="Вопрос в поддержку…" value="' + esc(S.supDraft || '') + '" autocomplete="off" aria-label="Сообщение в поддержку"><button class="btn p" style="width:44px;height:44px;flex:none" aria-label="Отправить">' + ic('send', 20) + '</button></form></div>'; };
@@ -3009,6 +3020,263 @@ Object.assign(MA, {
   'm-receipt'(){ pushNote('Приложите чек об оплате', 'Прошло 3 дня после оплаты по СБП, а чека ещё нет. ' + liveF().owner + ' ждёт подтверждения', {to:'home'}); }
 });
 
+/* ===================== iteration 8, part 2: booking with cancellation rules, contract, payment, act, movers ===================== */
+const instr = f => f.ownerG === 'm' ? f.owner + 'ом' : f.owner.replace(/а$/, 'ой');
+const advOf = rent => Math.round(rent * .1 / 100) * 100, penOf = rent => Math.round(rent * .05 / 100) * 100;
+const moveInOf = f => dos(f).free.replace(/^с /, '');
+const DSTAGE = {booking:'ждём подтверждения брони', booked:'квартира забронирована', contract:'договор', pay:'оплата при въезде', act:'акт приёма-передачи', done:'заселились', cancelled:'бронь отменена'};
+function dealStage(D){ if(D.cancelled) return 'cancelled'; if(D.actDone) return 'done'; if(D.paid === true) return 'act'; if(D.signed) return 'pay'; if(D.booked === 'wait') return 'booking'; return D.booked ? (D.contract ? 'contract' : 'booked') : 'contract'; }
+const mkDeal = id => { const f = byId(id); return {id, moveIn:moveInOf(f), adv:advOf(f.rent), pen:penOf(f.rent), booked:false, contract:null, signed:false, ownerSigned:false, pay:null, paid:false, receipt:false, act:{ok:true, note:''}, actSent:false, actDone:false, movers:{}, cancelled:false}; };
+const dealOf = id => S.deal && S.deal.id === id ? S.deal : null;
+const stepHead = (n, title, state) => '<div class="row"><span style="display:flex;gap:10px;align-items:center"><span class="stepn' + (state === 'done' ? ' done' : state === 'now' ? ' now' : '') + '">' + (state === 'done' ? '✓' : n) + '</span><b>' + title + '</b></span></div>';
+
+/* entry points: chat banner, chat strip, flat card, profile */
+function dealLinks(f){ const D = dealOf(f.id);
+  if(D && !D.cancelled) return '<button class="link" style="align-self:flex-start" data-act="deal" data-v="' + f.id + '">Заселение: ' + DSTAGE[dealStage(D)] + ' ›</button>';
+  return '<span style="display:flex;gap:16px;flex-wrap:wrap"><button class="link" data-act="dbook" data-v="' + f.id + '">Забронировать</button><button class="link" data-act="deal" data-v="' + f.id + '">Договор и заселение</button></span>'; }
+function dealStrip(f){ const D = dealOf(f.id); if(!D || D.cancelled || D.actDone || S.live) return '';
+  return '<button class="istrip" data-act="deal" data-v="' + f.id + '"><span style="flex:1">Заселение ' + D.moveIn + '<div class="small muted" style="font-weight:500">' + cap(DSTAGE[dealStage(D)]) + (D.booked === true ? ' · аванс ' + rub(D.adv) + ' у «Двора»' : '') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'; }
+function dealBox(f){ const D = dealOf(f.id); if(S.live || (!D && !S.booking[f.id])) return '';
+  if(D && !D.cancelled) return '<div class="box"><div style="font-weight:800">Заселение ' + D.moveIn + '</div><div class="small muted">' + cap(DSTAGE[dealStage(D)]) + '</div><button class="btn s" style="height:44px" data-act="deal" data-v="' + f.id + '">Открыть</button></div>';
+  return '<div class="box"><div style="font-weight:800">Понравилась квартира?</div><div class="small muted">Забронируйте её за ' + rub(advOf(f.rent)) + ' (10% аренды), пока решаете, или сразу переходите к договору. Заезд ' + moveInOf(f) + '.</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:44px" data-act="dbook" data-v="' + f.id + '">Забронировать</button><button class="btn p" style="height:44px" data-act="deal" data-v="' + f.id + '">Договор</button></div></div>'; }
+const dealRow = () => { const D = S.deal; if(!D || D.cancelled || D.actDone) return '';
+  return '<button class="list-row" data-act="deal" data-v="' + D.id + '"><span>Заселение · ' + byId(D.id).short + '<div class="small muted">' + cap(DSTAGE[dealStage(D)]) + ', заезд ' + D.moveIn + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'; };
+
+/* booking sheet */
+SH.dbook = () => { const f = byId(S.cur), a = advOf(f.rent), p = penOf(f.rent), W = S.wallet;
+  return sheet('<div class="h1" style="font-size:17px">Бронь · ' + f.short + '</div><div class="small muted">Заезд ' + moveInOf(f) + '. Квартира будет за вами, пока вы готовите договор и переезд.</div>' +
+    '<div class="box"><div class="row"><span>Аванс, 10% аренды</span><b>' + rub(a) + '</b></div><div class="small muted">Лежит на счёте «Двора». При заселении пойдёт в залог.</div></div>' +
+    '<div class="tip"><b>Если бронь отменят</b>' +
+      '<span>· Откажется ' + f.owner + ': вернём ' + rub(a) + ' и ещё ' + rub(p) + ' от собственника.</span>' +
+      '<span>· Откажетесь вы: ' + f.owner + ' получит аванс ' + rub(a) + ' и ещё ' + rub(p) + ' с вас.</span>' +
+      '<span>· В первый час отменить можно бесплатно, если нажали случайно.</span>' +
+      '<span>· Меньше чем за неделю до заезда отменить можно только через поддержку, если случилось что-то не по вашей вине.</span></div>' +
+    '<div class="small muted">' + (W.bal >= a ? 'Спишем с кошелька, там ' + rub(W.bal) : 'Спишем с карты ' + W.card) + '</div>' +
+    '<button class="btn p" data-act="dbook-do">Забронировать за ' + rub(a) + '</button>'); };
+
+/* cancellation sheet: rules depend on the first hour and the last week */
+SH.dcancel = () => { const D = S.deal, f = byId(D.id), r = S.bcR || '';
+  if(M.weekLeft) return sheet('<div class="h1" style="font-size:17px">Отменить бронь</div><div class="err"><b>До заезда меньше недели</b><span>Отменить бронь кнопкой уже нельзя ни вам, ни ' + datv(f) + '. Если случилось что-то не по вашей вине (ЧП, болезнь, смерть близких), напишите в поддержку: мы свяжемся с ' + instr(f) + ' и предложим мирное решение.</span></div>' +
+    '<button class="btn p" data-act="bc-support" data-v="emergency">Написать в поддержку</button><button class="btn s" data-act="close-sheet">Не отменять</button>');
+  const R = [['oops', 'Нажали случайно', M.hourPassed ? 'Бесплатно можно только в первый час после брони' : 'Вернём аванс ' + rub(D.adv) + ' целиком', M.hourPassed],
+    ['mind', 'Передумали или нашли другую', f.owner + ' получит аванс ' + rub(D.adv) + ' и ещё ' + rub(D.pen) + ' с вас'],
+    ['notas', 'Квартира не такая, как в описании', 'Разберёмся через поддержку. Если подтвердится, вернём аванс целиком'],
+    ['emergency', 'Чрезвычайная ситуация', 'Поддержка свяжется с ' + instr(f) + ' и предложит мирное решение']];
+  const sel = R.find(x => x[0] === r);
+  return sheet('<div class="h1" style="font-size:17px">Отменить бронь</div><div class="small muted">' + f.short + ' · заезд ' + D.moveIn + '</div>' +
+    R.map(([k, l, sub, off]) => '<button class="list-row" data-act="bc-reason" data-v="' + k + '"' + (off ? ' disabled style="opacity:.45"' : '') + '><span>' + l + '<div class="small muted">' + sub + '</div></span><span>' + (r === k ? ic('check', 18) : '') + '</span></button>').join('') +
+    (!sel ? '<button class="btn p" disabled>Выберите причину</button>'
+      : r === 'notas' || r === 'emergency' ? '<button class="btn p" data-act="bc-support" data-v="' + r + '">Написать в поддержку</button>'
+      : '<button class="btn p" data-act="bc-do">' + (r === 'oops' ? 'Отменить и вернуть ' + rub(D.adv) : 'Отменить и заплатить ' + rub(D.pen)) + '</button>') +
+    '<button class="btn s" data-act="close-sheet">Не отменять</button>'); };
+
+/* contract sheet */
+SH.contract = () => { const f = byId(S.deal.id), d = dos(f);
+  return sheet('<div class="h1" style="font-size:17px">Договор аренды</div><div class="small muted">' + f.short + ' · ' + f.params + '</div>' +
+    '<div class="box"><div class="row"><span>Срок</span><b>' + d.term + ' мес., с ' + S.deal.moveIn + '</b></div><div class="row"><span>Аренда</span><b>' + rub(f.rent) + ' в месяц</b></div><div class="row"><span>Залог</span><b>' + rub(f.rent) + '</b></div><div class="row"><span>День оплаты</span><b>' + d.payDay + ' числа</b></div></div>' +
+    '<div class="box small"><b>' + f.owner + ', собственник' + (f.verified ? ' ✓' : '') + '</b><span class="muted">' + (f.verified ? 'Паспорт и право собственности сверены с выпиской из ЕГРН' : 'Документы собственника ещё не проверены. Попросите выписку из ЕГРН') + '</span></div>' +
+    '<div class="tip"><b>На что обратить внимание</b><span>· ' + d.early + '</span><span>· ' + d.fix + '</span><span>· Залог хранится в «Дворе» и вернётся при выезде, если по акту всё в порядке</span></div>' +
+    '<button class="btn s" data-act="contract-pdf">Открыть договор целиком</button><button class="btn p" data-act="contract-sign">Подписать по коду из СМС</button>'); };
+
+/* movers: questions and a recommendation */
+const LOADS = [['до 10', 1], ['10–20', 2], ['20–40', 3], ['больше 40', 4]], CARRY = ['никто', '1', '2', '3 и больше'];
+function moversPlan(m){ const L = (LOADS.find(x => x[0] === m.boxes) || [0, 0])[1], c = CARRY.indexOf(m.people); if(!L || c < 0) return null;
+  const hands = {1:2, 2:2, 3:3, 4:4}[L], movers = Math.max(0, hands - c), car = {1:'легковой фургон', 2:'Газель до 1,5 т', 3:'Газель удлинённая', 4:'грузовик до 3 т'}[L];
+  return {movers, car, hours:L >= 3 ? 3 : 2}; }
+function moversBox(D, n){ const m = D.movers, a = S.anketa, p = moversPlan(m);
+  if(m.declined) return '<div class="box">' + stepHead(n, 'Переезд', 'done') + '<div class="small muted">Справитесь сами. Если передумаете, <button class="link" data-act="mv-undo">закажите грузчиков</button></div></div>';
+  if(m.ordered) return '<div class="box">' + stepHead(n, 'Переезд', 'done') + '<div class="small">' + (p.movers ? p.movers + ' ' + plural(p.movers, 'грузчик', 'грузчика', 'грузчиков') + ' и ' : '') + p.car + ', ' + D.moveIn + ' в 9:00</div><div class="small muted">Грузчикам платите после погрузки, за машину — после доставки в новую квартиру. Оплата отдельно от аренды.</div></div>';
+  return '<div class="box">' + stepHead(n, 'Переезд' + (a.move === 'да' ? '' : ' · по желанию'), 'now') +
+    '<div class="lbl">Сколько получилось коробок и пакетов?</div><div class="chips">' + LOADS.map(([l]) => '<button class="chip' + (m.boxes === l ? ' on' : '') + '" data-act="mv-boxes" data-v="' + l + '">' + l + '</button>').join('') + '</div>' +
+    '<div class="lbl">Сколько человек в семье может носить вещи?</div><div class="chips">' + CARRY.map(l => '<button class="chip' + (m.people === l ? ' on' : '') + '" data-act="mv-people" data-v="' + l + '">' + l + '</button>').join('') + '</div>' +
+    (p ? '<div class="tip"><b>Дворецкий советует: ' + (p.movers ? p.movers + ' ' + plural(p.movers, 'грузчик', 'грузчика', 'грузчиков') + ' и ' : 'грузчики не нужны, только ') + p.car + '</b><span>' + (p.movers ? 'Грузчики ≈ ' + rub(p.movers * 700 * p.hours) + ' за ' + p.hours + ' часа. ' : '') + 'Машина ≈ 40 ₽ за км. Приедут ' + D.moveIn + ' в 9:00. Грузчикам платите после погрузки, за машину — после доставки.</span></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:44px" data-act="mv-no">Не нужно</button><button class="btn p" style="height:44px" data-act="mv-order">Заказать</button></div>'
+      : '<button class="link small" style="align-self:flex-start" data-act="mv-no">Не нужно, справимся сами</button>') + '</div>'; }
+
+/* the move-in screen */
+V.deal = () => { const D = S.deal, f = byId(D.id), d = dos(f), st = dealStage(D), I = inspOf(D.id), photos = Object.values(I.ph).flat();
+  const due = f.rent * 2 - (D.booked === true ? D.adv : 0);
+  if(D.cancelled) return topBack('Заселение · ' + f.short) + '<div class="body"><div class="h1">Бронь отменена</div><div class="muted" style="font-size:14px;line-height:20px">' + D.cancelTxt + '</div><button class="btn p" data-act="tab" data-v="search">К поиску</button></div>';
+  let n = 0;
+  const bookBox = '<div class="box">' + stepHead('', 'Бронь', D.booked === true ? 'done' : D.booked ? 'now' : '') +
+    (D.booked === true ? '<div class="small">Квартира за вами до заезда ' + D.moveIn + '. Аванс ' + rub(D.adv) + ' у «Двора», при заселении пойдёт в залог.</div>' + (D.paid ? '' : '<button class="link small" style="align-self:flex-start;color:#E5484D" data-act="dcancel">Отменить бронь</button>')
+      : D.booked ? '<div class="small muted">Аванс ' + rub(D.adv) + ' внесён. Ждём, когда ' + f.owner + ' подтвердит бронь</div>'
+      : '<div class="small muted">Необязательно. Бронь держит квартиру за вами: аванс ' + rub(D.adv) + ', 10% аренды.</div><button class="link small" style="align-self:flex-start" data-act="dbook" data-v="' + f.id + '">Забронировать</button>') + '</div>';
+  const cBox = '<div class="box">' + stepHead(++n, 'Договор', D.signed ? 'done' : 'now') +
+    (D.signed ? '<div class="small">' + (D.contract === 'paper' ? 'Бумажный договор загружен, ' + f.owner + ' видит его в чате' : 'Подписан онлайн вами и ' + instr(f)) + '</div><button class="link small" style="align-self:flex-start" data-act="contract-pdf">Открыть договор</button>'
+      : D.contract === 'online' ? '<div class="small muted">Вы подписали. Ждём подпись ' + gen(f) + '</div>'
+      : '<div class="small muted">Срок ' + d.term + ' мес., аренда ' + rub(f.rent) + ', залог ' + rub(f.rent) + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="btn s" style="height:44px;font-size:13px" for="dpaper">Фото бумажного</label><button class="btn p" style="height:44px;font-size:13px" data-act="contract">Подписать онлайн</button></div><input type="file" id="dpaper" accept="image/*,application/pdf" hidden>') + '</div>';
+  const pm = D.pay, payDone = D.paid === true;
+  const pBox = '<div class="box">' + stepHead(++n, 'Оплата при въезде', payDone ? 'done' : D.signed ? 'now' : '') +
+    '<div class="row small"><span>Залог</span><span>' + rub(f.rent) + '</span></div><div class="row small"><span>Первый месяц</span><span>' + rub(f.rent) + '</span></div>' +
+    (D.booked === true ? '<div class="row small"><span>Аванс за бронь уже внесён</span><span>− ' + rub(D.adv) + '</span></div>' : '') +
+    '<div class="row" style="font-weight:800"><span>К оплате</span><span>' + rub(due) + '</span></div>' +
+    (!D.signed ? '<div class="err" style="padding:10px 12px"><b>Сначала подпишите договор</b><span>Без договора оплата небезопасна: не будет документа, по которому можно вернуть деньги.</span></div>'
+      : payDone ? '<div class="small">' + (pm === 'wallet' ? '✓ ' + rub(due) + ' на защищённом счёте «Двора». ' + f.owner + ' получит первый месяц после подписания акта, залог ' + rub(f.rent) + ' хранится в «Дворе» до выезда.'
+          : pm === 'cash' ? '✓ ' + f.owner + ' подтвердил' + ga(f, 'а') + ' ' + rub(due) + ' наличными.' + (D.booked === true ? ' Аванс ' + rub(D.adv) + ' «Двор» перевёл ' + datv(f) + '.' : '') + ' Залог у собственника, при выезде вернёт он.'
+          : '✓ Оплачено по СБП' + (D.receipt ? ', чек приложен.' : ', чек приложите в течение 3 дней.') + ' Залог у собственника, при выезде вернёт он.') + '</div>'
+      : D.paid === 'wait' ? '<div class="small muted">Ждём, когда ' + f.owner + ' подтвердит получение наличных</div>'
+      : [['wallet', 'Безопасная сделка через кошелёк', 'Деньги лежат на защищённом счёте, пока вы не подпишете акт. Залог хранится в «Дворе». Рекомендуем'], ['cash', 'Наличными ' + datv(f), f.owner + ' подтвердит получение в приложении'], ['sbp', 'По СБП ' + datv(f), 'Приложите чек о переводе']]
+          .map(([k, l, sub]) => '<button class="list-row" data-act="dpay-m" data-v="' + k + '"><span>' + l + '<div class="small muted">' + sub + '</div></span><span>' + (pm === k ? ic('check', 18) : '') + '</span></button>').join('') +
+        (pm === 'wallet' ? '<button class="btn p" data-act="dpay-do">Оплатить ' + rub(due) + '</button><div class="small muted">' + (S.wallet.bal >= due ? 'С кошелька, там ' + rub(S.wallet.bal) : S.wallet.bal ? rub(S.wallet.bal) + ' с кошелька, остальное с карты ' + S.wallet.card : 'С карты ' + S.wallet.card) + '</div>'
+          : pm === 'cash' ? '<button class="btn p" data-act="dpay-do">Отдали ' + rub(due) + ' наличными</button>'
+          : pm === 'sbp' ? '<label class="btn p" for="dsbp">Оплатили, приложить чек</label><input type="file" id="dsbp" accept="image/*,application/pdf" hidden><button class="link small" style="align-self:center" data-act="dpay-later">Чек приложу позже</button>' : '')) + '</div>';
+  const mBox = S.anketa.move === 'нет' && !D.movers.ordered ? '' : moversBox(D, ++n);
+  const aBox = '<div class="box">' + stepHead(++n, 'Акт приёма-передачи', D.actDone ? 'done' : payDone ? 'now' : '') +
+    (!payDone ? '<div class="small muted">В день заезда сверите квартиру с ' + instr(f) + ', запишете счётчики и подпишете акт. Фото с осмотра подтянутся сами.</div>'
+      : D.actSent ? '<div class="small muted">Вы подписали. Ждём подпись ' + gen(f) + '</div>'
+      : '<div class="small muted">Объект ' + f.params.split(' · ').slice(0, 2).join(', ') + ' · дата передачи ' + D.moveIn + '</div>' +
+        [['a-el', 'Электросчётчик, кВт·ч', '14 532'], ['a-cold', 'Холодная вода, м³', '00213'], ['a-hot', 'Горячая вода, м³', '00148']].map(([id, l, ph]) => '<label class="small" style="display:flex;flex-direction:column;gap:4px">' + l + '<input id="' + id + '" class="field" type="text" inputmode="numeric" placeholder="' + ph + '" autocomplete="off"></label>').join('') +
+        '<div class="lbl">Фото состояния</div>' + (photos.length ? '<div class="small muted">' + photos.length + ' фото с осмотра. Если что-то изменилось, добавьте новые</div>' : '<div class="small muted">Сфотографируйте комнаты, технику и мебель</div>') +
+        '<div class="ithumbs">' + photos.slice(0, 6).map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') + '<label class="iadd" for="inspf-act">+ фото</label><input type="file" id="inspf-act" accept="image/*" capture="environment" multiple hidden></div>' +
+        '<button class="ckrow" data-act="act-ok" aria-pressed="' + D.act.ok + '"><span class="ck' + (D.act.ok ? ' on' : '') + '">✓</span><span>Претензий к состоянию нет</span></button>' +
+        (D.act.ok ? '' : '<input id="actnote" class="field" type="text" placeholder="Что не так: например, скол на столешнице" value="' + esc(D.act.note) + '" autocomplete="off">') +
+        '<button class="btn p" data-act="act-sign">Подписать акт</button>') + '</div>';
+  return topBack('Заселение · ' + f.short) + '<div class="body" style="gap:12px">' +
+    '<div class="small muted">Заезд ' + D.moveIn + ' · ' + f.owner + ', собственник' + (f.verified ? ' ✓' : '') + '</div>' + bookBox + cBox + pBox + mBox + aBox + '</div>'; };
+V.moved = () => { const f = byId(S.deal.id), D = S.deal;
+  return '<div class="body" style="justify-content:center;align-items:center;text-align:center;gap:14px"><div class="okring">' + ic('check', 40) + '</div><div class="h1">Вы заселились!</div>' +
+    '<div class="muted" style="font-size:14px;line-height:20px;max-width:300px">' + (D.pay === 'wallet' ? 'Первый месяц ушёл ' + datv(f) + ', залог ' + rub(f.rent) + ' хранится в «Дворе» и вернётся при выезде.' : 'Акт подписан, копия в чате с ' + instr(f) + '.') + ' Аренда, коммуналка и счётчики теперь в «Моём доме».</div></div>' +
+    '<div class="foot one" style="gap:8px"><button class="btn p" data-act="moved-home">Перейти в «Мой дом»</button></div>'; };
+function dealFinish(){ const D = S.deal, f = byId(D.id), d = dos(f); D.actDone = true;
+  S.live = {id:f.id, since:D.moveIn, paid:true, meters:false, pay:D.pay === 'wallet' ? 'wallet' : D.pay, payDay:d.payDay, dep:D.pay === 'wallet' ? 'dvor' : 'owner', receipt:D.receipt}; noteFlat(f.id);
+  chatOf(f).push({sys:true, t:'Акт подписан обеими сторонами. Добро пожаловать домой!'});
+  butlerSay('Поздравляю с новым домом! В «Моём доме» аренда, коммуналка и счётчики. Напомню о платеже за 3 дня до ' + d.payDay + ' числа.');
+  S.sheet = null; S.stack = []; S.screen = 'moved'; render(true); }
+const depRow = f => { const L = S.live; if(!L || !L.dep) return '<div class="row muted"><span>Залог</span><span>' + rub(f.rent) + '</span></div>';
+  return '<div class="row"><span>Залог</span><b>' + rub(f.rent) + '</b></div><div class="small muted">' + (L.dep === 'dvor' ? 'Хранится в «Дворе», вернётся при выезде, если по акту всё в порядке.' : 'У собственника, при выезде вернёт ' + f.owner + '.') + '</div>'; };
+
+/* support: cancellations and emergencies */
+const supQuick = () => S.mode === 'owner' ? SUP_QO.concat(S.own && S.own.reqs.some(x => x.deal && x.deal.booked === true && !x.deal.cancelled) ? ['Отменить бронь семьи'] : [])
+  : (S.deal && S.deal.booked === true && !S.deal.cancelled ? ['Отменить бронь', 'Чрезвычайная ситуация'] : []).concat(SUP_Q);
+function supFlats(m){ return '<div class="box dcard"><b>Похожие квартиры</b><div class="small muted">' + m.t + '</div>' + m.ids.map(id => { const x = byId(id); return '<button class="list-row" style="padding:10px 0" data-act="open" data-v="' + id + '"><span>' + x.short + '<div class="small muted">' + rub(x.rent) + '/мес · ' + x.params.split(' · ').slice(0, 2).join(', ') + ' · сад ' + x.sad + ' мин</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'; }).join('') + '</div>'; }
+const similarTo = f => FLATS.filter(x => x.id !== f.id && Math.abs(x.rent - f.rent) <= f.rent * .12 && parseInt(x.params, 10) === parseInt(f.params, 10)).sort((a, b) => Math.abs(a.rent - f.rent) - Math.abs(b.rent - f.rent)).slice(0, 3);
+function supResolve(kind){ const D = S.deal; if(!D || D.cancelled) return; const f = byId(D.id);
+  later(6500, () => { if(!S.deal || S.deal.cancelled) return; D.cancelled = true; wAdd('Возврат аванса за бронь · ' + f.short, D.adv);
+    D.cancelTxt = kind === 'notas' ? 'Модератор сверил фото с объявлением: квартира отличается от описания. Аванс ' + rub(D.adv) + ' вернули на кошелёк целиком, объявление отправили на проверку.' : 'Поддержка договорилась с ' + instr(f) + ': бронь отменена без штрафа, аванс ' + rub(D.adv) + ' вернули на кошелёк.';
+    S.support.push({me:false, t:kind === 'notas' ? 'Проверили фото: квартира и правда отличается от описания. Вернули аванс ' + rub(D.adv) + ' на кошелёк целиком, объявление сняли на проверку. Подобрать похожие квартиры?' : 'Связалась с ' + instr(f) + ' и объяснила ситуацию. ' + f.owner + ' отнеслась с пониманием: бронь отменили без штрафа с обеих сторон, аванс ' + rub(D.adv) + ' вернули на кошелёк. Держитесь, если понадобится помощь с жильём позже, пишите.'});
+    chatOf(f).push({sys:true, t:'Бронь отменена через поддержку, без штрафа'}); S.chatBottom = true; pushNote('Бронь отменена без штрафа', 'Аванс ' + rub(D.adv) + ' вернули на кошелёк', {to:'support'}); }); }
+function supAnsDeal(q){ const D = S.deal, f = D && byId(D.id), own = S.mode === 'owner';
+  if(/ч(с|п)\b|чрезвыч|умер|смерт|похорон|пожар|потоп|затоп|наводн|болезн|больниц|госпитал|авари|стихий/.test(q)){
+    if(!own && D && D.booked === true && !D.cancelled){ supResolve('emergency'); return 'Сочувствую. Я свяжусь с ' + instr(f) + ', объясню ситуацию и предложу решение, которое устроит обе стороны: обычно это отмена без штрафа или перенос заезда. Напишу здесь в течение часа.'; }
+    return 'Сочувствую. Расскажите, что случилось, и я помогу: свяжусь со второй стороной, объясню ситуацию и предложу мирное решение.'; }
+  if(/не (как|такая).{0,20}(описан|объявлен|фото)|не соответств/.test(q) && !own && D && D.booked === true && !D.cancelled){ supResolve('notas'); return 'Понимаю. Пришлите фото того, что отличается, модератор сверит их с объявлением. Если подтвердится, вернём аванс целиком без штрафа.'; }
+  if(/отмен\w* брон|отказ\w*.{0,20}брон/.test(q)){
+    if(own) return 'Отменить бронь можно в «Просмотрах» на карточке семьи. Семья получит аванс и ещё 5% аренды с вас. Меньше чем за неделю до заезда — только через меня, если случилось что-то не по вашей вине. Если отменяете, мы поможем семье найти похожую квартиру.';
+    if(D && D.booked === true && !D.cancelled) return M.weekLeft ? 'До заезда меньше недели, поэтому кнопкой бронь уже не отменить. Если случилось что-то не по вашей вине (ЧП, болезнь, смерть близких), опишите ситуацию: я свяжусь с ' + instr(f) + ' и предложу мирное решение.'
+      : 'Отменить бронь можно в «Заселении» → «Отменить бронь». ' + (M.hourPassed ? '' : 'В первый час это бесплатно, если нажали случайно. ') + 'Если вы передумали, ' + f.owner + ' получит аванс ' + rub(D.adv) + ' и ещё ' + rub(D.pen) + '. Если квартира не как в описании или случилось ЧП, напишите сюда, разберёмся без штрафа.';
+    return 'Бронь можно отменить в «Заселении». В первый час бесплатно, если нажали случайно. Потом сторона, которая отменяет, платит другой 5% аренды сверху аванса. Меньше чем за неделю до заезда — только через поддержку.'; }
+  return ''; }
+
+/* ---------- owner side ---------- */
+const odealBtn = i => { const x = S.own.reqs[i], X = x.deal;
+  if(X && X.cancelled) return '<div class="small muted">Бронь отменена</div>';
+  return (X && X.booked === true ? '<div class="small">Семья забронировала: аванс ' + rub(X.adv) + ' у «Двора»</div>' : '<div class="small muted">Договорились после просмотра?</div>') +
+    '<button class="btn s" style="height:40px" data-act="odeal" data-v="' + i + '">' + (X && X.signed ? 'Заселение: ' + (X.paid === true ? 'акт' : 'оплата') + ' ›' : 'Оформить договор и заселение') + '</button>'; };
+const mkODeal = x => { const L = S.own.list[x.fi], r = +L.form.price; return {rent:r, adv:advOf(r), pen:penOf(r), booked:false, contract:null, signed:false, paid:false, pay:null, actSent:false, actDone:false, cancelled:false, act:{ok:true}}; };
+V.odeal = () => { const x = S.own.reqs[S.odr], X = x.deal, L = S.own.list[x.fi], fam = x.who;
+  if(X.cancelled) return topBack('Заселение · ' + fam) + '<div class="body"><div class="h1">Бронь отменена</div><div class="muted" style="font-size:14px;line-height:20px">' + X.cancelTxt + '</div></div>';
+  const due = X.rent * 2 - (X.booked === true ? X.adv : 0);
+  return topBack('Заселение · ' + fam) + '<div class="body" style="gap:12px"><div class="small muted">' + esc(titleOf(L)) + ' · заезд 1 ноября</div>' +
+    '<div class="box">' + stepHead('', 'Бронь', X.booked === true ? 'done' : '') + (X.booked === true ? '<div class="small">Семья внесла аванс ' + rub(X.adv) + ', он у «Двора». При заселении пойдёт в залог.</div>' + (X.paid ? '' : '<button class="link small" style="align-self:flex-start;color:#E5484D" data-act="ocancel">Отменить бронь</button>') : '<div class="small muted">Семья не бронировала</div>') + '</div>' +
+    '<div class="box">' + stepHead(1, 'Договор', X.signed ? 'done' : 'now') +
+      (X.signed ? '<div class="small">' + (X.contract === 'paper' ? 'Бумажный договор загружен' : 'Подписан онлайн вами и семьёй') + '</div>'
+        : X.contract === 'online' ? '<div class="small muted">Вы подписали. Ждём подпись семьи</div>'
+        : '<div class="small muted">Срок 11 мес., аренда ' + rub(X.rent) + ', залог ' + rub(X.rent) + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="btn s" style="height:44px;font-size:13px" for="opaper">Фото бумажного</label><button class="btn p" style="height:44px;font-size:13px" data-act="ocontract">Подписать онлайн</button></div><input type="file" id="opaper" accept="image/*,application/pdf" hidden>') + '</div>' +
+    '<div class="box">' + stepHead(2, 'Оплата при въезде', X.paid === true ? 'done' : X.signed ? 'now' : '') +
+      '<div class="row small"><span>Залог и первый месяц' + (X.booked === true ? ' минус аванс' : '') + '</span><span>' + rub(due) + '</span></div>' +
+      (!X.signed ? '<div class="small muted">Семья оплатит после подписания договора</div>'
+        : X.paid === true ? '<div class="small">' + (X.pay === 'wallet' ? '✓ Деньги на защищённом счёте «Двора». Первый месяц придёт вам в кошелёк после акта, залог ' + rub(X.rent) + ' хранится в «Дворе» до выезда семьи.' : '✓ Вы подтвердили получение наличных. Залог у вас, при выезде вернёте семье сами.') + '</div>'
+        : X.paid === 'cash' ? '<div class="small">Семья говорит, что отдала вам ' + rub(due) + ' наличными' + (X.booked === true ? ', а аванс ' + rub(X.adv) + ' «Двор» переведёт вам в кошелёк' : '') + '</div><button class="btn p" style="height:44px" data-act="ocash-ok">Подтвердить получение</button>'
+        : '<div class="small muted">Ждём оплату от семьи</div>') + '</div>' +
+    '<div class="box">' + stepHead(3, 'Акт приёма-передачи', X.actDone ? 'done' : X.paid === true ? 'now' : '') +
+      (X.paid !== true ? '<div class="small muted">В день заезда сверите квартиру с семьёй, запишете счётчики и подпишете акт</div>'
+        : X.actSent ? '<div class="small muted">Вы подписали. Ждём подпись семьи</div>'
+        : '<div class="small muted">Семья сделала 14 фото на просмотре, они уже в акте. Проверьте показания счётчиков и состояние.</div><div class="ithumbs">' + [1, 2, 3, 4].map(() => '<span class="ithumb"></span>').join('') + '</div>' +
+          '<label class="small" style="display:flex;flex-direction:column;gap:4px">Электросчётчик, кВт·ч<input class="field" type="text" inputmode="numeric" value="14 532" autocomplete="off"></label>' +
+          '<button class="btn p" data-act="oact-sign">Подписать акт</button>') + '</div></div>'; };
+function odealFinish(i){ const x = S.own.reqs[i], X = x.deal, L = S.own.list[x.fi]; X.actDone = true; x.status = 'rented'; L.tenant = tenantOf(x); L.tenant.pay = X.pay === 'wallet' ? 'wallet' : 'cash'; L.tenant.paid = true; L.tenant.dep = X.pay === 'wallet' ? 'dvor' : 'owner'; L.tenant.depSum = X.rent;
+  if(X.pay === 'wallet') wAdd('Первый месяц · ' + x.who, X.rent);
+  S.own.threads.push({fi:x.fi, tenant:true, who:x.who, msgs:[{sys:true, t:'Акт подписан обеими сторонами. Семья заезжает ' + L.tenant.since}, {me:false, t:'Спасибо! Ключи получили, всё в порядке.'}]});
+  obutSay(x.who + ' теперь ваши жильцы на ' + titleOf(L) + '. Напомню им об оплате до 5 числа и о показаниях счётчиков до 25-го.');
+  pushNote('Акт подписан', X.pay === 'wallet' ? 'Первый месяц ' + rub(X.rent) + ' пришёл в кошелёк, залог у «Двора»' : x.who + ' во вкладке «Жильцы»', {to:'otenants'}); }
+const oDepRow = T => T.dep ? '<div class="row muted"><span>Залог ' + rub(T.depSum) + '</span><span>' + (T.dep === 'dvor' ? 'у «Двора»' : 'у вас') + '</span></div>' + (T.dep === 'dvor' ? '<div class="small muted">Выплатим вам, если при выезде будут повреждения по акту</div>' : '') : '';
+
+Object.assign(A, {
+  deal(v){ const id = v || S.cur; if(S.deal && !S.deal.cancelled && !S.deal.actDone && S.deal.id !== id){ toast('Уже идёт заселение на ' + byId(S.deal.id).short); return; }
+    if(!dealOf(id) || S.deal.cancelled) S.deal = mkDeal(id); S.cur = id; S.sheet = null; go('deal'); },
+  dbook(v){ const id = v || S.cur; if(S.deal && !S.deal.cancelled && !S.deal.actDone && S.deal.id !== id){ toast('Уже идёт заселение на ' + byId(S.deal.id).short); return; } S.cur = id; S.sheet = 'dbook'; render(); },
+  'dbook-do'(){ const f = byId(S.cur); if(!dealOf(f.id) || S.deal.cancelled) S.deal = mkDeal(f.id); const D = S.deal, W = S.wallet;
+    if(W.bal >= D.adv) wAdd('Аванс за бронь · ' + f.short, -D.adv); else W.hist.unshift({t:'Аванс за бронь · ' + f.short + ' · с карты', s:-D.adv, d:'сегодня'});
+    D.booked = 'wait'; chatOf(f).push({sys:true, t:'Вы забронировали квартиру, аванс ' + rub(D.adv) + ' у «Двора». Ждём подтверждения ' + gen(f)}); S.sheet = null; S.chatBottom = true;
+    if(S.screen !== 'deal') go('deal'); else render(); toast('Бронь отправлена ' + datv(f));
+    later(3500, () => { if(D.cancelled || D.booked !== 'wait') return; D.booked = true; chatOf(f).push({me:false, t:'Подтверждаю бронь, квартира ваша до заезда ' + D.moveIn + '.'}); pushNote(f.owner + ' подтвердил' + ga(f, 'а') + ' бронь', f.short + ' за вами до ' + D.moveIn, {to:'deal'}); }); },
+  dcancel(){ S.bcR = ''; S.sheet = 'dcancel'; render(); },
+  'bc-reason'(v){ S.bcR = v; render(); },
+  'bc-do'(){ const D = S.deal, f = byId(D.id), oops = S.bcR === 'oops'; D.cancelled = true; S.sheet = null;
+    if(oops){ wAdd('Возврат аванса за бронь · ' + f.short, D.adv); D.cancelTxt = 'Вы отменили бронь в первый час, аванс ' + rub(D.adv) + ' вернули на кошелёк.'; }
+    else { if(S.wallet.bal >= D.pen) wAdd('Компенсация за отмену брони · ' + f.owner, -D.pen); else S.wallet.hist.unshift({t:'Компенсация за отмену брони · ' + f.owner + ' · с карты', s:-D.pen, d:'сегодня'});
+      D.cancelTxt = 'Вы отменили бронь. ' + f.owner + ' получил' + ga(f, 'а') + ' аванс ' + rub(D.adv) + ' и компенсацию ' + rub(D.pen) + '.'; }
+    chatOf(f).push({sys:true, t:'Бронь отменена' + (oops ? ' в первый час, без штрафа' : '')}); render(); toast(oops ? 'Бронь отменена, аванс вернули' : 'Бронь отменена'); },
+  'bc-support'(v){ const f = byId(S.deal.id); S.sheet = null; go('support'); supSend(v === 'notas' ? 'Квартира на ' + f.short + ' не такая, как в описании, хочу отменить бронь' : 'У нас чрезвычайная ситуация, нужно отменить бронь на ' + f.short); },
+  contract(){ S.sheet = 'contract'; render(); },
+  'contract-pdf'(){ toast('Договор откроется PDF-файлом, 6 страниц'); },
+  'contract-sign'(){ const D = S.deal, f = byId(D.id); D.contract = 'online'; S.sheet = null; chatOf(f).push({sys:true, t:'Вы подписали договор онлайн. Ждём подпись ' + gen(f)}); render(); toast('Подписали. Ждём ' + gen(f));
+    later(3000, () => { if(D.contract !== 'online' || D.signed) return; D.signed = true; chatOf(f).push({sys:true, t:'Договор подписан обеими сторонами'}); pushNote(f.owner + ' подписал' + ga(f, 'а') + ' договор', 'Можно оплатить въезд', {to:'deal'}); }); },
+  'dpay-m'(v){ S.deal.pay = v; render(); },
+  'dpay-do'(){ const D = S.deal, f = byId(D.id), due = f.rent * 2 - (D.booked === true ? D.adv : 0), W = S.wallet;
+    if(D.pay === 'wallet'){ const fromW = Math.min(W.bal, due); if(fromW) wAdd('Въезд · ' + f.short + ' · на защищённый счёт', -fromW); if(due > fromW) W.hist.unshift({t:'Въезд · ' + f.short + ' · с карты на защищённый счёт', s:-(due - fromW), d:'сегодня'});
+      D.paid = true; chatOf(f).push({sys:true, t:'Оплата въезда на защищённом счёте «Двора». ' + f.owner + ' получит первый месяц после акта'}); render(); toast('Оплачено, деньги на защищённом счёте'); return; }
+    D.paid = 'wait'; render(); toast('Отправили ' + datv(f) + ' на подтверждение');
+    later(3500, () => { if(D.paid !== 'wait') return; D.paid = true; chatOf(f).push({me:false, t:'Получил' + ga(f, 'а') + ' ' + rub(due) + ' наличными, спасибо!'}); pushNote(f.owner + ' подтвердил' + ga(f, 'а') + ' оплату', rub(due) + ' наличными', {to:'deal'}); }); },
+  'dpay-later'(){ S.deal.paid = true; S.deal.receipt = false; render(); toast('Хорошо. Если чек не появится за 3 дня, напомним'); },
+  'mv-boxes'(v){ S.deal.movers.boxes = v; render(); },
+  'mv-people'(v){ S.deal.movers.people = v; render(); },
+  'mv-order'(){ S.deal.movers.ordered = true; render(); toast('Заказали на ' + S.deal.moveIn + ', 9:00'); },
+  'mv-no'(){ S.deal.movers.declined = true; render(); },
+  'mv-undo'(){ S.deal.movers = {}; render(); },
+  'act-ok'(){ S.deal.act.ok = !S.deal.act.ok; render(); },
+  'act-sign'(){ const D = S.deal, f = byId(D.id); D.actSent = true; render(); toast('Подписали акт. Ждём ' + gen(f)); later(2500, () => { if(!D.actDone) dealFinish(); }); },
+  'moved-home'(){ S.tab = 'home'; S.stack = []; S.screen = 'home'; render(true); },
+  odeal(v){ const x = S.own.reqs[+v]; x.deal = x.deal || mkODeal(x); S.odr = +v; go('odeal'); },
+  ocontract(){ const X = S.own.reqs[S.odr].deal; X.contract = 'online'; render(); toast('Подписали. Ждём семью');
+    later(3000, () => { if(X.signed) return; X.signed = true; const i = S.odr; pushNote('Семья подписала договор', 'Ждём оплату въезда', {to:'odeal'});
+      later(3500, () => { X.pay = M.cashPay ? 'cash' : 'wallet'; X.paid = M.cashPay ? 'cash' : true; pushNote(M.cashPay ? 'Семья отдала наличные' : 'Семья оплатила въезд', M.cashPay ? 'Подтвердите получение в приложении' : 'Деньги на защищённом счёте «Двора»', {to:'odeal'}); }); }); },
+  'ocash-ok'(){ const X = S.own.reqs[S.odr].deal; X.paid = true; if(X.booked === true) wAdd('Аванс за бронь · ' + S.own.reqs[S.odr].who, X.adv); render(); toast('Получение подтверждено'); },
+  'oact-sign'(){ const X = S.own.reqs[S.odr].deal, i = S.odr; X.actSent = true; render(); toast('Подписали акт. Ждём семью'); later(2500, () => { odealFinish(i); }); },
+  ocancel(){ const x = S.own.reqs[S.odr], X = x.deal;
+    if(M.weekLeft){ go('support'); supSend('Нужно отменить бронь семьи, до заезда меньше недели'); return; }
+    X.cancelled = true; if(S.wallet.bal >= X.pen) wAdd('Компенсация семье за отмену брони', -X.pen); else S.wallet.hist.unshift({t:'Компенсация семье за отмену брони · с карты', s:-X.pen, d:'сегодня'});
+    X.cancelTxt = 'Вы отменили бронь. Семья получила аванс ' + rub(X.adv) + ' и компенсацию ' + rub(X.pen) + ' с вас. Поддержка поможет ей найти похожую квартиру.'; render(); toast('Бронь отменена'); }
+});
+document.addEventListener('change', e => { const t = e.target; if(!t.files || !t.files.length) return;
+  if(t.id === 'dpaper' && S.deal){ const D = S.deal, f = byId(D.id); D.contract = 'paper'; D.signed = true; chatOf(f).push({me:true, t:'Загрузил' + (S.user && /а$/.test(S.user.name) ? 'а' : '') + ' фото подписанного договора.'}); render(); toast('Договор загружен'); }
+  if(t.id === 'opaper'){ const X = S.own.reqs[S.odr].deal; X.contract = 'paper'; X.signed = true; render(); toast('Договор загружен'); later(3500, () => { X.pay = M.cashPay ? 'cash' : 'wallet'; X.paid = M.cashPay ? 'cash' : true; pushNote(M.cashPay ? 'Семья отдала наличные' : 'Семья оплатила въезд', M.cashPay ? 'Подтвердите получение в приложении' : 'Деньги на защищённом счёте «Двора»', {to:'odeal'}); }); }
+  if(t.id === 'dsbp' && S.deal){ S.deal.paid = true; S.deal.receipt = true; chatOf(byId(S.deal.id)).push({me:true, t:'Оплатил' + (S.user && /а$/.test(S.user.name) ? 'а' : '') + ' въезд по СБП, чек во вложении.'}); render(); toast('Чек приложен'); }
+ });
+document.addEventListener('input', e => { if(e.target.id === 'actnote' && S.deal) S.deal.act.note = e.target.value; });
+
+Object.assign(MA, {
+  'm-hour'(){ M.hourPassed = !M.hourPassed; render(); },
+  'm-week'(){ M.weekLeft = !M.weekLeft; render(); },
+  'm-cashpay'(){ M.cashPay = !M.cashPay; renderMod(); },
+  'm-ocancel'(){ const D = S.deal; if(!D || D.booked !== true || D.cancelled) return; const f = byId(D.id); D.cancelled = true; wAdd('Возврат аванса и компенсация · ' + f.short, D.adv + D.pen);
+    D.cancelTxt = f.owner + ' отменил' + ga(f, 'а') + ' бронь. Вернули аванс ' + rub(D.adv) + ' и компенсацию ' + rub(D.pen) + ' на кошелёк. Поддержка подобрала похожие квартиры в чате.';
+    chatOf(f).push({me:false, t:'Простите, вынужден' + ga(f, 'а') + ' отменить бронь: квартира понадобилась родственникам.'}, {sys:true, t:f.owner + ' отменил' + ga(f, 'а') + ' бронь'});
+    const sim = similarTo(f).map(x => x.id);
+    S.support.push({me:false, t:'Видим, что ' + f.owner + ' отменил' + ga(f, 'а') + ' бронь на ' + f.short + '. Вернули вам аванс ' + rub(D.adv) + ' и ' + rub(D.pen) + ' компенсации на кошелёк. Мне очень жаль, помогу найти замену.'}, {kind:'flats', ids:sim.length ? sim : FLATS.filter(x => x.id !== f.id).slice(0, 3).map(x => x.id), t:'Похожие по цене, площади и садам рядом, свободны к ' + D.moveIn});
+    pushNote(f.owner + ' отменил' + ga(f, 'а') + ' бронь', 'Вернули ' + rub(D.adv + D.pen) + ' на кошелёк. Поддержка подобрала похожие квартиры', {to:'support'}); },
+  'm-obook'(){ if(!S.own){ toast('Сначала включите сценарий собственника'); return; } const i = S.own.reqs.findIndex(x => x.status !== 'no' && x.status !== 'rented'); if(i < 0) return; const x = S.own.reqs[i];
+    if(x.status === 'wait') x.status = 'ok'; x.deal = x.deal || mkODeal(x); x.deal.booked = true; pushNote(x.who + ' забронировали квартиру', 'Аванс ' + rub(x.deal.adv) + ' у «Двора», заезд 1 ноября', {to:'oreq'}); }
+});
+const modExtra2 = opt => '<h3>Итерация 8 · бронь и заселение</h3>' +
+  opt('m-hour', 'Прошло больше часа после брони', !!M.hourPassed, 'бесплатная отмена «нажали случайно» недоступна') +
+  opt('m-week', 'До заезда меньше недели', !!M.weekLeft, 'отменить бронь можно только через поддержку') +
+  opt('m-cashpay', 'Семья платит наличными (собственник)', !!M.cashPay, 'иначе семья платит через безопасную сделку') +
+  '<button class="s"' + (S.deal && S.deal.booked === true && !S.deal.cancelled ? '' : ' disabled style="opacity:.5"') + ' data-act="m-ocancel">Собственник отменяет бронь</button>' +
+  '<button class="s"' + (S.own ? '' : ' disabled style="opacity:.5"') + ' data-act="m-obook">Семья бронирует квартиру (собственник)</button>';
+
 function renderMod(){
   const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
   m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор';
@@ -3029,7 +3297,7 @@ function renderMod(){
       (M.pend ? '<div class="small"><b>Участник · ' + byId(M.pend.id).owner + ', ' + byId(M.pend.id).short + ':</b> ' + esc(M.pend.t) + '</div>' : '<div class="small muted">Ждём сообщения участника в чате собственника. Ответить можно и без вопроса: в текущий чат.</div>') +
       '<input id="wozt" type="text" autocomplete="off" placeholder="Ответ, Enter = от собственника" value="' + esc(M.wozDraft) + '" style="height:38px;border:1px solid #D0D3D9;border-radius:8px;padding:0 10px;font:inherit">' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" data-act="m-woz-owner">От собственника</button><button class="s" data-act="m-woz-bot">От Дворецкого</button>' + (M.pend ? '<button class="s" data-act="m-woz-sug">Подставить автоответ</button>' : '') + '</div></div>' : '') +
-    modExtra(opt) +
+    modExtra(opt) + modExtra2(opt) +
     '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (Амирхана, 21)</button>' +
     '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
     (S.own && S.own.list.some(L => L.status === 'review') ? '<button class="s" data-act="m-own">Одобрить объявление собственника</button>' : '') +
