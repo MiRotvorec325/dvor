@@ -1237,7 +1237,7 @@ function mapMount(){
   if(D.sel && LF.lastSel !== D.sel.id){ LF.lastSel = D.sel.id; LF.map.panTo(LL(D.sel.x, D.sel.y)); }
   if(!D.sel) LF.lastSel = null;
 }
-const DAYS = ['Пт, 16 октября','Сб, 17 октября','Вс, 18 октября'];
+const DAYS = ['Пт, 30 октября','Сб, 31 октября','Вс, 1 ноября'];
 const WD = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], WDA = {'Пн':'в понедельник','Вт':'во вторник','Ср':'в среду','Чт':'в четверг','Пт':'в пятницу','Сб':'в субботу','Вс':'в воскресенье'};
 const dayW = d => WDA[d.split(', ')[0]] + ', ' + d.split(', ')[1];
 const dayOf = v => { const [y,m,dd] = v.split('-').map(Number); return WD[new Date(y, m-1, dd).getDay()] + ', ' + dd + ' ' + MONTHS[m-1] + (y !== 2026 ? ' ' + y : ''); };
@@ -1254,7 +1254,7 @@ function fresh(){
     filters:{sad:10, lift:true, kids:true, verified:true, beds2:false, parking:false, pets:false, budget:0}, anketaDone:true,
     sort:'sad', fav:[], scroll:{}, cityQ:'', placeQ:'', whenDate:'',
     chats:{},
-    booking:{}, draft:'', sheet:null, toast:null, push:null,
+    booking:{}, draft:'', sheet:null, toast:null, push:null, rented:{},
     loading:null, nearLoading:false, aiState:'ok', notif:{flats:true, owners:true}, faq:-1,
     district:'Ново-Савиновский', mapSel:null, subscribed:false, mapPoi:'sad', theme:THEME0, set:{vibro:true, sound:true, mapStart:false},
     live:null, myRev:{}, own:null, mode:'tenant',
@@ -1285,7 +1285,7 @@ function match(f, flt){
 }
 function results(flt){
   if(!area()) return [];
-  const r = FLATS.filter(f => match(f, flt || S.filters));
+  const r = FLATS.filter(f => match(f, flt || S.filters) && !(S.rented || {})[f.id]);
   const key = {sad:f=>f.sad, school:f=>f.school, clinic:f=>f.clinic, price:f=>f.rent, entry:f=>f.entry, area:f=>-f.m2, new:f=>FLATS.indexOf(f)*-1}[S.sort];
   return r.sort((a,b) => key(a)-key(b));
 }
@@ -1790,7 +1790,7 @@ const titleOf = L => (L.form.addr || 'Без адреса') + ', ' + L.form.room
 const ownTitle = () => titleOf(S.own.list[S.own.cur]);
 const fiTitle = i => S.own.list.length > 1 ? '<div class="small muted">' + esc(titleOf(S.own.list[i])) + '</div>' : '';
 function obutSay(t){ if(S.own) S.own.but.push({me:false, t}); }
-const OREQS = i => [{fi:i, who:'Семья Петровых', kids:'ребёнок 3–7 лет', day:'Сб, 17 октября', time:'12:00', status:'wait'}, {fi:i, who:'Алия Сафина', kids:'двое детей, 1–3 и 7+ лет', day:'Вс, 18 октября', time:'15:00', status:'wait'}];
+const OREQS = i => [{fi:i, who:'Семья Петровых', kids:'ребёнок 3–7 лет', day:'Сб, 31 октября', time:'12:00', status:'wait'}, {fi:i, who:'Алия Сафина', kids:'двое детей, 1–3 и 7+ лет', day:'Вс, 1 ноября', time:'15:00', status:'wait'}];
 const OTHREADS = i => [{fi:i, who:'Семья Петровых', msgs:[{me:false, t:'Здравствуйте! Есть ли в доме лифт? У нас коляска.'}, {bot:true, t:cfgAns(i, 'lift')}]},
   {fi:i, who:'Алия Сафина', msgs:[{me:false, t:'Добрый день! А кто жил в квартире до нас?'}, {sys:true, t:'В объявлении этого нет, Дворецкий передал вопрос вам'}]}];
 
@@ -2254,7 +2254,7 @@ function applyAnketa(){ const a = S.anketa; S.anketaDone = true;
   S.filters = {sad: a.near.includes('sad') ? a.sadMax : 0, school: a.near.includes('school') ? a.schoolMax : 0, clinic: a.near.includes('clinic') ? a.clinicMax : 0, lift: a.near.includes('liftc'), kids: a.kids, verified: a.verified, beds2: S.filters.beds2, parking: a.near.includes('parking'), pets: a.pet !== 'нет' ? a.pet : false, budget: S.filters.budget || 0}; }
 function ownApprove(i){ if(!S.own) return; if(i === undefined) i = S.own.list.findIndex(L => L.status === 'review'); const L = S.own.list[i]; if(!L || L.status !== 'review') return;
   const first = !S.own.list.some(x => x.status === 'ok'); L.status = 'ok';
-  if(first){ S.own.reqs.push(...OREQS(i)); S.own.threads.push(...OTHREADS(i)); } else S.own.reqs.push({fi:i, who:'Семья Хасановых', kids:'ребёнок до 1 года', day:'Вс, 18 октября', time:'12:00', status:'wait'});
+  if(first){ S.own.reqs.push(...OREQS(i)); S.own.threads.push(...OTHREADS(i)); } else S.own.reqs.push({fi:i, who:'Семья Хасановых', kids:'ребёнок до 1 года', day:'Вс, 1 ноября', time:'12:00', status:'wait'});
   obutSay('Объявление ' + titleOf(L) + ' опубликовано. ' + (first ? 'Пришли две заявки на просмотр, они во вкладке «Просмотры».' : 'Пришла заявка на просмотр от Семьи Хасановых.') + ' На вопросы семей по объявлению отвечаю сам, личные передаю вам.');
   S.push = {title:'Документы сверены', text:'Объявление ' + titleOf(L) + ' опубликовано', id:null, own:true}; render(); later(4500, () => { S.push = null; render(); }); }
 function supSend(t){ S.support.push({me:true, t}); S.chatBottom = true; render();
@@ -2376,7 +2376,7 @@ const A = {
   reviews(v){ const [k, id] = v.split(':'); S.cur = id; S.revKind = k; S.revFlat = ''; go('reviews'); },
   'rev-flat'(v){ S.revFlat = v; render(); },
   'bd-flat'(v){ S.cur = v; noteFlat(v); const b = S.booking[v]; S.bookDraft = b && b.status !== 'cancel' ? {day:b.day, time:b.time, place:b.place, placeTxt:b.placeTxt} : {...S.bookDraft}; render(); },
-  'push-open'(){ if(S.push.own){ S.push = null; A['mode-owner'](); return; } const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
+  'push-open'(){ if(S.push.rented){ S.push = null; S.tab = 'search'; S.stack = []; S.screen = 'results'; S.scroll.results = 0; render(); return; } if(S.push.own){ S.push = null; A['mode-owner'](); return; } const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
   pin(v){ S.mapSel = v; render(); },
   go(v){ go(v); },
   notif(v){ S.notif[v] = !S.notif[v]; render(); },
@@ -2471,7 +2471,7 @@ document.addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === '
 const clampMin = v => { v = Math.round(+v); return v >= 5 ? Math.min(v, 999) : 0; };
 const minToT = m => String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
 const tToMin = t => +t.slice(0,2)*60 + +t.slice(3,5);
-const OWN_DAYS = Array.from({length:167}, (_, i) => { const t = new Date(2026, 9, 16 + i); return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0'); });
+const OWN_DAYS = Array.from({length:153}, (_, i) => { const t = new Date(2026, 9, 30 + i); return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0'); });
 const HOURS = Array.from({length:14}, (_, i) => String(8 + i).padStart(2,'0'));
 const MINS = Array.from({length:12}, (_, i) => String(i*5).padStart(2,'0'));
 const WH = 36;
@@ -2555,6 +2555,12 @@ function setupTask(t){
 const MA = {
   'm-task'(v){ setupTask(v); },
   'm-reset'(){ setupTask('t1'); },
+  'm-rented'(){ const id = Object.keys(S.booking).find(k => S.booking[k].status !== 'cancel') || (S.fav.includes('B') ? 'B' : S.fav[0]) || 'B', f = byId(id);
+    S.rented = {...(S.rented || {}), [id]:true}; S.fav = S.fav.filter(x => x !== id); if(S.booking[id]) S.booking[id].status = 'cancel';
+    if((S.chats[ck(id)] || []).length) chatOf(f).push({bot:true, t:'Собственник отметил, что квартиру на ' + f.short + ' сдали. Переписка остаётся здесь.'});
+    const n = results().length;
+    S.push = {title:'Квартиру на ' + f.short + ' сдали', text:'Ваши вопросы собственнику сохранены. ' + (n ? 'Под вашу анкету есть ещё ' + kv(n) + ', показать?' : 'Пришлём пуш, когда появится подходящая'), rented:true};
+    if(S.screen === 'card' && S.cur === id) back(); render(); },
   'm-ai'(){ M.ai = !M.ai; if(S.screen === 'compare') S.aiState = M.ai ? 'fail' : 'ok'; render(); },
   'm-slow'(){ M.slow = !M.slow; render(); },
   'm-off'(){ M.offline = !M.offline; if(!M.offline) flushOffline(); render(); },
@@ -2585,7 +2591,7 @@ function renderMod(){
     '<h3>Задания · план теста, слайд 06</h3>' +
     TASKS.map(([n,t,k,done]) => '<button class="task" data-act="m-task" data-v="' + k + '"><b class="n">' + n + '</b><span>' + t + '<br><span class="muted small">Готово, когда ' + done + '</span></span></button>').join('') +
     '<h3>Состояния из wireframe</h3>' +
-    opt('m-ai','Ошибка ИИ в сравнении',M.ai,'4а · в Т3 у двух участников из пяти') +
+    opt('m-ai','Ошибка ИИ в сравнении',M.ai,'4а · в Т3, не у всех участников') +
     opt('m-slow','Долгая загрузка «Что рядом»',M.slow,'3а · при следующем открытии карточки') +
     opt('m-off','Нет интернета в чате',M.offline,'5а · сообщения ждут сеть') +
     opt('m-auto','Собственник подтверждает сам',M.autoConfirm,'через 6 секунд после запроса') +
@@ -2598,6 +2604,7 @@ function renderMod(){
     '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
     (S.own && S.own.list.some(L => L.status === 'review') ? '<button class="s" data-act="m-own">Одобрить объявление собственника</button>' : '') +
     '<button class="s" data-act="m-owner-demo">Собственник с двумя квартирами и жильцами</button>' +
+    '<button class="s" data-act="m-rented">Пуш «квартиру сдали» · сценарий 3</button>' +
     '<button class="s" data-act="m-reset">Начать заново</button>';
   if(wf){ const w = $('#wozt'); if(w){ w.focus(); w.setSelectionRange(w.value.length, w.value.length); } }
 }
