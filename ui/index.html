@@ -961,6 +961,33 @@ body{--desk:#E9E2D8}
 .ph .link.muted{color:var(--mute)}
 .ph .toast button{text-decoration:none;padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.08)}
 .ph[data-theme=light] .link:not(.muted){color:#C2453A}
+
+/* iteration 8: checklist, wallet, rent date */
+.ck{width:22px;height:22px;flex:none;border:1.5px solid var(--edge);border-radius:6px;display:grid;place-items:center;font-size:13px;font-weight:800;color:transparent}
+.ck.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.ckrow{display:flex;gap:10px;align-items:center;padding:5px 0;font-size:14px;line-height:19px;text-align:left;width:100%}
+.ithumbs{display:flex;gap:8px;flex-wrap:wrap;padding-top:4px}
+.ithumb{width:64px;height:64px;border-radius:10px;background:var(--fill) center/cover no-repeat;position:relative;flex:none}
+.ithumb span{position:absolute;right:-6px;top:-6px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:13px;line-height:20px;text-align:center}
+.iadd{width:64px;height:64px;border-radius:10px;border:1.5px dashed var(--edge);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--mute);cursor:pointer;flex:none}
+.istrip{flex:none;display:flex;align-items:center;gap:8px;padding:8px 18px;border-bottom:1px solid var(--line);background:var(--soft);font-size:13px;font-weight:700;width:100%;text-align:left}
+.dcard{max-width:84%;align-self:flex-start;background:var(--paper)}
+.dcard.mine{align-self:flex-end}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.days .chip{justify-content:center;padding:8px 0}
+.bars{display:flex;align-items:flex-end;gap:10px;height:100px}
+.bars > div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;line-height:13px;color:var(--mute)}
+.bars i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:var(--fill)}
+.bars .cur i{background:var(--ink)}
+.wbal{font-size:30px;line-height:36px;font-weight:800}
+.tip{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:12px;line-height:17px}
+
+.ph .ck.on{background:var(--cta);border-color:var(--cta);color:var(--cta-tx)}
+.ph .days .chip{padding:8px 0;justify-content:center}
+.ph .bars .cur i{background:var(--cta)}
+.ph .tip{background:var(--fill);border-radius:18px;padding:12px 14px}
+.ph .istrip{background:var(--fill);border-bottom-color:transparent}
+.ph .dcard{background:var(--soft)}
 </style>
 
 <div class="desk">
@@ -1439,14 +1466,14 @@ const THEME0 = 'dark';
 function fresh(){
   return {
     screen:'welcome', stack:[], tab:'search', cur:'B', step:1, user:null, reg:{name:'', surname:'', phone:'', code:'', sent:false, role:'', now:'', roleDone:false},
-    anketa:{income:0, incomeSkip:false, city:'Казань', when:'через месяц', age:'1–3 года', children:['1–3 года'], near:['sad','clinic','park','liftc'], sadMax:10, schoolMax:15, clinicMax:15, work:'ул. Баумана, 1', commute:['авто'], cars:'1', pet:'нет', kids:true, verified:true},
+    anketa:{income:0, incomeSkip:false, city:'Казань', when:'через месяц', age:'1–3 года', children:['1–3 года'], near:['sad','clinic','park','liftc'], sadMax:10, schoolMax:15, clinicMax:15, work:'ул. Баумана, 1', commute:['авто'], cars:'1', pet:'нет', kids:true, verified:true, move:'решу позже'},
     filters:{sad:10, lift:true, kids:true, verified:true, beds2:false, parking:false, pets:false, budget:0}, anketaDone:true,
     sort:'sad', fav:[], scroll:{}, cityQ:'', placeQ:'', whenDate:'',
     chats:{},
     booking:{}, draft:'', sheet:null, toast:null, push:null, rented:{},
     loading:null, nearLoading:false, aiState:'ok', notif:{flats:true, owners:true}, faq:-1,
     district:'Ново-Савиновский', mapSel:null, subscribed:false, mapPoi:'sad', theme:THEME0, set:{vibro:true, sound:true, mapStart:false},
-    live:null, myRev:{}, own:null, mode:'tenant',
+    live:null, myRev:{}, own:null, mode:'tenant', wallet:{bal:0, card:'Мир ·· 4417', auto:false, hist:[]}, insp:{},
     support:[{me:false, t:'Здравствуйте! Я Анна из поддержки «Двора». Помогу с поиском, объявлением, жильцами или аккаунтом.'}], mapPois:['sad'], mapZoom:1, workQ:'',
     butler:[{me:false, t:'Я Дворецкий, помощник «Двора». Здесь напомню о просмотрах и подскажу, что взять с собой. Спросите, например: «Когда ближайший просмотр?»'}]
   };
@@ -1637,6 +1664,7 @@ V.anketa = () => {
     '<div class="h1">Куда и когда переезжаете?</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Город</div>' + citySearch() + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Когда нужна квартира?</div>' + whenPick() + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Нужна помощь с переездом?</div>' + choice('move', ['да', 'нет', 'решу позже'], a.move) + '<div class="small muted">Грузчики и машина. Сколько нужно, посчитаем перед переездом по количеству вещей</div></div>' +
     '<div class="box small muted">В прототипе квартиры есть в Казани, в Ново-Савиновском районе.</div>' + stepFoot(1);
   if(n === 2){
     const nearOpts = [['park','Парк'],['liftc','Лифт для коляски'],['parking','Парковка']];
@@ -1895,10 +1923,10 @@ V.chat = () => {
   return '<div class="top"><button data-act="back" aria-label="Назад">' + ic('back', 22) + '</button><button class="t" data-act="owner" data-v="' + f.id + '" style="display:flex;flex-direction:column" aria-label="Профиль собственника"><span>' + f.owner + (f.verified?' ✓':'') + '</span><span class="small muted" style="font-weight:500">собственник · отвечает за час</span></button>' +
       '<button class="small muted link" data-act="show-map" data-v="' + f.id + '" aria-label="' + f.short + ' на карте">◎ ' + f.short + '</button>' + homeBtn() + '</div>' +
     (M.offline ? '<div class="small" style="flex:none;padding:8px 18px;border-bottom:1px solid var(--ink);background:var(--soft)"><b>Нет подключения к интернету.</b> Сообщения сохранены и уйдут сами, когда появится сеть.</div>' : '') +
-    bookStrip(f) +
+    bookStrip(f) + inspStrip(f) +
     '<div class="body" style="gap:10px;background:var(--paper)">' +
-    '<div class="box small" style="background:rgba(230,176,74,.14);color:#F0CD86;flex-direction:row;gap:8px"><b>!</b><span>Номер и чат бесплатны. Не переводите деньги до просмотра.</span>' + (S.live ? '' : '<button class="link" style="align-self:flex-start;font-weight:700" data-act="live-ask" data-v="' + f.id + '">Договорились? Отметить «Снимаем»</button>') + '</div>' +
-    msgs.map((m,i) => (m.sys ? '<div class="small muted" style="align-self:center;text-align:center;max-width:90%">' + esc(m.t) + '</div>' : '<div class="bubble ' + (m.me?'me':'they') + (m.bot?' bot':'') + '">' + (m.bot ? '<div class="small bothd" style="font-weight:800;margin-bottom:2px">Дворецкий · по объявлению</div>' : '') + esc(m.t) + '</div>') +
+    '<div class="box small" style="background:rgba(230,176,74,.14);color:#F0CD86;flex-direction:row;gap:8px"><b>!</b><span>Номер и чат бесплатны. Не переводите деньги напрямую, это может быть опасно: бронь и оплата через «Двор» защищены.</span>' + (S.live ? '' : '<button class="link" style="align-self:flex-start;font-weight:700" data-act="live-ask" data-v="' + f.id + '">Договорились? Отметить «Снимаем»</button>') + '</div>' +
+    msgs.map((m,i) => m.kind ? chatCard(m, i) : (m.sys ? '<div class="small muted" style="align-self:center;text-align:center;max-width:90%">' + esc(m.t) + '</div>' : '<div class="bubble ' + (m.me?'me':'they') + (m.bot?' bot':'') + '">' + (m.bot ? '<div class="small bothd" style="font-weight:800;margin-bottom:2px">Дворецкий · по объявлению</div>' : '') + esc(m.t) + '</div>') +
       (m.failed ? '<div class="small" style="align-self:flex-end;margin-top:-6px">Не отправлено · <button class="link" data-act="resend" data-v="' + i + '">Повторить</button></div>' : '')).join('') +
     (S.typing ? '<div class="bubble they muted">' + f.owner + ' печатает…</div>' : '') +
     '</div>' +
@@ -1931,10 +1959,7 @@ V.home = () => { const f = byId(S.live.id), d = dos(f), L = S.live;
   return '<div class="top"><span class="t">Мой дом</span></div><div class="body" style="gap:12px">' +
     '<div class="box"><div style="font-size:18px;font-weight:800">' + f.short + '</div><div class="small muted">' + f.params + '</div><div class="small">Заезд ' + L.since + ' · договор на ' + d.term + ' мес.</div>' +
       '<div class="row small"><button class="link" style="font-weight:700" data-act="owner" data-v="' + f.id + '">' + f.owner + ', собственник' + (f.verified ? ' ✓' : '') + '</button><button class="link" data-act="write" data-v="' + f.id + '">Написать</button></div></div>' +
-    '<div class="box"><div style="font-weight:800">Платежи</div>' +
-      '<div class="row"><span>Аренда · до ' + d.payDay + ' числа<div class="small muted">' + PAYH[d.pay] + (d.crypto ? ', можно криптовалютой' : '') + '</div></span><b>' + rub(f.rent) + '</b></div>' +
-      '<div class="row small"><span class="' + (L.paid ? '' : 'muted') + '">' + (L.paid ? '✓ Оплачено за этот месяц' : 'Ждёт оплаты') + '</span><button class="link" data-act="live-paid">' + (L.paid ? 'Отменить отметку' : 'Отметить оплату') + '</button></div>' +
-      '<div class="row" style="font-weight:800;border-top:1px solid var(--line);padding-top:8px"><span>Обычно в месяц</span><span>≈ ' + rub(f.rent + f.util) + '</span></div><div class="small muted" style="margin-top:-4px">аренда, коммуналка (свет, вода, отопление) и ЖКУ (' + f.zhkuWhat + ')</div></div>' +
+    payBox(f) +
     '<div class="box"><div style="font-weight:800">Коммуналка и ЖКУ</div>' +
       '<div class="row" style="align-items:flex-start;gap:12px"><span>За сентябрь<div class="small muted">коммуналка ' + rub(prevComm(f)) + ' + ЖКУ ' + rub(f.zhku) + ' · ✓ оплачено</div></span><b style="white-space:nowrap">' + rub(prevComm(f) + f.zhku) + '</b></div>' +
       (L.bill ? '<div class="row" style="align-items:flex-start;gap:12px"><span>За октябрь<div class="small muted">коммуналка ' + rub(L.bill) + ' + ЖКУ ' + rub(f.zhku) + ' · ' + (L.billPaid ? '✓ оплачено' : 'оплатить до 10 ноября') + '</div></span><b style="white-space:nowrap">' + rub(L.bill + f.zhku) + '</b></div>' +
@@ -2087,7 +2112,7 @@ V.omsg = () => { const o = S.own, ten = o.ochTab === 'ten', bl = o.but[o.but.len
       : '<div class="muted" style="font-size:14px;line-height:20px;padding-top:12px">' + (ten ? 'Здесь будут чаты с семьями, которые уже живут в ваших квартирах. Отметьте «Сдал этой семье» во вкладке «Просмотры».' : 'Здесь будут вопросы семей по объявлениям.') + '</div>') +
     (ten ? '' : '<div class="small muted" style="padding-top:12px">На вопросы по объявлению (лифт, залог, животные, коммуналка) Дворецкий отвечает сам. Личные вопросы передаёт вам.</div>') + '</div>' + tabs(); };
 V.othread = () => { const t = S.own.threads[S.oth];
-  return topBack(t.who + (t.tenant ? ' · жильцы' : '')) + (S.own.list.length > 1 ? '<div class="small muted" style="flex:none;padding:6px 18px;border-bottom:1px solid var(--line)">' + esc(titleOf(S.own.list[t.fi])) + '</div>' : '') + '<div class="body" style="gap:10px;background:var(--paper)">' + t.msgs.map(m => m.sys ? '<div class="small muted" style="align-self:center;text-align:center;max-width:90%">' + esc(m.t) + '</div>'
+  return topBack(t.who + (t.tenant ? ' · жильцы' : '')) + (S.own.list.length > 1 ? '<div class="small muted" style="flex:none;padding:6px 18px;border-bottom:1px solid var(--line)">' + esc(titleOf(S.own.list[t.fi])) + '</div>' : '') + '<div class="body" style="gap:10px;background:var(--paper)">' + t.msgs.map((m, i) => m.kind ? chatCard(m, i) : m.sys ? '<div class="small muted" style="align-self:center;text-align:center;max-width:90%">' + esc(m.t) + '</div>'
       : '<div class="bubble ' + (m.me || m.bot ? 'me' : 'they') + (m.bot ? ' bot' : '') + '">' + (m.bot ? '<div class="small bothd" style="font-weight:800;margin-bottom:2px">Дворецкий ответил за вас</div>' : '') + esc(m.t) + '</div>').join('') + '</div>' +
     '<div style="flex:none;padding:10px 18px 14px;border-top:1px solid var(--line);background:var(--paper)"><form class="row" style="gap:8px" data-form="othread"><input id="othmsg" class="field" placeholder="Ответить…" value="' + esc(S.othDraft || '') + '" autocomplete="off" aria-label="Ответ"><button class="btn p" style="width:44px;height:44px;flex:none" aria-label="Отправить">' + ic('send', 20) + '</button></form></div>'; };
 V.otenants = () => { const o = S.own, l = o.list.map((L, i) => [L, i]).filter(([L]) => L.tenant);
@@ -2095,15 +2120,15 @@ V.otenants = () => { const o = S.own, l = o.list.map((L, i) => [L, i]).filter(([
     (l.length ? l.map(([L, i]) => { const T = L.tenant, F = L.form;
       return '<div class="box"><div class="row"><b style="font-size:15px">' + T.who + '</b><span class="chip on" style="font-size:11px">живут</span></div><div class="small muted">' + esc(titleOf(L)) + '</div>' +
         '<div class="row muted"><span>Заехали</span><span>' + T.since + '</span></div><div class="row muted"><span>Договор</span><span>до ' + T.till + '</span></div><div class="row muted"><span>Семья</span><span>' + T.kids + '</span></div>' +
-        '<div class="row"><span>Аренда за октябрь · ' + rub(+F.price) + '</span><b>' + (T.paid ? '✓ оплачено' : 'ждём до 5 числа') + '</b></div>' +
+        oPayRows(L, i) +
         '<div class="row"><span>Показания счётчиков</span><b>' + (T.meters ? '✓ переданы' : 'ещё нет') + '</b></div>' +
         '<div class="row small"><button class="link" style="font-weight:700" data-act="oten-chat" data-v="' + i + '">Написать</button><button class="link" data-act="oten-info" data-v="' + i + '">Подробнее о жильцах</button>' + (T.meters ? '' : '<button class="link" data-act="oten-remind" data-v="' + i + '">Напомнить</button>') + '</div></div>'; }).join('')
       : '<div class="h1">Пока никто не заехал</div><div class="muted" style="font-size:14px;line-height:20px">Когда договоритесь с семьёй после просмотра, нажмите «Сдал этой семье» во вкладке «Просмотры». Здесь появятся жильцы: оплата, счётчики, договор и чат.</div><button class="btn s" data-act="tab" data-v="oreq">К просмотрам</button>') + '</div>' + tabs(); };
-const tenantOf = x => ({who:x.who, kids:x.kids, since:'1 ноября 2026', till:'1 октября 2027', phone:'+7 (917) 2' + (x.who.length * 7 % 90 + 10) + '-4' + (x.who.length % 9) + '-1' + (x.who.length % 7) , pets:'нет', paid:false, meters:false});
+const tenantOf = x => ({who:x.who, kids:x.kids, since:'1 ноября 2026', till:'1 октября 2027', phone:'+7 (917) 2' + (x.who.length * 7 % 90 + 10) + '-4' + (x.who.length % 9) + '-1' + (x.who.length % 7) , pets:'нет', paid:false, meters:false, pay:'wallet', payDay:5});
 function ownerDemo(){ clearTimers(); const th = S.theme; S = fresh(); S.theme = th; S.user = {...DEMO_USER, role:'both'}; const o = S.own = mkOwn(); o.passport = true;
   o.list[0].egrn = true; o.list[0].status = 'ok'; o.list[0].views = 37; Object.assign(o.list[0].form, {addr:'ул. Амирхана, 30', rooms:'2', m2:'54', floor:'5/9', price:'42000', comm:'5900', pets:'small', kids:true, lift:true, pantry:true, parking:false, photos:8});
   const L1 = mkL(); L1.egrn = true; L1.status = 'ok'; L1.views = 52; Object.assign(L1.form, {addr:'ул. Сибгата Хакима, 5', rooms:'3', m2:'71', floor:'7/12', price:'51000', comm:'7800', pets:'cats', kids:true, lift:true, pantry:false, parking:true, photos:10});
-  L1.tenant = {who:'Семья Галиевых', kids:'двое детей, 3–7 и 7+ лет', since:'1 сентября 2026', till:'1 августа 2027', phone:'+7 (917) 284-41-15', pets:'кошка', paid:true, meters:false};
+  L1.tenant = {who:'Семья Галиевых', kids:'двое детей, 3–7 и 7+ лет', since:'1 сентября 2026', till:'1 августа 2027', phone:'+7 (917) 284-41-15', pets:'кошка', paid:true, meters:false, pay:'sbp', payDay:5};
   o.list.push(L1); o.reqs = OREQS(0); o.threads = OTHREADS(0).concat([{fi:1, tenant:true, who:'Семья Галиевых', msgs:[{sys:true, t:'Семья заехала 1 сентября 2026'}, {me:false, t:'Добрый день! Оплатили октябрь по СБП.'}, {me:true, t:'Спасибо, получил.'}, {me:false, t:'В ванной подтекает смеситель, посмотрите, пожалуйста?'}]}]);
   o.but.push({me:false, t:'Напоминаю: сегодня до 25 числа Семья Галиевых передаёт показания счётчиков по Сибгата Хакима, 5. Пока их нет.'});
   S.mode = 'owner'; S.tab = 'cabinet'; S.screen = 'cabinet'; render(true); toast('Демо: две квартиры, во второй живут Галиевы'); }
@@ -2181,7 +2206,7 @@ const ownerProfile = () => { const o = S.own, n = o.list.filter(L => L.status ==
   '<button class="list-row" data-act="ocfg"><span>Ответы Дворецкого<div class="small muted">Что он отвечает семьям за вас</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="me-edit"><span>Имя, фамилия и телефон</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="mode-tenant"><span>Перейти в режим «Снимаю»<div class="small muted">Поиск квартиры для своей семьи, анкета семьи, избранное</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="go" data-v="settings"><span>Настройки<div class="small muted">Город, уведомления, Дворецкий</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
+  walletRow() + '<button class="list-row" data-act="go" data-v="settings"><span>Настройки<div class="small muted">Город, уведомления, Дворецкий</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="support"><span>Чат с поддержкой' + (S.support.length > 1 ? '<div class="small muted">' + esc(S.support[S.support.length-1].t).slice(0, 40) + '…</div>' : '') + '</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="go" data-v="help"><span>Помощь</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="sign-out-ask" style="color:#E5484D;font-weight:700"><span>Выйти из аккаунта</span><span></span></button></div>' + tabs(); };
@@ -2194,7 +2219,7 @@ V.profile = () => S.mode === 'owner' && S.own && S.user ? ownerProfile() : '<div
   ((S.live ? '<button class="list-row" data-act="tab" data-v="home"><span>Мой дом<div class="small muted">' + byId(S.live.id).short + ' · живёте с ' + S.live.since + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'
       : '<button class="list-row" data-act="live-pick"><span>Сняли, заехали, живём<div class="small muted">Оплата, коммуналка и договор в одном месте</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>') +
       '<button class="list-row" data-act="own-start"><span>' + (ownOk() ? 'Перейти в режим «Сдаю»' : 'Сдаю квартиру') + '<div class="small muted">' + (!S.own ? 'Кабинет собственника: объявления, просмотры, жильцы' : ownOk() ? 'Объявления, просмотры, жильцы и чаты' : S.own.status === 'review' ? 'Документы на проверке у модератора' : 'Продолжить: шаг ' + ownStep() + ' из 4') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>') +
-  '<button class="list-row" data-act="go" data-v="settings"><span>Настройки</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
+  walletRow() + '<button class="list-row" data-act="go" data-v="settings"><span>Настройки</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="support"><span>Чат с поддержкой' + (S.support.length > 1 ? '<div class="small muted">' + esc(S.support[S.support.length-1].t).slice(0, 40) + '…</div>' : '') + '</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   '<button class="list-row" data-act="go" data-v="help"><span>Помощь</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
   (S.user ? '<button class="list-row" data-act="sign-out-ask" style="color:#E5484D;font-weight:700"><span>Выйти из аккаунта</span><span></span></button>' : '') +
@@ -2202,7 +2227,7 @@ V.profile = () => S.mode === 'owner' && S.own && S.user ? ownerProfile() : '<div
 const EDIT_T = {1:'Город и дата переезда', 2:'Дети и что рядом', 3:'Работа, машины и доход', 4:'Питомцы и собственник'};
 V.family = () => { const a = S.anketa;
   const near = Object.keys(DIST).filter(k => a.near.includes(k)).map(k => DIST[k][1] + ' до ' + fmtMin(a[k + 'Max'])).join(', ') || 'не учитываем';
-  const rows = [[1, a.city + ', переезд ' + a.when], [2, kidsTxt() + '. ' + near], [3, a.work + ', ' + a.commute.join(', ') + ', машин: ' + a.cars + ', доход: ' + (a.income ? rub(a.income) + ' в месяц' : 'не указан')], [4, ['питомцы: ' + a.pet, a.kids ? 'согласен на ребёнка' : '', a.verified ? 'только проверенные' : ''].filter(Boolean).join(', ')]];
+  const rows = [[1, a.city + ', переезд ' + a.when + '. Помощь с переездом: ' + a.move], [2, kidsTxt() + '. ' + near], [3, a.work + ', ' + a.commute.join(', ') + ', машин: ' + a.cars + ', доход: ' + (a.income ? rub(a.income) + ' в месяц' : 'не указан')], [4, ['питомцы: ' + a.pet, a.kids ? 'согласен на ребёнка' : '', a.verified ? 'только проверенные' : ''].filter(Boolean).join(', ')]];
   return topBack('Анкета семьи') + '<div class="body" style="gap:0"><div class="small muted" style="padding-bottom:6px">Меняйте любой пункт отдельно. Выдача обновится сразу после сохранения.</div>' +
     rows.map(([n, v]) => '<button class="list-row" data-act="edit-one" data-v="' + n + '"><span><b>' + EDIT_T[n] + '</b><div class="small muted">' + esc(v) + '</div></span><span class="muted small">Изменить ›</span></button>').join('') +
     '<button class="link small" style="margin-top:14px;align-self:flex-start" data-act="edit-anketa">Пройти анкету заново</button></div>'; };
@@ -2566,7 +2591,7 @@ const A = {
   reviews(v){ const [k, id] = v.split(':'); S.cur = id; S.revKind = k; S.revFlat = ''; go('reviews'); },
   'rev-flat'(v){ S.revFlat = v; render(); },
   'bd-flat'(v){ S.cur = v; noteFlat(v); const b = S.booking[v]; S.bookDraft = b && b.status !== 'cancel' ? {day:b.day, time:b.time, place:b.place, placeTxt:b.placeTxt} : {...S.bookDraft}; render(); },
-  'push-open'(){ if(S.push.rented){ S.push = null; S.tab = 'search'; S.stack = []; S.screen = 'results'; S.scroll.results = 0; render(); return; } if(S.push.own){ S.push = null; A['mode-owner'](); return; } const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
+  'push-open'(){ if(S.push.to){ const to = S.push.to; S.push = null; go(to); return; } if(S.push.rented){ S.push = null; S.tab = 'search'; S.stack = []; S.screen = 'results'; S.scroll.results = 0; render(); return; } if(S.push.own){ S.push = null; A['mode-owner'](); return; } const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
   pin(v){ S.mapSel = v; render(); },
   'pin-close'(){ S.mapSel = null; render(); },
   go(v){ go(v); },
@@ -2590,7 +2615,7 @@ const A = {
   'live-ask'(v){ S.liveId = v; S.liveDay = null; S.sheet = 'liveask'; render(); },
   'live-day'(v){ S.liveDay = v; render(); },
   'live-do'(){ const f = byId(S.liveId), d = dos(f), day = S.liveDay || d.free.replace(/^с /, '');
-    S.live = {id:f.id, since:day, paid:false, meters:false}; noteFlat(f.id);
+    S.live = {id:f.id, since:day, paid:false, meters:false, pay:d.pay === 'cash' ? 'cash' : 'sbp', payDay:d.payDay}; noteFlat(f.id);
     chatOf(f).push({me:true, t:'Договорились, снимаем квартиру' + (ownerFlats(f).length > 1 ? ' на ' + f.short : '') + '. Заезжаем ' + day + '.'});
     ownerReply(f, f.ownerG === 'f' ? 'Отлично, рада! Подготовлю договор и ключи, встретимся в день заезда.' : 'Хорошо. Подготовлю договор и ключи, встретимся в день заезда.', 2600);
     butlerSay('Поздравляю с новым домом! В «Моём доме» будут аренда, коммуналка и ЖКУ, напомню о платеже за 3 дня до ' + d.payDay + ' числа.');
@@ -2771,6 +2796,212 @@ function wozSend(bot){ const el = $('#wozt'), t = (el ? el.value : M.wozDraft).t
   chatOf(f).push(bot ? {bot:true, t:pre + t} : {me:false, t}); M.pend = null; M.wozDraft = ''; S.chatBottom = true; render(); }
 document.addEventListener('input', e => { if(e.target.id === 'wozt') M.wozDraft = e.target.value; });
 document.addEventListener('keydown', e => { if(e.target.id === 'wozt' && e.key === 'Enter'){ e.preventDefault(); wozSend(false); } });
+/* ===================== iteration 8: viewing checklist, wallet, rent date change ===================== */
+const pushNote = (title, text, extra) => { S.push = Object.assign({title, text}, extra || {}); render(); later(4800, () => { if(S.push && S.push.title === title){ S.push = null; render(); } }); };
+const liveF = () => S.live && byId(S.live.id);
+const payDayOf = () => S.live.payDay || dos(liveF()).payDay;
+const PAYM = {wallet:'из кошелька «Двора»', cash:'наличными', sbp:'по СБП'};
+const wAdd = (t, s) => { S.wallet.bal += s; S.wallet.hist.unshift({t, s, d:'сегодня'}); };
+const dayNote = n => n > 28 ? 'В месяцах, где нет ' + n + ' числа, оплата в последний день месяца.' : '';
+
+/* ---------- viewing checklist: rooms come from the flat ---------- */
+function inspRooms(f){ const d = dos(f), n = parseInt(f.params, 10) || 1, bath = d.bath || '', R = [];
+  R.push(['kitchen', 'Кухня', ['Холодильник', d.stove ? 'Плита, ' + d.stove : 'Плита', 'Раковина и смеситель'].concat(d.dish ? ['Посудомоечная машина'] : [], ['Другая техника: микроволновка, вытяжка, чайник'])]);
+  if(n === 1) R.push(['room', 'Комната', ['Кровать или диван', 'Шкафы', 'Окна, подоконник, батареи']]);
+  else { if(n >= 3) R.push(['living', 'Гостиная', ['Диван, стол и стулья', 'Телевизор', 'Окна и батареи']]);
+    R.push(['bed', n >= 3 ? 'Спальня' : 'Спальня или гостиная', ['Кровать', 'Шкафы', 'Окна и батареи']]);
+    R.push(['kids', 'Детская', ['Какая мебель есть: кровать, стол, шкаф', 'Розетки и окна: заглушки, ручки']]); }
+  R.push(['bath', 'Ванная', ['Стиральная машина', 'Раковина и смеситель', /душ/.test(bath) && !/ванн/.test(bath) ? 'Душевая кабина' : 'Ванна или душ', 'Туалет', 'Нет ли протечек и плесени']]);
+  R.push(['hall', 'Прихожая', ['Входная дверь и замки', 'Шкаф или вешалка']]);
+  if(d.balcony && d.balcony !== 'нет') R.push(['balcony', cap(d.balcony.split(',')[0].replace('застеклённый ', '')), ['Остекление и рамы', 'Пол и стены']]);
+  return R; }
+const inspOf = id => (S.insp = S.insp || {})[id] = S.insp[id] || {ck:{}, ph:{}, open:{kitchen:true}, saved:false};
+function inspStrip(f){ const b = S.booking[f.id]; if(!b || b.status !== 'ok' || !M.viewDay || S.live) return '';
+  const I = inspOf(f.id), n = Object.values(I.ph).flat().length;
+  return '<button class="istrip" data-act="insp" data-v="' + f.id + '"><span style="flex:1">Сегодня просмотр · чек-лист осмотра<div class="small muted" style="font-weight:500">' + (I.saved ? '✓ Сохранён, фото: ' + n : 'Отметьте технику и мебель, сделайте фото') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'; }
+V.insp = () => { const f = byId(S.cur), I = inspOf(f.id), R = inspRooms(f);
+  const all = R.reduce((a, r) => a + r[2].length, 0), done = Object.values(I.ck).filter(Boolean).length, ph = Object.values(I.ph).flat().length;
+  return topBack('Осмотр · ' + f.short) + '<div class="body" style="gap:12px">' +
+    '<div class="box"><div style="font-weight:800">Что фотографировать</div>' +
+      ['1–3 общих фото каждой комнаты с разных углов', 'Технику включённой и крупно', 'Мебель: углы, обивку, дверцы, ящики', 'Дизайнерский декор, если он есть: светильники, панели, картины', 'Царапины, пятна, сколы и трещины вблизи', 'Окна, батареи и счётчики с показаниями']
+        .map(t => '<div class="small" style="display:flex;gap:8px"><span aria-hidden="true">·</span><span>' + t + '</span></div>').join('') +
+      '<div class="small muted">Фото видите вы и ' + f.owner + '. При въезде они попадут в акт приёма-передачи, и при выезде никто не сможет сказать, что было иначе.</div></div>' +
+    '<div class="row small"><span>Проверено ' + done + ' из ' + all + '</span><span class="muted">фото: ' + ph + '</span></div><div class="prog"><div style="width:' + Math.round(done / all * 100) + '%"></div></div>' +
+    R.map(([k, name, items]) => { const op = I.open[k], pp = I.ph[k] || [], c = items.filter((_, j) => I.ck[k + ':' + j]).length;
+      return '<div class="box" style="gap:8px"><button class="row" style="width:100%" data-act="insp-room" data-v="' + k + '" aria-expanded="' + !!op + '"><b>' + name + '</b><span class="small muted">' + c + ' из ' + items.length + (pp.length ? ' · фото ' + pp.length : '') + ' ' + (op ? '▴' : '▾') + '</span></button>' +
+        (op ? items.map((t, j) => { const on = !!I.ck[k + ':' + j]; return '<button class="ckrow" data-act="insp-ck" data-v="' + k + ':' + j + '" aria-pressed="' + on + '"><span class="ck' + (on ? ' on' : '') + '">✓</span><span>' + t + '</span></button>'; }).join('') +
+          '<div class="ithumbs">' + pp.map((u, j) => '<button class="ithumb" style="background-image:url(' + u + ')" data-act="insp-del" data-v="' + k + ':' + j + '" aria-label="Удалить фото"><span>×</span></button>').join('') +
+          '<label class="iadd" for="inspf-' + k + '">+ фото</label><input type="file" id="inspf-' + k + '" accept="image/*" capture="environment" multiple hidden></div>' : '') + '</div>'; }).join('') +
+    '</div><div class="foot one"><button class="btn p" data-act="insp-save">' + (I.saved ? 'Сохранить изменения' : 'Сохранить осмотр') + '</button></div>'; };
+function inspFiles(input){ const k = input.id.slice(6), id = S.cur, I = inspOf(id), files = [...input.files];
+  files.forEach(file => { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => {
+    const s = Math.min(1, 320 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); (I.ph[k] = I.ph[k] || []).push(c.toDataURL('image/jpeg', .8)); render(); }; img.src = r.result; }; r.readAsDataURL(file); }); }
+
+/* ---------- wallet ---------- */
+const walletRow = () => '<button class="list-row" data-act="go" data-v="wallet"><span>Кошелёк<div class="small muted">' + rub(S.wallet.bal) + (S.wallet.auto ? ' · автопополнение включено' : '') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>';
+function commBars(f){ const L = S.live, p = prevComm(f), v = [['июль', Math.round(p * .88 / 10) * 10], ['август', Math.round(p * .9 / 10) * 10], ['сентябрь', p], ['октябрь', L.bill || 0]], mx = Math.max(...v.map(x => x[1]));
+  return '<div class="box"><div style="font-weight:800">Коммуналка по месяцам</div><div class="bars">' + v.map(([m, s], i) => '<div class="' + (i === 3 ? 'cur' : '') + '"><span>' + (s ? tys(s) : '—') + '</span><i style="height:' + (s ? Math.max(8, Math.round(s / mx * 56)) : 4) + 'px"></i><span>' + m.slice(0, 3) + '</span></div>').join('') + '</div>' +
+    '<div class="small muted">' + (L.bill ? 'В октябре на ' + rub(Math.abs(L.bill - p)) + (L.bill > p ? ' больше' : ' меньше') + ', чем в сентябре.' : 'Октябрь появится, когда ' + f.owner + ' пришлёт счёт по вашим показаниям.') + ' Коммуналку платите ' + datv(f) + ' напрямую, здесь только её динамика.</div></div>'; }
+V.wallet = () => { const W = S.wallet, own = S.mode === 'owner', f = liveF(), L = S.live;
+  const rentBox = own ? (S.own.list.filter(L => L.tenant).length ? '<div class="box"><div style="font-weight:800">Аренда от жильцов</div>' + S.own.list.filter(L => L.tenant).map(L => { const T = L.tenant;
+        return '<div class="row" style="align-items:flex-start"><span>' + T.who + '<div class="small muted">' + ((T.pay || 'wallet') === 'wallet' ? 'через кошелёк, ' + (T.payDayNext || T.payDay || 5) + ' числа' : PAYM[T.pay] + ', мимо кошелька') + '</div></span><b>' + rub(+L.form.price) + '</b></div>'; }).join('') +
+        '<div class="small muted">Аренда через кошелёк приходит сама в день оплаты. Вывести на карту можно в любой момент.</div></div>' : '')
+    : L && L.pay === 'wallet' ? '<div class="box"><div style="font-weight:800">Аренда</div><div class="row"><span>Спишем ' + payDayOf() + ' числа<div class="small muted">и переведём ' + datv(f) + (L.payDayNext ? ' · со следующего месяца ' + L.payDayNext + ' числа' : '') + '</div></span><b>' + rub(f.rent) + '</b></div>' +
+        (L.paid ? '<div class="small">✓ Аренда за этот месяц списана</div>' : W.bal < f.rent ? '<div class="small" style="font-weight:700">На кошельке не хватает ' + rub(f.rent - W.bal) + '.' + (W.auto ? ' Перед списанием пополним с карты сами.' : ' Пополните или включите автопополнение.') + '</div>' : '<div class="small muted">✓ На кошельке хватает</div>') +
+        '<button class="link small" style="align-self:flex-start" data-act="pdate">Изменить дату оплаты</button></div>'
+    : L ? '<div class="box small"><span>Аренду ' + f.short + ' вы платите ' + PAYM[L.pay] + '. Через кошелёк аренда уходит сама в срок, а история платежей видна вам и ' + datv(f) + '.</span><button class="link" style="align-self:flex-start" data-act="paym-set" data-v="wallet">Платить аренду через кошелёк</button></div>' : '';
+  return topBack('Кошелёк') + '<div class="body" style="gap:12px">' +
+    '<div class="box"><div class="small muted">На кошельке</div><div class="wbal">' + rub(W.bal) + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn p" style="height:44px" data-act="wtop">Пополнить</button><button class="btn s" style="height:44px" data-act="wout"' + (W.bal ? '' : ' disabled') + '>Вывести</button></div></div>' +
+    rentBox +
+    (own ? '' : '<div class="box"><button class="row" style="width:100%;align-items:flex-start;gap:12px" data-act="wauto" aria-pressed="' + W.auto + '"><span style="text-align:left"><b>Автопополнение</b><div class="small muted" style="margin-top:2px">' + (L && L.pay === 'wallet' ? 'Если к дню оплаты на кошельке не хватит, пополним с карты ' + W.card + ' на недостающую сумму' : 'Пополним кошелёк с карты ' + W.card + ', когда подойдёт день оплаты') + '</div></span><span class="tgl' + (W.auto ? ' on' : '') + '"></span></button></div>') +
+    (L && !own ? commBars(f) : '') +
+    '<div class="box"><div style="font-weight:800">История</div>' + (W.hist.length ? W.hist.map(h => '<div class="row" style="align-items:flex-start"><span>' + h.t + '<div class="small muted">' + h.d + '</div></span><b style="white-space:nowrap">' + (h.s > 0 ? '+' : '−') + ' ' + rub(Math.abs(h.s)) + '</b></div>').join('') : '<div class="small muted">Операций пока нет</div>') + '</div>' +
+    '<div class="small muted">Деньги на кошельке хранятся на счёте «Двора» в банке-партнёре. Вывести их на свою карту можно в любой момент.</div></div>'; };
+SH.wtop = () => { const a = S.wDraft || (S.live && S.live.pay === 'wallet' ? liveF().rent : 10000);
+  return sheet('<div class="h1" style="font-size:17px">Пополнить кошелёк</div><div class="chips">' + [...new Set([S.live ? liveF().rent : 0, 10000, 25000, 50000])].filter(Boolean).map(v => '<button class="chip' + (v === a ? ' on' : '') + '" data-act="wamt" data-v="' + v + '">' + rub(v) + '</button>').join('') + '</div>' +
+    '<label class="lbl" for="wamt">Своя сумма</label><input id="wamt" class="field" type="number" inputmode="numeric" min="100" step="100" value="' + a + '" autocomplete="off"><div class="small muted">С карты ' + S.wallet.card + ', без комиссии</div>' +
+    '<button class="btn p" data-act="wtop-do">Пополнить на ' + rub(a) + '</button>'); };
+SH.wout = () => sheet('<div class="h1" style="font-size:17px">Вывести на карту</div><div class="small muted">Всё, что на кошельке, придёт на карту ' + S.wallet.card + ' в течение минуты</div><div class="wbal">' + rub(S.wallet.bal) + '</div><button class="btn p" data-act="wout-do">Вывести ' + rub(S.wallet.bal) + '</button>');
+
+/* payments box in «Мой дом» */
+function payBox(f){ const L = S.live, d = dos(f), pm = L.pay || 'sbp', day = payDayOf(), W = S.wallet;
+  const st = pm === 'wallet'
+      ? (L.paid ? '<span>✓ Списано за этот месяц</span><button class="link" data-act="go" data-v="wallet">Кошелёк</button>'
+        : L.late ? '<span style="font-weight:700">Не хватило ' + rub(f.rent - W.bal) + ', платёж ждёт</span><button class="link" data-act="wtop">Пополнить</button>'
+        : '<span class="muted">Спишем ' + day + ' числа · на кошельке ' + rub(W.bal) + '</span><button class="link" data-act="go" data-v="wallet">Кошелёк</button>')
+    : pm === 'cash'
+      ? (L.paid === 'wait' ? '<span class="muted">Ждём, когда ' + f.owner + ' подтвердит получение</span>' : L.paid ? '<span>✓ ' + f.owner + ' подтвердил' + ga(f, 'а') + ' оплату</span>' : '<span class="muted">Ждёт оплаты</span><button class="link" data-act="pay-cash">Отдали наличными</button>')
+      : (L.paid ? (L.receipt ? '<span>✓ Оплачено, чек приложен</span>' : '<span>Оплачено · чек не приложен</span><label class="link" for="rcpt">Приложить чек</label><input type="file" id="rcpt" accept="image/*,application/pdf" hidden>')
+        : '<span class="muted">Ждёт оплаты</span><span style="display:flex;gap:12px"><label class="link" for="rcpt">Оплатили, приложить чек</label><input type="file" id="rcpt" accept="image/*,application/pdf" hidden></span>');
+  return '<div class="box"><div style="font-weight:800">Платежи</div>' +
+    '<div class="row"><span>Аренда · до ' + day + ' числа<div class="small muted">' + PAYM[pm] + (pm === 'wallet' ? ', спишется сама' : ' ' + datv(f)) + (L.payDayNext ? ' · со следующего месяца ' + L.payDayNext + ' числа' : '') + '</div></span><b style="white-space:nowrap">' + rub(f.rent) + '</b></div>' +
+    '<div class="row small">' + st + '</div>' +
+    (pm === 'sbp' && !L.paid ? '<button class="link small" style="align-self:flex-start" data-act="pay-sbp-later">Оплатили, чек приложу позже</button>' : '') +
+    '<div class="row small"><button class="link" data-act="pdate">Изменить дату</button><button class="link muted" data-act="paym">Способ оплаты</button></div>' +
+    (pm !== 'wallet' ? '<div class="tip"><span><b>Дворецкий советует кошелёк «Двора»</b>. Аренда уйдёт сама в срок, даже если вы забудете, а вся история платежей видна вам и ' + datv(f) + '. Если возникнет спор, поддержка разберётся по записям.</span><button class="link" style="align-self:flex-start" data-act="paym-set" data-v="wallet">Платить через кошелёк</button></div>' : '') +
+    '<div class="row" style="font-weight:800;border-top:1px solid var(--line);padding-top:8px"><span>Обычно в месяц</span><span>≈ ' + rub(f.rent + f.util) + '</span></div><div class="small muted" style="margin-top:-4px">аренда, коммуналка (свет, вода, отопление) и ЖКУ (' + f.zhkuWhat + ')</div></div>'; }
+SH.paym = () => { const f = liveF(), d = dos(f), opts = ['wallet'].concat(d.pay === 'cash' ? ['cash'] : d.pay === 'sbp' ? ['sbp'] : ['cash', 'sbp']);
+  return sheet('<div class="h1" style="font-size:17px">Как платить аренду</div><div class="small muted">' + f.owner + ' принимает ' + PAYH[d.pay] + '. Кошелёк «Двора» работает со всеми собственниками.</div>' +
+    opts.map(k => '<button class="list-row" data-act="paym-set" data-v="' + k + '"><span>' + cap(PAYM[k]) + '<div class="small muted">' + {wallet:'Спишется сама в день оплаты. Рекомендуем', cash:'Отметите в приложении, ' + f.owner + ' подтвердит получение', sbp:'Приложите чек о переводе'}[k] + '</div></span><span>' + (S.live.pay === k ? ic('check', 18) : '') + '</span></button>').join('')); };
+
+/* owner side: rent rows in «Жильцы» */
+function oPayRows(L, i){ const T = L.tenant, F = L.form, pm = T.pay || 'wallet', day = T.payDay || 5;
+  return '<div class="row"><span>Аренда · ' + rub(+F.price) + '<div class="small muted">' + (pm === 'wallet' ? 'через кошелёк «Двора», ' + day + ' числа' : PAYM[pm] + ', до ' + day + ' числа') + (T.payDayNext ? ' · со следующего месяца ' + T.payDayNext + ' числа' : '') + '</div></span><b>' + (T.paid ? '✓ оплачено' : T.late ? 'задерживается' : 'ждём до ' + day + ' числа') + '</b></div>' +
+    '<div class="row small"><button class="link" data-act="odate" data-v="' + i + '">Изменить дату оплаты</button>' + (pm !== 'wallet' && !T.walletAsked ? '<button class="link muted" data-act="owallet-offer" data-v="' + i + '">Предложить кошелёк</button>' : '') + '</div>'; }
+
+/* ---------- rent date change: a request card in the chat, the other side confirms or counters ---------- */
+SH.pdate = () => { const own = S.mode === 'owner', T = own && S.own.list[S.odate].tenant, f = !own && liveF();
+  const cur = own ? (T.payDayNext || T.payDay || 5) : (S.live.payDayNext || payDayOf()), sel = S.pdDraft || cur;
+  return sheet('<div class="h1" style="font-size:17px">Дата оплаты аренды</div><div class="small muted">Сейчас ' + cur + ' числа. Выберите удобную дату: запрос придёт в чат ' + (own ? 'жильцам' : datv(f)) + ', и дата сменится со следующего месяца, когда ' + (own ? 'они подтвердят' : 'он' + ga(f, 'а') + ' подтвердит') + '.</div>' +
+    '<div class="days">' + Array.from({length:31}, (_, i) => i + 1).map(n => '<button class="chip' + (n === sel ? ' on' : '') + '" data-act="pd-pick" data-v="' + n + '">' + n + '</button>').join('') + '</div>' +
+    (dayNote(sel) ? '<div class="small muted">' + dayNote(sel) + '</div>' : '') +
+    '<button class="btn p" data-act="pd-send"' + (sel === cur ? ' disabled' : '') + '>' + (sel === cur ? 'Выберите другую дату' : 'Отправить запрос: ' + sel + ' числа') + '</button>'); };
+function chatCard(m, i){ const own = S.mode === 'owner', mine = m.who === 'me', f = !own && byId(S.cur);
+  const from = mine ? 'Вы предлагаете' : own ? 'Жильцы предлагают' : f.owner + ' предлагает';
+  return '<div class="box dcard' + (mine ? ' mine' : '') + '"><div class="small muted">' + from + '</div><b>Платить аренду ' + m.day + ' числа</b><div class="small muted">каждый месяц, начиная со следующего' + (m.day > 28 ? '; в коротких месяцах в последний день' : '') + '</div>' +
+    (m.status === 'ok' ? '<div class="small" style="font-weight:800">✓ Обе стороны подтвердили</div>'
+      : m.status === 'counter' ? '<div class="small muted">Предложена другая дата ↓</div>'
+      : m.status === 'other' ? '<div class="small muted">Вы предложили другую дату</div>'
+      : mine ? '<div class="small muted">⏳ Ждём подтверждения</div>'
+      : '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="btn p" style="height:40px;font-size:13px" data-act="date-ok" data-v="' + i + '">Подтвердить</button><button class="btn s" style="height:40px;font-size:13px" data-act="date-other" data-v="' + i + '">Другая дата</button></div>') + '</div>'; }
+const altDay = n => n === 10 ? 15 : 10;
+function dateApplyTenant(day){ const f = liveF(); S.live.payDayNext = day; chatOf(f).push({sys:true, t:'Дата оплаты изменена: со следующего месяца ' + day + ' числа'}); butlerSay('Дата оплаты аренды ' + f.short + ' меняется на ' + day + ' число со следующего месяца. Напомню за 3 дня.'); }
+function dateApplyOwner(t, day){ const T = S.own.list[t.fi].tenant; T.payDayNext = day; t.msgs.push({sys:true, t:'Дата оплаты изменена: со следующего месяца ' + day + ' числа'}); }
+function ownerAnswersDate(f){ const list = chatOf(f), card = list.filter(m => m.kind === 'date' && m.who === 'me' && m.status === 'wait').pop(); if(!card) return;
+  if(M.dateCounter && !card.countered){ card.status = 'counter'; const alt = altDay(card.day);
+    list.push({me:false, t:card.day + ' числа мне неудобно, давайте ' + alt + '-го?'}, {kind:'date', who:'them', day:alt, status:'wait', t:'Запрос: оплата ' + alt + ' числа'});
+    S.chatBottom = true; pushNote(f.owner + ' предлагает другую дату', 'Оплата аренды ' + alt + ' числа · ' + f.short, {id:f.id}); return; }
+  card.status = 'ok'; list.push({me:false, t:'Подтверждаю, пусть будет ' + card.day + ' числа.'}); dateApplyTenant(card.day); S.chatBottom = true;
+  pushNote(f.owner + ' подтвердил' + ga(f, 'а') + ' новую дату', 'Аренда ' + card.day + ' числа со следующего месяца', {id:f.id}); }
+function tenantAnswersDate(ti){ const t = S.own.threads[ti], card = t.msgs.filter(m => m.kind === 'date' && m.who === 'me' && m.status === 'wait').pop(); if(!card) return;
+  if(M.dateCounter && !card.countered){ card.status = 'counter'; const alt = altDay(card.day);
+    t.msgs.push({me:false, t:'Нам удобнее ' + alt + '-го, зарплата приходит раньше. Можно так?'}, {kind:'date', who:'them', day:alt, status:'wait', t:'Запрос: оплата ' + alt + ' числа'});
+    S.chatBottom = true; pushNote(t.who + ' предлагают другую дату', 'Оплата аренды ' + alt + ' числа', {to:'otenants'}); return; }
+  card.status = 'ok'; t.msgs.push({me:false, t:'Хорошо, нам подходит ' + card.day + ' числа.'}); dateApplyOwner(t, card.day); S.chatBottom = true;
+  pushNote(t.who + ' подтвердили новую дату', 'Аренда ' + card.day + ' числа со следующего месяца', {to:'otenants'}); }
+
+/* ---------- moderator: money and viewing scenarios ---------- */
+const modExtra = (opt) => { const dis = ' disabled style="opacity:.5"', has = S.live || (S.own && S.own.list.some(L => L.tenant));
+  return '<h3>Итерация 8 · деньги и просмотр</h3>' +
+    opt('m-viewday', 'Сегодня день просмотра', !!M.viewDay, 'в чате под плашкой «Просмотр» появится чек-лист осмотра') +
+    opt('m-datecounter', 'На смену даты — встречное предложение', !!M.dateCounter, 'иначе вторая сторона соглашается') +
+    opt('m-cardfail', 'На карте не хватит денег', !!M.cardFail, 'автопополнение не пройдёт в день оплаты') +
+    '<button class="s" data-act="m-live">Семья уже живёт (Амирхана, 21): «Мой дом» и кошелёк</button>' +
+    '<button class="s"' + (has ? '' : dis) + ' data-act="m-pre">За 3 дня до оплаты аренды</button>' +
+    '<button class="s"' + (has ? '' : dis) + ' data-act="m-payday">Наступил день оплаты</button>' +
+    '<button class="s"' + (S.live && S.live.pay === 'sbp' && S.live.paid && !S.live.receipt ? '' : dis) + ' data-act="m-receipt">Прошло 3 дня, чек по СБП не приложен</button>'; };
+
+Object.assign(A, {
+  insp(v){ S.cur = v; inspOf(v); go('insp'); },
+  'insp-room'(k){ const I = inspOf(S.cur); I.open[k] = !I.open[k]; render(); },
+  'insp-ck'(v){ const I = inspOf(S.cur); I.ck[v] = !I.ck[v]; render(); },
+  'insp-del'(v){ const [k, j] = v.split(':'), I = inspOf(S.cur); I.ph[k].splice(+j, 1); render(); },
+  'insp-save'(){ const f = byId(S.cur), I = inspOf(f.id), n = Object.values(I.ph).flat().length; I.saved = true;
+    chatOf(f).push({sys:true, t:'Осмотр сохранён: отмечено ' + Object.values(I.ck).filter(Boolean).length + ', фото ' + n + '. ' + f.owner + ' увидит их в акте приёма-передачи'}); S.chatBottom = true; back(); toast('Осмотр сохранён'); },
+  wtop(){ S.wDraft = 0; S.sheet = 'wtop'; render(); },
+  wamt(v){ S.wDraft = +v; render(); },
+  'wtop-do'(){ const a = S.wDraft || (S.live && S.live.pay === 'wallet' ? liveF().rent : 10000); if(a < 100) return; wAdd('Пополнение с карты ' + S.wallet.card, a); if(S.live && S.live.late && S.wallet.bal >= liveF().rent) MA['m-payday-do']();
+    S.sheet = null; render(); toast('Кошелёк пополнен на ' + rub(a)); },
+  wout(){ S.sheet = 'wout'; render(); },
+  'wout-do'(){ const a = S.wallet.bal; wAdd('Вывод на карту ' + S.wallet.card, -a); S.sheet = null; render(); toast(rub(a) + ' отправили на карту'); },
+  wauto(){ S.wallet.auto = !S.wallet.auto; render(); toast(S.wallet.auto ? 'Автопополнение включено' : 'Автопополнение выключено'); },
+  paym(){ S.sheet = 'paym'; render(); },
+  'paym-set'(v){ const f = liveF(), was = S.live.pay; S.live.pay = v; S.sheet = null; if(v !== was){ S.live.paid = false; S.live.late = false; }
+    if(v === 'wallet' && was !== 'wallet'){ chatOf(f).push({sys:true, t:'Вы перешли на оплату аренды через кошелёк «Двора»'}); ownerReply(f, f.ownerG === 'f' ? 'Хорошо, так даже удобнее, буду видеть платежи.' : 'Хорошо, так удобнее.', 2600); }
+    render(); toast('Аренда: ' + PAYM[v]); },
+  'pay-cash'(){ const f = liveF(); S.live.paid = 'wait'; render(); toast('Отправили ' + datv(f) + ' на подтверждение');
+    later(4000, () => { if(S.live && S.live.paid === 'wait'){ S.live.paid = true; chatOf(f).push({me:false, t:'Получил' + ga(f, 'а') + ' наличные за этот месяц, спасибо!'}); pushNote(f.owner + ' подтвердил' + ga(f, 'а') + ' оплату', 'Наличные за аренду ' + rub(f.rent) + ' получены', {id:f.id}); } }); },
+  'pay-sbp-later'(){ S.live.paid = true; S.live.receipt = false; render(); toast('Хорошо. Если чек не появится за 3 дня, напомним'); },
+  pdate(){ S.pdDraft = 0; S.odate = null; S.sheet = 'pdate'; render(); },
+  odate(v){ S.pdDraft = 0; S.odate = +v; S.sheet = 'pdate'; render(); },
+  'pd-pick'(v){ S.pdDraft = +v; render(); },
+  'pd-send'(){ const day = S.pdDraft; if(!day) return; S.sheet = null;
+    if(S.mode === 'owner'){ const fi = S.odate, ti = S.own.threads.findIndex(t => t.tenant && t.fi === fi), t = S.own.threads[ti];
+      t.msgs.push({kind:'date', who:'me', me:true, day, status:'wait', t:'Запрос: оплата ' + day + ' числа'}); render(); toast('Запрос отправлен жильцам'); later(3500, () => { tenantAnswersDate(ti); render(); }); return; }
+    const f = liveF(); chatOf(f).push({kind:'date', who:'me', me:true, day, status:'wait', t:'Запрос: оплата ' + day + ' числа'}); S.cur = f.id; render(); toast('Запрос отправлен ' + datv(f) + '. Дата сменится, когда он' + ga(f, 'а') + ' подтвердит');
+    later(3500, () => { ownerAnswersDate(f); render(); }); },
+  'date-ok'(i){ if(S.mode === 'owner'){ const t = S.own.threads[S.oth], m = t.msgs[+i]; m.status = 'ok'; t.msgs.push({me:true, t:'Подтверждаю, ' + m.day + ' числа.'}); dateApplyOwner(t, m.day); render(); toast('Новая дата: ' + m.day + ' числа'); return; }
+    const f = byId(S.cur), m = chatOf(f)[+i]; m.status = 'ok'; chatOf(f).push({me:true, t:'Подтверждаю, ' + m.day + ' числа.'}); dateApplyTenant(m.day); S.chatBottom = true; render(); toast('Новая дата: ' + m.day + ' числа'); },
+  'date-other'(i){ const list = S.mode === 'owner' ? S.own.threads[S.oth].msgs : chatOf(byId(S.cur)), m = list[+i]; m.status = 'other';
+    list.filter(x => x.kind === 'date').forEach(x => { x.countered = true; });
+    if(S.mode === 'owner') A.odate(String(S.own.threads[S.oth].fi)); else A.pdate(); },
+  'owallet-offer'(v){ const fi = +v, T = S.own.list[fi].tenant, t = S.own.threads.find(x => x.tenant && x.fi === fi); T.walletAsked = true;
+    if(t) t.msgs.push({bot:true, t:'Предлагаю платить аренду через кошелёк «Двора»: платёж уходит сам в срок, а история видна нам обоим.'}); render(); toast('Предложили ' + T.who);
+    later(4000, () => { T.pay = 'wallet'; if(t) t.msgs.push({me:false, t:'Давайте, подключили кошелёк. Со следующего месяца платим через него.'}); pushNote(T.who + ' перешли на кошелёк', 'Аренда будет приходить сама ' + (T.payDay || 5) + ' числа', {to:'otenants'}); }); }
+});
+document.addEventListener('change', e => { const t = e.target;
+  if(t.id && t.id.startsWith('inspf-') && t.files.length) inspFiles(t);
+  if(t.id === 'rcpt' && t.files.length && S.live){ S.live.paid = true; S.live.receipt = true; const f = liveF(); chatOf(f).push({me:true, t:'Оплатил' + (S.user && /а$/.test(S.user.name) ? 'а' : '') + ' аренду по СБП, чек во вложении.'}); render(); toast('Чек приложен, ' + f.owner + ' его увидит'); } });
+document.addEventListener('input', e => { if(e.target.id === 'wamt'){ S.wDraft = +e.target.value || 0; const b = document.querySelector('#phone [data-act="wtop-do"]'); if(b) b.textContent = 'Пополнить на ' + rub(S.wDraft || 0); } });
+
+Object.assign(MA, {
+  'm-viewday'(){ M.viewDay = !M.viewDay; const bk = Object.entries(S.booking).find(([, b]) => b.status === 'ok');
+    if(M.viewDay && bk){ const f = byId(bk[0]); pushNote('Сегодня просмотр в ' + bk[1].time, f.short + ' · откройте чек-лист осмотра в чате', {id:f.id}); } else render(); },
+  'm-datecounter'(){ M.dateCounter = !M.dateCounter; renderMod(); },
+  'm-cardfail'(){ M.cardFail = !M.cardFail; renderMod(); },
+  'm-live'(){ clearTimers(); const th = S.theme; S = fresh(); S.theme = th; S.user = {...DEMO_USER}; S.anketa.city = HAS.city; S.district = HAS.district;
+    S.liveId = 'B'; A['live-do'](); wAdd('Пополнение с карты ' + S.wallet.card, 20000); render(); },
+  'm-pre'(){ if(S.mode === 'owner'){ toast('Напоминание за 3 дня получают жильцы'); return; } const f = liveF(), L = S.live, W = S.wallet;
+    const t = L.pay === 'wallet' ? (W.bal >= f.rent ? 'На кошельке хватает, ничего делать не нужно' : 'На кошельке ' + rub(W.bal) + (W.auto ? ', недостающее пополним с карты сами' : '. Пополните или включите автопополнение'))
+      : 'Оплата ' + PAYM[L.pay] + ' ' + datv(f) + '. Убедитесь, что деньги готовы';
+    butlerSay('Через 3 дня, ' + payDayOf() + ' числа, оплата аренды ' + rub(f.rent) + '. ' + t + '.');
+    pushNote('Через 3 дня оплата аренды ' + rub(f.rent), t, {to:L.pay === 'wallet' ? 'wallet' : 'home'}); },
+  'm-payday'(){ if(S.mode === 'owner'){ const ts = S.own.list.filter(L => L.tenant); ts.forEach(L => { const T = L.tenant;
+        if((T.pay || 'wallet') === 'wallet'){ if(M.cardFail){ T.late = true; } else { T.paid = true; T.late = false; wAdd('Аренда · ' + T.who, +L.form.price); } } else T.paid = true; });
+      const late = ts.filter(L => L.tenant.late);
+      pushNote(late.length ? 'Оплата от ' + late[0].tenant.who.replace('Семья ', 'семьи ') + ' задерживается' : 'Аренда поступила', late.length ? 'Дворецкий уже напомнил жильцам. Как только пополнят кошелёк, деньги придут' : 'Деньги в кошельке, вывести можно в любой момент', {to:'wallet'}); return; }
+    MA['m-payday-do'](); },
+  'm-payday-do'(){ const f = liveF(), L = S.live, W = S.wallet;
+    if(L.pay !== 'wallet'){ pushNote('Сегодня день оплаты аренды', rub(f.rent) + ' ' + PAYM[L.pay] + ' ' + datv(f), {to:'home'}); return; }
+    if(W.bal < f.rent && W.auto && !M.cardFail){ const need = f.rent - W.bal; wAdd('Автопополнение с карты ' + W.card, need); }
+    if(W.bal >= f.rent){ wAdd('Аренда · ' + f.short + ' → ' + f.owner, -f.rent); L.paid = true; L.late = false;
+      pushNote('Аренда оплачена', rub(f.rent) + ' ушли ' + datv(f) + ' из кошелька', {to:'wallet'}); return; }
+    L.late = true; butlerSay('Не хватило ' + rub(f.rent - W.bal) + ' для оплаты аренды. Пополните кошелёк, и платёж уйдёт сам. ' + f.owner + ' получил' + ga(f, 'а') + ' уведомление, что оплата задерживается.');
+    pushNote('Не хватило ' + rub(f.rent - W.bal) + ' на аренду', 'Пополните кошелёк, платёж уйдёт сам', {to:'wallet'}); },
+  'm-receipt'(){ pushNote('Приложите чек об оплате', 'Прошло 3 дня после оплаты по СБП, а чека ещё нет. ' + liveF().owner + ' ждёт подтверждения', {to:'home'}); }
+});
+
 function renderMod(){
   const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
   m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор';
@@ -2791,6 +3022,7 @@ function renderMod(){
       (M.pend ? '<div class="small"><b>Участник · ' + byId(M.pend.id).owner + ', ' + byId(M.pend.id).short + ':</b> ' + esc(M.pend.t) + '</div>' : '<div class="small muted">Ждём сообщения участника в чате собственника. Ответить можно и без вопроса: в текущий чат.</div>') +
       '<input id="wozt" type="text" autocomplete="off" placeholder="Ответ, Enter = от собственника" value="' + esc(M.wozDraft) + '" style="height:38px;border:1px solid #D0D3D9;border-radius:8px;padding:0 10px;font:inherit">' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" data-act="m-woz-owner">От собственника</button><button class="s" data-act="m-woz-bot">От Дворецкого</button>' + (M.pend ? '<button class="s" data-act="m-woz-sug">Подставить автоответ</button>' : '') + '</div></div>' : '') +
+    modExtra(opt) +
     '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (Амирхана, 21)</button>' +
     '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
     (S.own && S.own.list.some(L => L.status === 'review') ? '<button class="s" data-act="m-own">Одобрить объявление собственника</button>' : '') +
