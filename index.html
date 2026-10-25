@@ -89,7 +89,12 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .sk{background:var(--fill);border-radius:6px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.5}}
 @media (prefers-reduced-motion:reduce){.sk{animation:none}}
-.grid{display:grid;grid-template-columns:1.3fr repeat(var(--n),minmax(0,1fr));border:1px solid var(--edge);border-radius:12px;overflow:hidden;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums}
+.gridwrap{flex:none;overflow-x:auto;border:1px solid var(--edge);border-radius:12px;user-select:none}
+.gridwrap.drag{cursor:grabbing}
+.grid{display:grid;grid-template-columns:104px repeat(var(--n),minmax(80px,1fr));min-width:100%;width:max-content;font-size:12px;line-height:16px;font-variant-numeric:tabular-nums}
+.grid .lb{position:sticky;left:0;z-index:1;background:var(--paper);box-shadow:1px 0 0 var(--line)}
+.grid .lb.hd{background:var(--soft)}
+.grid .c{white-space:nowrap}
 .grid > *{padding:8px;border-top:1px solid var(--line)}
 .grid .hd{background:var(--soft);border-top:0;font-weight:800;text-align:center}
 .grid .c{text-align:center}
@@ -106,7 +111,17 @@ input[type=range]{width:100%;accent-color:var(--ink)}
 .gal .gcnt{position:absolute;right:10px;bottom:10px;z-index:1;padding:2px 9px;border-radius:999px;background:var(--paper);color:var(--ink);font-size:11px;font-weight:800}
 .garr{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:36px;height:36px;border-radius:50%;background:var(--paper);color:var(--ink);font-size:22px;line-height:34px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .garr.l{left:10px}.garr.r{right:10px}
-.map{position:relative;height:100%;min-height:520px;background:var(--fill);border-radius:12px;overflow:hidden;flex:1}
+.map{position:relative;height:100%;min-height:520px;background:var(--fill);border-radius:12px;overflow:hidden;flex:1;isolation:isolate}
+.mapwrap{position:relative;flex:1;min-height:340px;display:flex;flex-direction:column}
+.mapwrap > .map{min-height:0;height:auto}
+.map.schema{overflow:auto;display:flex;cursor:grab;user-select:none;scrollbar-width:none}
+.map.schema::-webkit-scrollbar{display:none}
+.map.schema.drag{cursor:grabbing}
+.map.schema .mapin{flex:none;margin:auto}
+.ph .mapov{position:absolute;left:10px;right:10px;bottom:10px;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.ph .mapov.box{background:var(--paper);border:1px solid var(--line)}
+.ph .maphint{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-align:center;color:var(--mute)}
+.mapx{width:28px;height:28px;margin:-6px -6px 0 auto;border-radius:50%;display:grid;place-items:center;font-size:13px;flex:none;color:var(--mute)}
 .map svg{position:absolute;inset:0;width:100%;height:100%}
 .mlbl{position:absolute;transform:translate(-50%,-50%);font-size:10px;line-height:12px;font-weight:700;color:var(--mute);white-space:nowrap;pointer-events:none;letter-spacing:.02em}
 .mlbl.v{transform:translate(-50%,-50%) rotate(-90deg)}
@@ -1208,7 +1223,19 @@ function osmRoute(key, a, b){ LF.routes[key] = 'wait';
     .then(r => r.json()).then(j => { const c = j.routes && j.routes[0] && j.routes[0].geometry.coordinates; LF.routes[key] = c && c.length > 1 ? c.map(([x, y]) => [y, x]) : 'fail'; })
     .catch(() => { LF.routes[key] = 'fail'; }).then(() => { if(S.screen === 'map') mapMount(); }); }
 const LL = (x, y) => [55.8420 - y * 0.00030, 49.0850 + x * 0.00095];
+/* schema: keep the view centre across re-renders and zoom; mouse drag pans the schema and the compare table */
+function schemaMount(){ const m = document.querySelector('#phone .map.schema'); if(!m) return;
+  const c = S.mapC || [.5, .5];
+  m.scrollLeft = c[0] * m.scrollWidth - m.clientWidth / 2; m.scrollTop = c[1] * m.scrollHeight - m.clientHeight / 2;
+  m.onscroll = () => { S.mapC = [(m.scrollLeft + m.clientWidth / 2) / m.scrollWidth, (m.scrollTop + m.clientHeight / 2) / m.scrollHeight]; }; }
+let DRG = null, DRGclick = false;
+document.addEventListener('pointerdown', e => { const m = e.pointerType === 'mouse' && e.button === 0 && e.target.closest && e.target.closest('#phone .map.schema, #phone .gridwrap'); if(!m) return; DRG = {m, x:e.clientX, y:e.clientY, l:m.scrollLeft, t:m.scrollTop, moved:false}; });
+document.addEventListener('pointermove', e => { if(!DRG) return; const dx = e.clientX - DRG.x, dy = e.clientY - DRG.y; if(!DRG.moved && Math.hypot(dx, dy) < 5) return;
+  DRG.moved = true; DRG.m.classList.add('drag'); DRG.m.scrollLeft = DRG.l - dx; DRG.m.scrollTop = DRG.t - dy; e.preventDefault(); });
+document.addEventListener('pointerup', () => { if(!DRG) return; DRG.m.classList.remove('drag'); if(DRG.moved){ DRGclick = true; setTimeout(() => { DRGclick = false; }, 0); } DRG = null; });
+document.addEventListener('click', e => { if(DRGclick){ DRGclick = false; e.stopPropagation(); e.preventDefault(); } }, true);
 function mapMount(){
+  schemaMount();
   const host = document.querySelector('#phone .lmap-host'), D = S.mapDraw; if(!host || !window.L || !D) return;
   if(!LF.map){ LF.el = document.createElement('div'); LF.el.style.cssText = 'position:absolute;inset:0';
     LF.map = L.map(LF.el, {zoomControl:false, attributionControl:true, zoomSnap:.5}).setView(LL(55, 55), 14);
@@ -1649,12 +1676,12 @@ V.compare = () => {
     ['Собственник', f=>f.verified?1:0, f=>f.verified?'✓':'—', null]
   ];
   const best = verdict(list).best;
-  let g = '<div class="grid" style="--n:' + list.length + '"><div class="hd"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '" style="font-size:11px;line-height:14px">' + (f.id === best.id ? '<span class="pick">советует помощник</span>' : '') + f.short.replace(', ', '<br>') + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
+  let g = '<div class="gridwrap"><div class="grid" style="--n:' + list.length + '"><div class="hd lb"></div>' + list.map(f => '<button class="hd" data-act="open" data-v="' + f.id + '" style="font-size:11px;line-height:14px">' + (f.id === best.id ? '<span class="pick">советует помощник</span>' : '') + f.short.replace(', ', '<br>') + '<div class="small muted" style="font-weight:500;font-size:10px">' + tys(f.rent) + '/мес</div></button>').join('');
   rows.forEach(([l,val,show,best]) => {
     const vals = list.map(val), b = best ? Math.min(...vals) : null;
-    g += '<div>' + l + '</div>' + list.map((f,i) => '<div class="c' + (best && vals[i]===b ? ' best' : '') + '">' + show(f) + '</div>').join('');
+    g += '<div class="lb">' + l + '</div>' + list.map((f,i) => '<div class="c' + (best && vals[i]===b ? ' best' : '') + '">' + show(f) + '</div>').join('');
   });
-  g += '<div></div>' + list.map(f => '<button class="c go" data-act="open" data-v="' + f.id + '" aria-label="Открыть объявление ' + f.short + '"><span>Открыть</span></button>').join('') + '</div>';
+  g += '<div class="lb"></div>' + list.map(f => '<button class="c go" data-act="open" data-v="' + f.id + '" aria-label="Открыть объявление ' + f.short + '"><span>Открыть</span></button>').join('') + '</div></div>';
   const v = verdict(list);
   let ai;
   if(S.aiState === 'fail') ai = '<div class="err"><div style="font-weight:800">Вывод помощника не загрузился</div><div>Таблица на месте: выбрать квартиру можно и без вывода.</div><div class="row"><button class="btn s" style="height:38px;width:auto;padding:0 16px" data-act="ai-retry">Повторить</button><span class="small muted">Выбранные квартиры сохранены</span></div></div>';
@@ -1663,7 +1690,7 @@ V.compare = () => {
     '<div class="small muted">Учёл: минуты до ' + (onlySchool() ? 'школы' : needSchool() ? 'сада и школы' : 'сада') + ', сумму въезда, лифт</div>' +
     '<div class="small muted">Решение за вами · <button class="link" data-act="why">Почему такой вывод?</button></div></div>';
   return head + '<div class="body" style="gap:12px"><div class="small muted">По приоритетам вашей анкеты · обновлено 2 мин назад</div>' + g +
-    '<div class="small muted">Серым выделено лучшее значение в строке</div>' + ai +
+    '<div class="small muted">Серым выделено лучшее значение в строке' + (list.length > 3 ? '. Таблица листается вбок →' : '') + '</div>' + ai +
     '</div><div class="foot one"><button class="btn p" data-act="pick-book">Записаться на просмотр</button></div>';
 };
 
@@ -1966,19 +1993,18 @@ V.map = () => {
   S.mapDraw = real ? {r, sel, pks} : null;
   return head +
     '<div class="chips" role="group" aria-label="Показать путь до, можно несколько">' + Object.entries(POI).map(([k, p]) => '<button class="chip' + (pks.includes(k) ? ' on' : '') + '" data-act="map-poi" data-v="' + k + '" aria-pressed="' + pks.includes(k) + '">' + p[2] + ' ' + DIST[k][1] + '</button>').join('') + '<span style="margin-left:auto;display:flex;gap:6px"><button class="chip" style="width:34px;justify-content:center;font-size:16px" data-act="map-zoom" data-v=".5" aria-label="Приблизить">+</button><button class="chip" style="width:34px;justify-content:center;font-size:16px" data-act="map-zoom" data-v="-.5" aria-label="Отдалить">−</button><button class="chip" data-act="map-mode">' + (real ? 'Схема' : 'Карта') + '</button></span></div>' +
-    (real ? '<div class="map lmap-host">' : '<div class="map" style="overflow:auto"><div class="mapin" style="position:relative;width:' + z*100 + '%;height:' + z*100 + '%">' + mapSvg() +
+    '<div class="mapwrap">' + (real ? '<div class="map lmap-host">' : '<div class="map schema"><div class="mapin" style="position:relative;width:' + z*100 + '%;height:' + z*100 + '%">' + mapSvg() +
     routes.filter(x => x[2]).map(([k, n, p]) => { const w = walkPath([sel.x, sel.y], p), m = walkMid(w);
       return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="sroute" points="' + w.map(q => q.join(',')).join(' ') + '" fill="none" stroke-linejoin="round" stroke="#16181D" stroke-dasharray="5 4" vector-effect="non-scaling-stroke" style="stroke-width:2.5px"/></svg>' +
       '<span class="walk" style="left:' + m[0] + '%;top:' + m[1] + '%">' + POI[k][2] + ' ' + sel[k] + ' мин</span>'; }).join('') +
     Object.entries(POI).map(([k, [nkk, PP, ic]]) => Object.entries(PP).map(([n,[x,y]]) => '<span class="poi' + (k === 'sad' ? ' sad' : '') + '" style="left:' + x + '%;top:' + y + '%' + (sel && pks.includes(k) && sel[nkk]===n ? ';border-color:var(--ink);color:var(--ink);background:var(--soft);z-index:2' : !pks.includes(k) ? ';opacity:.55' : '') + '">' + ic + ' ' + poiShort(n) + '</span>').join('')).join('') +
     pos.map(([f, y]) => '<button class="pin' + (sel&&sel.id===f.id?' sel':'') + '" style="left:' + f.x + '%;top:' + y + '%' + (sel&&sel.id===f.id?';z-index:4':'') + '" data-act="pin" data-v="' + f.id + '" aria-label="' + f.short + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>').join('') +
-    '</div>') + (r.length ? '' : '<div style="position:absolute;inset:auto 12px 12px 12px" class="box small" >Под фильтры квартир нет. Ослабьте фильтр в списке.</div>') +
-    '</div>' +
-    (sel ? '<div class="box"><div class="small" style="font-weight:700">' + sel.short + '</div><div class="row"><b>' + rub(sel.rent) + '/мес</b>' + heart(sel) + '</div><div class="small">Въезд ' + rub(sel.entry) + '</div>' +
+    '</div>') + '</div>' +
+    (!r.length ? '<div class="mapov box small">Под фильтры квартир нет. Ослабьте фильтр в списке.</div>' : sel ? '<div class="mapov box"><div class="row" style="align-items:flex-start"><div class="small" style="font-weight:700">' + sel.short + '</div><button class="mapx" data-act="pin-close" aria-label="Закрыть карточку">✕</button></div><div class="row"><b>' + rub(sel.rent) + '/мес</b>' + heart(sel) + '</div><div class="small">Въезд ' + rub(sel.entry) + '</div>' +
         routes.map(([k, n]) => '<div class="small">' + POI[k][2] + ' ' + n + ' пешком ' + sel[k] + ' мин' + (k === 'clinic' ? '' : (k === 'school' ? ' · закреплена' : ' · закреплён')) + '</div>').join('') +
         (pk !== 'clinic' && nearest !== tn ? '<div class="small muted">Ближе по прямой ' + poiShort(nearest) + ', но дом закреплён за ' + tn.replace('Сад', 'садом').replace('Школа', 'школой') + ', поэтому путь до него</div>' : '') +
         '<button class="btn p" style="height:40px" data-act="open" data-v="' + sel.id + '">Открыть квартиру</button></div>'
-         : '<div class="small muted" style="text-align:center">' + kv(r.length) + ' на карте. Нажмите на цену, чтобы увидеть путь до ' + pgen + '</div>') +
+         : '<div class="mapov maphint small">' + kv(r.length) + ' на карте. Нажмите на цену, чтобы увидеть путь до ' + pgen + '</div>') + '</div>' +
     '<button class="btn s" style="height:40px" data-act="tab" data-v="search">Списком</button></div>' + tabs();
 };
 const ava = () => S.user && S.user.photo ? '<label for="avafile" class="img up" style="width:52px;height:52px;border-radius:50%;background:center/cover url(' + S.user.photo + ');cursor:pointer" aria-label="Сменить фото"></label>'
@@ -2322,7 +2348,7 @@ const A = {
   'but-quick'(v){ butSend(v); },
   'obut-quick'(v, el){ obutSend(v, el ? el.textContent : v); },
   'map-mode'(){ if(S.mapMode === 'schema' || LF.ok === false){ S.mapMode = 'real'; if(LF.ok === false){ LF.ok = null; LF.errs = 0; LF.loads = 0; if(LF.map) LF.map.eachLayer(l => l.redraw && l.redraw()); setTimeout(() => { if(!LF.loads){ LF.ok = false; if(S.screen === 'map'){ render(); toast('Карта не загрузилась, показываем схему'); } } }, 5000); } } else S.mapMode = 'schema'; render(); },
-  'map-zoom'(v){ if(LF.map && document.querySelector('#phone .lmap-host')){ +v > 0 ? LF.map.zoomIn() : LF.map.zoomOut(); return; } S.mapZoom = Math.max(1, Math.min(2.5, (S.mapZoom || 1) + (+v))); render(); },
+  'map-zoom'(v){ if(LF.map && document.querySelector('#phone .lmap-host')){ +v > 0 ? LF.map.zoomIn() : LF.map.zoomOut(); return; } S.mapZoom = Math.max(.5, Math.min(3, (S.mapZoom || 1) + (+v))); render(); },
   'set-sort'(v){ S.sort = v; S.sheet = null; S.scroll.results = 0; render(); },
   district(){ S.sheet = 'district'; S.placeQ = ''; render(); },
   'place-d'(v){ S.anketa.city = HAS.city; S.district = v; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
@@ -2378,6 +2404,7 @@ const A = {
   'bd-flat'(v){ S.cur = v; noteFlat(v); const b = S.booking[v]; S.bookDraft = b && b.status !== 'cancel' ? {day:b.day, time:b.time, place:b.place, placeTxt:b.placeTxt} : {...S.bookDraft}; render(); },
   'push-open'(){ if(S.push.rented){ S.push = null; S.tab = 'search'; S.stack = []; S.screen = 'results'; S.scroll.results = 0; render(); return; } if(S.push.own){ S.push = null; A['mode-owner'](); return; } const id = S.push.id; S.push = null; S.cur = id; if(S.screen === 'chat'){ render(); } else { S.chatBottom = true; go('chat'); } },
   pin(v){ S.mapSel = v; render(); },
+  'pin-close'(){ S.mapSel = null; render(); },
   go(v){ go(v); },
   notif(v){ S.notif[v] = !S.notif[v]; render(); },
   faq(v){ S.faq = S.faq === +v ? -1 : +v; render(); },
