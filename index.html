@@ -1412,7 +1412,8 @@ const famGen = s => { s = s.trim(); const l = s.toLowerCase();
   if(/(ский|цкий|ская|цкая)$/.test(l)) return s.slice(0,-2) + 'их';
   return s; };
 const AGES = ['до 1 года','1–3 года','3–7 лет','7+ лет'];
-const kidsTxt = () => { const c = S.anketa.children; return (c.length === 1 ? 'Ребёнок ' : 'Дети: ') + c.join(', '); };
+const kidsTxt = () => { const c = S.anketa.children.filter(Boolean); return !c.length ? 'Дети не указаны' : (c.length === 1 ? 'Ребёнок ' : 'Дети: ') + c.join(', '); };
+const kidsOk = () => S.anketa.children.length > 0 && S.anketa.children.every(Boolean);
 const DEMO_USER = {name:'Никита', surname:'Вохмянин', phone:'+7 (900) 123-45-67', role:'rent'};
 const phoneDigits = v => { let d = v.replace(/\D/g, ''); if(v.trim().startsWith('+7') || d[0] === '8' || (d[0] === '7' && d.length === 11)) d = d.slice(1); return d.slice(0, 10); };
 const fmtPhone = v => { if(/^\+7?$/.test(v.trim())) return v.trim(); const d = phoneDigits(v); if(!d) return /\d/.test(v) ? '+7 (' : ''; let o = '+7 (' + d.slice(0,3); if(d.length >= 3) o += ') ' + d.slice(3,6); if(d.length >= 6) o += '-' + d.slice(6,8); if(d.length >= 8) o += '-' + d.slice(8,10); return o; };
@@ -1502,10 +1503,11 @@ V.anketa = () => {
     const nearOpts = [['park','Парк'],['liftc','Лифт для коляски'],['parking','Парковка']];
     return stepTop(2) +
     '<div class="h1">Расскажите о детях, и мы покажем только подходящие квартиры</div>' +
+    (a.children.length ? '' : '<div class="box small"><b>Пока никого не добавили</b><span class="muted">Нажмите «Добавить ребёнка» и выберите возраст. Без этого не сможем подобрать сады, школы и безопасные квартиры.</span></div>') +
     a.children.map((age, i) => '<div style="display:flex;flex-direction:column;gap:8px"><div class="row"><div class="lbl">' + (a.children.length > 1 ? (i+1) + '-й ребёнок, возраст' : 'Сколько лет ребёнку?') + '</div>' +
-      (a.children.length > 1 ? '<button class="link small" data-act="kid-del" data-v="' + i + '" aria-label="Убрать ' + (i+1) + '-го ребёнка">Убрать</button>' : '') + '</div><div class="chips">' +
+      (a.children.length ? '<button class="link small" data-act="kid-del" data-v="' + i + '" aria-label="Убрать ' + (i+1) + '-го ребёнка">Убрать</button>' : '') + '</div><div class="chips">' +
       AGES.map(o => '<button class="chip' + (o === age ? ' on' : '') + '" data-act="kid-age" data-v="' + i + ':' + o + '">' + o + '</button>').join('') + '</div></div>').join('') +
-    (a.children.length < 4 ? '<button class="btn s" style="height:40px;flex:none" data-act="kid-add">+ Добавить ребёнка</button>' : '') +
+    (a.children.length < 4 ? '<button class="btn s" style="height:40px;flex:none" data-act="kid-add">' + (a.children.length ? '+ Добавить ещё ребёнка' : '+ Добавить ребёнка') + '</button>' + (S.kidErr && !kidsOk() ? '<div class="small" style="color:#E5484D;font-weight:700">' + (a.children.length ? 'Выберите возраст каждого ребёнка' : 'Добавьте хотя бы одного ребёнка') + '</div>' : '') : '') +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Что ещё важно рядом?</div><div class="chips">' +
       nearOpts.map(([k,l]) => { const on = a.near.includes(k); return '<button class="chip' + (on?' on':'') + '" data-act="near" data-v="' + k + '" aria-pressed="' + on + '">' + (on?'✓ ':'') + l + '</button>'; }).join('') + '</div></div>' +
     '<div style="display:flex;flex-direction:column;gap:10px"><div class="lbl">Что должно быть в шаговой доступности?</div>' +
@@ -1671,7 +1673,7 @@ function insideBox(f){ const d = dos(f);
     ['Детская кроватка', d.crib ? 'есть' : 'нет'], ['Кондиционер', /^нет/.test(d.cond) ? 'нет' : d.cond], ['Интернет', d.net]];
   return '<div class="box"><div style="font-weight:800">Что есть в квартире</div>' + rows.map(([l, v]) => '<div class="row" style="align-items:flex-start;gap:12px"><span class="muted" style="flex:none">' + l + '</span><span class="small" style="text-align:right">' + cap(v) + '</span></div>').join('') + '</div>'; }
 const needSchool = () => S.anketa.near.includes('school') || S.anketa.children.includes('7+ лет');
-const onlySchool = () => S.anketa.children.every(c => c === '7+ лет');
+const onlySchool = () => S.anketa.children.length > 0 && S.anketa.children.every(c => c === '7+ лет');
 const mins = n => n + ' ' + plural(n,'минута','минуты','минут');
 function verdict(list){
   const sch = needSchool(), only = sch && onlySchool(), key = f => only ? f.school : sch ? f.sad + f.school : f.sad;
@@ -2309,9 +2311,9 @@ function supSend(t){ S.support.push({me:true, t}); S.chatBottom = true; render()
 const A = {
   back, tab: v => { S.mapForce = null; tab(v); },
   home(){ tab('search'); },
-  start(){ if(S.user){ S.step = 1; go('anketa'); } else { S.regNext = 'anketa'; go('reg'); } },
+  start(){ if(!S.kidsAsked){ S.anketa.children = []; S.kidsAsked = true; } if(S.user){ S.step = 1; go('anketa'); } else { S.regNext = 'anketa'; go('reg'); } },
   'kid-age'(v){ const i = v.indexOf(':'); S.anketa.children[+v.slice(0,i)] = v.slice(i+1); render(); },
-  'kid-add'(){ S.anketa.children.push('3–7 лет'); render(); },
+  'kid-add'(){ S.anketa.children.push(''); render(); },
   'kid-del'(v){ S.anketa.children.splice(+v, 1); render(); },
   'sign-in'(){ S.regNext = 'back'; S.reg = {name:'', surname:'', phone:'', code:'', sent:false, role:'', now:'', roleDone:false}; go('reg'); },
   'reg-send'(){ const r = S.reg; if(!regOk().send) return; r.sent = true; r.code = ''; render(); toast('Код отправлен на ' + r.phone); },
@@ -2332,6 +2334,8 @@ const A = {
   'to-welcome'(){ if(S.stack.length) back(); else { S.screen = 'welcome'; render(); } },
   'step-prev'(){ S.step--; render(true); },
   'step-next'(){
+    if(S.step === 2 && !kidsOk()){ S.kidErr = true; render(); toast(S.anketa.children.length ? 'Выберите возраст каждого ребёнка' : 'Добавьте хотя бы одного ребёнка'); return; }
+    S.kidErr = false;
     if(S.editOne) return A['edit-save']();
     if(S.step < 4){ S.step++; S.scroll['anketa' + S.step] = 0; render(); return; }
     applyAnketa();
@@ -2433,7 +2437,7 @@ const A = {
   'info-ver'(v){ S.verId = v; S.sheet = 'ver'; render(); },
   owner(v){ S.cur = v; go('owner'); },
   'edit-one'(v){ S.editOne = true; S.step = +v; S.ankBackup = JSON.parse(JSON.stringify(S.anketa)); S.whenBackup = S.whenDate; go('anketa'); },
-  'edit-save'(){ S.editOne = false; applyAnketa(); S.subscribed = false; back(); toast('Сохранили. Выдача обновлена'); },
+  'edit-save'(){ if(S.step === 2 && !kidsOk()){ S.kidErr = true; render(); toast(S.anketa.children.length ? 'Выберите возраст каждого ребёнка' : 'Добавьте хотя бы одного ребёнка'); return; } S.kidErr = false; S.editOne = false; applyAnketa(); S.subscribed = false; back(); toast('Сохранили. Выдача обновлена'); },
   'edit-cancel'(){ S.editOne = false; if(S.ankBackup){ S.anketa = S.ankBackup; S.whenDate = S.whenBackup; } back(); },
   support(){ go('support'); S.chatBottom = true; render(); },
   'sup-quick'(v){ supSend(v); },
