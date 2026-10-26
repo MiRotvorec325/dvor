@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Двор">
+<meta name="theme-color" content="#FFFFFF">
 <title>Прототип «Двор» · UI</title>
 </head>
 <body>
@@ -1112,6 +1117,18 @@ a.link{color:inherit}
 .mgrp.open{border-color:#16181D}
 .mgh{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:11px 12px;text-align:left;background:#F6F7F9;color:#16181D}
 .mgb{display:flex;flex-direction:column;gap:8px;padding:10px 12px}
+
+/* iteration 12: real phones */
+@media (max-width:500px){
+  html,body{margin:0}
+  .desk{padding:0;height:100vh;height:100dvh}
+  input,textarea,select,.field,.minbox{font-size:16px !important}
+  .chip .x{padding:8px 6px;margin:-8px -6px -8px 0}
+  .chip[data-act=quick]{white-space:normal;max-width:100%;text-align:left}
+  .modmode .modbtn{top:auto;bottom:calc(76px + env(safe-area-inset-bottom,0px));right:6px;width:28px;height:28px;padding:0;font-size:0;opacity:.55}
+  .modmode .modbtn::after{content:'М';font-size:12px}
+  .modmode.modrun .modbtn{font-size:0;width:14px;height:14px;padding:0;opacity:.3}
+}
 </style>
 
 <div class="desk">
@@ -2330,7 +2347,7 @@ V.cabinet = () => { const o = S.own, waitN = o.reqs.filter(x => x.status === 'wa
 V.oreq = () => { const o = S.own;
   return '<div class="top"><span class="t">Просмотры</span></div><div class="body" style="gap:12px">' + (o.list.length < 2 ? '<div class="small muted">' + esc(ownTitle()) + '</div>' : '') +
     (o.reqs.length ? '' : '<div class="muted" style="font-size:14px;line-height:20px">Заявок пока нет. Когда семья выберет время, она появится здесь, а Дворецкий напомнит.</div>') +
-    o.reqs.map((x, i) => '<div class="box" style="gap:6px"><div class="row"><b>' + x.who + '</b>' + OST[x.status] + '</div>' + fiTitle(x.fi) + '<div class="small">' + x.day + ' · ' + x.time + (x.fmt === 'video' ? ' · по видеосвязи' : '') + ' · ' + x.kids + '</div>' + (x.pair ? '<div class="small muted">Ищут вдвоём: ' + x.pair + ', оба увидят ваши ответы</div>' : '') +
+    o.reqs.map((x, i) => '<div class="box" style="gap:6px"><div class="row"><b>' + x.who + '</b>' + OST[x.status] + '</div>' + fiTitle(x.fi) + '<div class="small">' + x.day + ' · ' + x.time + (x.fmt === 'video' ? ' · по видеосвязи' : '') + ' · ' + x.kids + '</div>' + oFamRate(x) + (x.pair ? '<div class="small muted">Ищут вдвоём: ' + x.pair + ', оба увидят ваши ответы</div>' : '') +
       (x.status === 'wait' ? '<div class="row small"><button class="link" style="font-weight:700" data-act="oreq-ok" data-v="' + i + '">Принять</button><button class="link" data-act="oreq-move" data-v="' + i + '">Другое время</button><button class="link" style="color:#E5484D" data-act="oreq-no" data-v="' + i + '">Отклонить</button></div>'
         : (x.status === 'ok' || x.status === 'moved') && !o.list[x.fi].tenant ? (x.fmt === 'video' && !x.called ? '<button class="btn p" style="height:40px" data-act="ocall" data-v="' + i + '">Начать видеопросмотр</button>' : '') + odealBtn(i) : '') + '</div>').join('') + '</div>' + tabs(); };
 V.omsg = () => { const o = S.own, ten = o.ochTab === 'ten', bl = o.but[o.but.length - 1];
@@ -2936,6 +2953,7 @@ const wheel = (id, items, sel) => '<div class="wheel" id="' + id + '" data-sel="
   items.map(([v,l]) => '<div class="wi' + (v === sel ? ' on' : '') + '" data-wv="' + v + '">' + l + '</div>').join('') + '<div class="wpad"></div></div>';
 function wheelPicked(w){
   const items = w.querySelectorAll('.wi'), i = Math.max(0, Math.min(items.length - 1, Math.round(w.scrollTop / WH))), v = items[i].dataset.wv, d = S.bookDraft;
+  if(!d) return;
   items.forEach((el, j) => el.classList.toggle('on', j === i));
   if(w.id === 'wh-day'){ d.dayRaw = v; d.day = dayOf(v); }
   else { const h = w.id === 'wh-h' ? v : (d.time || '19:00').slice(0,2), m = w.id === 'wh-m' ? v : (d.time || '19:00').slice(3,5), t = h + ':' + m; d.time = t > '21:00' ? null : t; d.wantT = t; }
@@ -4030,22 +4048,392 @@ Object.assign(A, {
     obutSay('Видеопросмотр с ' + x.who.replace('Семья ', 'семьёй ') + ' прошёл: ' + min + ' мин, показали ' + C.step + ' из ' + OC_ROOMS.length + ' комнат. Снимки семьи попадут в акт, если договоритесь.'); back(); toast('Видеопросмотр завершён'); }
 });
 
+/* ===================== iteration 12: repairs, contract renewal, two-sided reviews, Gosuslugi guides, Т11–Т12 ===================== */
+const MV12 = {fixSelf:false, fixNo:false, fixBlame:false, raise:false};
+const r500 = x => Math.round(x / 500) * 500;
+const thumbs = l => '<div class="ithumbs">' + l.map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') + '</div>';
+const fShot = room => { const c = document.createElement('canvas'); c.width = 320; c.height = 240; const g = c.getContext('2d'), hue = hashS(room + 'fix') % 360; g.fillStyle = 'hsl(' + hue + ',18%,42%)'; g.fillRect(0, 0, 320, 240);
+  g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(110, 60, 100, 120); g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.arc(160, 200, 26, 0, 7); g.fill(); g.fillStyle = '#fff'; g.font = 'bold 18px sans-serif'; g.fillText(room, 14, 28); return c.toDataURL('image/jpeg', .8); };
+
+/* ---------- 5. Что-то сломалось ---------- */
+const FIX_CAT = [['water', 'Сантехника'], ['el', 'Электрика'], ['tech', 'Техника'], ['furn', 'Мебель'], ['win', 'Окна и двери'], ['other', 'Другое']];
+const FIX_PH = {water:'Например: течёт кран на кухне, капает под раковиной', el:'Например: не работает розетка в детской', tech:'Например: стиральная машина не сливает воду', furn:'Например: оторвалась дверца шкафа', win:'Например: не закрывается окно в спальне', other:'Опишите, что случилось'};
+const FIX_URG = {water:['Течёт сильно, может залить соседей', 'Сначала перекройте воду: краны у счётчиков. Потом позвоните в диспетчерскую управляющей компании, номер есть в квитанции ЖКУ и у входа в подъезд'],
+  el:['Нет света, искрит или пахнет гарью', 'Выключите автомат в электрощитке и не трогайте провода. Если идёт дым или пахнет гарью, звоните 112']};
+const fixes = () => S.fixes = S.fixes || [];
+const fixD = () => S.fixD = S.fixD || {cat:null, urg:false, t:'', ph:[]};
+const fixName = x => FIX_CAT.find(c => c[0] === x.cat)[1];
+const fixSt = (x, f) => ({sent:() => 'Отправили ' + datv(f), wait:() => 'Ждём ответа ' + gen(f), master:() => x.ok ? 'Мастер придёт ' + x.when : f.owner + ' предлагает мастера ' + x.when, self:() => f.owner + ' просит починить самим и вернёт деньги', selfwait:() => 'Отправили чек ' + rub(x.sum) + ', ждём ' + gen(f),
+  check:() => 'Мастер был. Всё работает?', blame:() => f.owner + ' считает, что сломали вы', sup:() => 'Разбирается поддержка', done:() => '✓ Починили'})[x.st]();
+function fixBox(f){ const l = fixes(), act = l.filter(x => x.st !== 'done');
+  return '<div class="box"><div class="row"><b>Поломки и ремонт</b>' + (act.length ? '<span class="small muted">' + act.length + ' в работе</span>' : '') + '</div>' +
+    (l.length ? l.map((x, i) => '<button class="list-row" data-act="fix-open" data-v="' + i + '"><span>' + esc(x.t || fixName(x)) + '<div class="small muted">' + fixSt(x, f) + '</div></span><span class="muted">›</span></button>').join('')
+      : '<div class="small muted">Если что-то сломается, напишите здесь. Передадим ' + datv(f) + ' и проследим, чтобы починили</div>') +
+    '<button class="btn s" style="height:42px" data-act="fix-new">Что-то сломалось</button></div>'; }
+V.fix = () => { const f = liveF(), d = dos(f), D = fixD(), U = FIX_URG[D.cat];
+  return topBack('Что сломалось?') + '<div class="body" style="gap:14px">' +
+    '<div class="chips">' + FIX_CAT.map(([k, l]) => '<button class="chip' + (D.cat === k ? ' on' : '') + '" data-act="fix-cat" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
+    (U ? '<button class="ckrow" data-act="fix-urg" aria-pressed="' + D.urg + '"><span class="ck' + (D.urg ? ' on' : '') + '">✓</span><span>' + U[0] + '</span></button>' + (D.urg ? '<div class="err" style="padding:10px 12px"><b>Срочно</b><span>' + U[1] + '</span></div>' : '') : '') +
+    '<div style="display:flex;flex-direction:column;gap:6px"><label class="lbl" for="fixt">Что случилось</label><input id="fixt" class="field" type="text" autocomplete="off" placeholder="' + (FIX_PH[D.cat] || FIX_PH.other) + '" value="' + esc(D.t) + '"></div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px"><div class="lbl">Фото · ' + D.ph.length + '</div><div class="ithumbs">' + D.ph.map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') +
+      '<label class="iadd" for="fixph">+ фото</label><input type="file" id="fixph" accept="image/*" capture="environment" multiple hidden></div><div class="small muted">С фото собственник быстрее поймёт, какой нужен мастер</div></div>' +
+    '<div class="box small"><b>Кто платит за ремонт</b><span>По договору: ' + esc(d.fix) + '</span><span class="muted">Если не договоритесь, поможет поддержка «Двора»: сравним с фото из акта при въезде</span></div>' +
+    '<button class="btn p" data-act="fix-send"' + (D.cat ? '' : ' disabled') + '>' + (D.cat ? 'Отправить ' + datv(f) : 'Выберите, что сломалось') + '</button></div>'; };
+V.fixd = () => { const f = liveF(), x = fixes()[S.fixI];
+  const st = x.st, btn2 = (a, l, b, m) => '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:44px;font-size:13px" data-act="' + a + '">' + l + '</button><button class="btn p" style="height:44px;font-size:13px" data-act="' + b + '">' + m + '</button></div>';
+  return topBack(fixName(x)) + '<div class="body" style="gap:12px">' +
+    '<div class="box"><b>' + esc(x.t || fixName(x)) + '</b>' + (x.urg ? '<span class="chip on" style="align-self:flex-start;font-size:11px">срочно</span>' : '') + (x.ph.length ? thumbs(x.ph) : '') + '<div class="small muted">Отправили ' + x.d + '</div></div>' +
+    '<div class="box"><div class="row"><b>Статус</b></div><div class="small" style="font-weight:700">' + fixSt(x, f) + '</div>' +
+      (x.log.length ? '<div style="display:flex;flex-direction:column;gap:4px">' + x.log.map(l => '<div class="small muted">· ' + esc(l) + '</div>').join('') + '</div>' : '') +
+      (st === 'master' && !x.ok ? btn2('fix-time', 'Другое время', 'fix-ok', 'Подходит')
+        : st === 'check' ? btn2('fix-bad', 'Не починили', 'fix-good', 'Всё работает')
+        : st === 'self' ? '<div class="small">Оплатите мастера сами и пришлите чек. «Двор» вернёт деньги на кошелёк и вычтет их из выплаты ' + datv(f) + '</div><label class="lbl" for="fixsum">Сумма по чеку, ₽</label><input id="fixsum" class="field" type="number" inputmode="numeric" value="1850"><button class="btn p" style="height:44px" data-act="fix-receipt">Отправить чек</button>'
+        : st === 'blame' ? '<div class="small muted">Вы не согласны? Поддержка сравнит фото поломки с фото из акта при въезде и решит, износ это или повреждение</div>' + btn2('fix-pay', 'Починим сами', 'fix-dispute', 'Оспорить')
+        : st === 'done' ? '<div class="small">' + x.res + '</div>' : '') + '</div>' +
+    '<button class="btn s" style="height:44px" data-act="write" data-v="' + f.id + '">Написать ' + datv(f) + '</button></div>'; };
+const fixLog = (x, t) => { x.log.push(t); };
+function fixReply(i){ const f = liveF(), x = fixes()[i];
+  if(MV12.fixNo && !x.nudged){ x.nudged = true; x.st = 'wait';
+    later(2500, () => { fixLog(x, 'Прошли сутки без ответа. Дворецкий напомнил ' + datv(f)); butlerSay(f.owner + ' не ответил' + ga(f, 'а') + ' на заявку «' + (x.t || fixName(x)) + '» за сутки. Я напомнил' + '. Если ответа не будет ещё сутки, подключу поддержку.'); pushNote('Напомнили ' + datv(f), 'Заявка о поломке без ответа сутки', {to:'fixd'}); });
+    later(6000, () => { x.st = 'sup'; fixLog(x, 'Двое суток без ответа. Подключили поддержку'); S.support.push({me:false, t:'Заявка о поломке без ответа 48 часов. Мы связываемся с собственником.'});
+      later(3500, () => { x.st = 'master'; x.ok = true; x.when = 'завтра, 10:00–12:00'; fixLog(x, 'Поддержка дозвонилась ' + datv(f) + ': мастер придёт ' + x.when); S.support.push({me:false, t:'Дозвонились до ' + gen(f) + '. Мастер придёт ' + x.when + '.'}); pushNote('Поддержка договорилась', 'Мастер придёт ' + x.when, {to:'fixd'}); }); });
+    return; }
+  if(MV12.fixBlame && !x.blamed){ x.blamed = true; ownerSay(f, 'Это вы сломали, раньше всё работало. Чините за свой счёт.', () => { x.st = 'blame'; fixLog(x, f.owner + ' считает поломку вашей виной'); pushNote(f.owner + ' ответил' + ga(f, 'а') + ' на заявку', 'Считает, что сломали вы', {to:'fixd'}); }); return; }
+  if(MV12.fixSelf){ ownerSay(f, 'Спасибо, что сказали! Вызовите, пожалуйста, мастера сами, а я верну деньги. Пришлите чек.', () => { x.st = 'self'; fixLog(x, f.owner + ' просит вызвать мастера самим и вернёт деньги'); pushNote(f.owner + ' ответил' + ga(f, 'а') + ' на заявку', 'Просит починить самим и вернёт деньги', {to:'fixd'}); }); return; }
+  x.when = x.urg ? 'сегодня, в течение двух часов' : 'завтра, 10:00–12:00';
+  ownerSay(f, (x.urg ? 'Поняла' : 'Спасибо, что сказали!').replace('Поняла', f.ownerG === 'm' ? 'Понял' : 'Поняла') + ' Мастер придёт ' + x.when + '. Будете дома?', () => { x.st = 'master'; x.ok = false; fixLog(x, f.owner + ' предлагает мастера ' + x.when); pushNote(f.owner + ' ответил' + ga(f, 'а') + ' на заявку', 'Мастер придёт ' + x.when, {to:'fixd'}); }); }
+Object.assign(A, {
+  'fix-new'(){ S.fixD = null; fixD(); go('fix'); },
+  'fix-cat'(v){ const D = fixD(); D.cat = v; if(!FIX_URG[v]) D.urg = false; render(); },
+  'fix-urg'(){ const D = fixD(); D.urg = !D.urg; render(); },
+  'fix-open'(v){ S.fixI = +v; go('fixd'); },
+  'fix-send'(){ const f = liveF(), D = fixD(), el = $('#fixt'); if(el) D.t = el.value.trim(); if(!D.cat) return;
+    const x = {cat:D.cat, t:D.t, urg:D.urg, ph:D.ph.slice(), st:'sent', d:'сегодня', log:[]}; fixes().push(x); const i = fixes().length - 1; S.fixD = null;
+    chatOf(f).push({me:true, t:'Заявка о поломке · ' + fixName(x) + (x.urg ? ' · срочно' : '') + ': ' + (x.t || 'без описания') + (x.ph.length ? ' (фото: ' + x.ph.length + ')' : '')});
+    butlerSay('Передал ' + datv(f) + ' заявку «' + (x.t || fixName(x)) + '». Если не ответит за сутки, напомню, через двое подключу поддержку.');
+    S.fixI = i; S.screen = 'fixd'; render(true); toast('Заявка отправлена ' + datv(f)); fixReply(i); },
+  'fix-ok'(){ const f = liveF(), x = fixes()[S.fixI]; x.ok = true; chatOf(f).push({me:true, t:'Подходит, будем дома ' + x.when + '.'}); fixLog(x, 'Вы подтвердили время: ' + x.when); render(); toast('Подтвердили время мастера');
+    later(4000, () => { x.st = 'check'; fixLog(x, 'Мастер был ' + x.when); pushNote('Мастер был?', 'Отметьте, починили ли ' + (x.t || fixName(x)).toLowerCase(), {to:'fixd'}); }); },
+  'fix-time'(){ const f = liveF(), x = fixes()[S.fixI]; chatOf(f).push({me:true, t:'В это время нас не будет дома. Можно вечером?'}); render();
+    ownerSay(f, 'Хорошо, тогда завтра с 18 до 20.', () => { x.when = 'завтра, 18:00–20:00'; fixLog(x, f.owner + ' перенес' + (f.ownerG === 'f' ? 'ла' : '') + ' мастера на ' + x.when); }); },
+  'fix-good'(){ const f = liveF(), x = fixes()[S.fixI]; x.st = 'done'; x.res = 'Ремонт оплатил' + ga(f, 'а') + ' ' + f.owner + ', как в договоре'; fixLog(x, 'Вы отметили: починили'); chatOf(f).push({me:true, t:'Мастер всё починил, спасибо!'}); render(); toast('Отметили: починили'); },
+  'fix-bad'(){ const f = liveF(), x = fixes()[S.fixI]; x.st = 'master'; x.ok = false; chatOf(f).push({me:true, t:'Мастер был, но не починил: ' + (x.t || fixName(x)).toLowerCase() + '.'}); fixLog(x, 'Вы отметили: не починили'); render();
+    ownerSay(f, 'Извините! Пришлю другого мастера послезавтра с 10 до 12.', () => { x.when = 'послезавтра, 10:00–12:00'; fixLog(x, f.owner + ' пришлёт другого мастера ' + x.when); }); },
+  'fix-receipt'(){ const f = liveF(), x = fixes()[S.fixI], el = $('#fixsum'); x.sum = Math.max(100, +(el && el.value) || 1850); x.st = 'selfwait'; fixLog(x, 'Вы отправили чек на ' + rub(x.sum)); chatOf(f).push({me:true, t:'Мастер починил. Чек на ' + rub(x.sum) + ' прикрепили.'}); render(); toast('Чек отправлен');
+    ownerSay(f, 'Получил' + ga(f, 'а') + ' чек, всё верно. Спасибо!', () => { x.st = 'done'; wAdd('Компенсация за ремонт · ' + f.short, x.sum); x.res = '«Двор» вернул ' + rub(x.sum) + ' вам на кошелёк и вычтет их из выплаты ' + datv(f); fixLog(x, f.owner + ' подтвердил' + ga(f, 'а') + ' чек. Деньги на кошельке'); pushNote('Вернули ' + rub(x.sum), 'Компенсация за ремонт на кошельке', {to:'fixd'}); }); },
+  'fix-pay'(){ const x = fixes()[S.fixI]; x.st = 'done'; x.res = 'Вы согласились починить за свой счёт'; fixLog(x, 'Вы согласились чинить сами'); render(); },
+  'fix-dispute'(){ const f = liveF(), x = fixes()[S.fixI], I = inspOf(f.id), had = Object.values(I.ph).flat().length > 0; x.st = 'sup'; fixLog(x, 'Вы оспорили. Передали в поддержку');
+    S.support.push({me:true, t:'Не согласны, что сломали мы: ' + (x.t || fixName(x)).toLowerCase() + '. Прошу сравнить с актом при въезде.'}); render(); toast('Передали в поддержку');
+    later(4500, () => { if(had){ x.st = 'master'; x.ok = true; x.when = 'завтра, 10:00–12:00'; fixLog(x, 'Поддержка сравнила с фото из акта при въезде: это износ, по договору чинит собственник. Мастер придёт ' + x.when); S.support.push({me:false, t:'Сравнили с фото при въезде: это износ, а не повреждение. По договору ремонт за счёт собственника. ' + f.owner + ' согласил' + (f.ownerG === 'f' ? 'ась' : 'ся') + ', мастер придёт ' + x.when + '.'}); pushNote('Поддержка разобралась', 'Это износ, ремонт за счёт ' + gen(f), {to:'fixd'}); }
+      else { x.st = 'done'; x.res = 'Фото при въезде нет, доказать нельзя. Поддержка предложила разделить стоимость ремонта пополам, обе стороны согласились'; fixLog(x, x.res); S.support.push({me:false, t:x.res + '.'}); pushNote('Поддержка разобралась', 'Стоимость ремонта делите пополам', {to:'fixd'}); } }); }
+});
+document.addEventListener('change', e => { const t = e.target; if(t.id !== 'fixph' || !t.files.length) return; const D = fixD();
+  [...t.files].forEach(file => { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const s = Math.min(1, 320 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); D.ph.push(c.toDataURL('image/jpeg', .8)); render(); }; img.src = r.result; }; r.readAsDataURL(file); }); });
+document.addEventListener('input', e => { if(e.target.id === 'fixt' && S.fixD) S.fixD.t = e.target.value; });
+
+/* owner side: a repair request from tenants */
+function oFixBox(L, i){ const T = L.tenant, X = T.fix; if(!X) return '';
+  const tm = [['завтра, 10:00–12:00', 'Завтра 10–12'], ['завтра, 18:00–20:00', 'Завтра 18–20'], ['послезавтра, 10:00–12:00', 'Послезавтра']];
+  return '<div class="box" style="background:var(--soft)"><b>Поломка: ' + X.t + '</b>' + thumbs([X.ph]) + '<div class="small muted">' + T.who + ' сообщили ' + X.d + '. По вашему договору: мелкий ремонт на жильцах, технику и трубы чините вы</div>' +
+    (X.st === 'new' ? '<div class="lbl">Когда придёт мастер</div><div class="chips">' + tm.map(([v, l]) => '<button class="chip' + (X.when === v ? ' on' : '') + '" data-act="ofix-when" data-v="' + i + ':' + v + '">' + l + '</button>').join('') + '</div>' +
+        '<button class="btn p" style="height:42px" data-act="ofix-master" data-v="' + i + '"' + (X.when ? '' : ' disabled') + '>' + (X.when ? 'Пришлю мастера' : 'Выберите время мастера') + '</button>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:42px;font-size:13px" data-act="ofix-self" data-v="' + i + '">Починят сами, верну деньги</button><button class="btn s" style="height:42px;font-size:13px" data-act="ofix-blame" data-v="' + i + '">Сломали жильцы</button></div>'
+      : X.st === 'master' ? '<div class="small">' + (X.conf ? '✓ Семья ждёт мастера ' + X.when : 'Предложили мастера ' + X.when + '. Ждём ответа семьи…') + '</div>' + (X.conf ? '<button class="btn p" style="height:42px" data-act="ofix-fixed" data-v="' + i + '">Мастер починил</button>' : '')
+      : X.st === 'self' ? (X.sum ? '<div class="small">Семья прислала чек на ' + rub(X.sum) + '</div><button class="btn p" style="height:42px" data-act="ofix-pay" data-v="' + i + '">Подтвердить чек</button>' : '<div class="small muted">Ждём чек от семьи…</div>')
+      : X.st === 'blame' ? '<div class="small muted">Семья оспорила. Поддержка сравнивает фото поломки с актом при въезде…</div>'
+      : X.st === 'blamed' ? '<div class="small">' + X.res + '</div><button class="btn p" style="height:42px" data-act="ofix-when" data-v="' + i + ':завтра, 10:00–12:00">Пришлю мастера</button>'
+      : '<div class="small">' + X.res + '</div>') + '</div>'; }
+Object.assign(A, {
+  'ofix-when'(v){ const [i, w] = v.split(':').length > 2 ? [v.slice(0, v.indexOf(':')), v.slice(v.indexOf(':') + 1)] : v.split(':'), X = S.own.list[+i].tenant.fix; X.when = w; if(X.st === 'blamed'){ X.st = 'new'; } render(); },
+  'ofix-master'(v){ const T = S.own.list[+v].tenant, X = T.fix; X.st = 'master'; render(); toast('Предложили мастера ' + X.when);
+    later(3000, () => { X.conf = true; pushNote(T.who + ' ждут мастера', X.when, {to:'otenants'}); }); },
+  'ofix-fixed'(v){ const X = S.own.list[+v].tenant.fix; X.st = 'done'; X.res = '✓ Починили. Семья подтвердила, что всё работает'; render(); toast('Заявка закрыта'); },
+  'ofix-self'(v){ const T = S.own.list[+v].tenant, X = T.fix; X.st = 'self'; render(); toast('Попросили семью вызвать мастера');
+    later(3500, () => { X.sum = 1850; pushNote(T.who + ' прислали чек', 'Ремонт: ' + rub(X.sum), {to:'otenants'}); }); },
+  'ofix-pay'(v){ const X = S.own.list[+v].tenant.fix; X.st = 'done'; X.res = '✓ Вернём семье ' + rub(X.sum) + ' и вычтем из вашей следующей выплаты аренды'; render(); toast('Чек подтверждён'); },
+  'ofix-blame'(v){ const T = S.own.list[+v].tenant, X = T.fix; X.st = 'blame'; render(); toast('Написали семье');
+    later(4000, () => { X.st = 'blamed'; X.res = 'Поддержка сравнила с фото из акта при въезде: кран уже был старый, это износ. По договору ремонт на вас'; pushNote('Поддержка разобралась', 'Это износ, ремонт за ваш счёт', {to:'otenants'}); }); }
+});
+
+/* ---------- 7. Продление договора ---------- */
+const simAvg = f => { const l = FLATS.filter(x => Math.abs(x.m2 - f.m2) <= 12); return r500(l.reduce((s, x) => s + x.rent, 0) / Math.max(1, l.length)); };
+function rnBox(f){ const L = S.live, R = L.rn; if(!R) return '';
+  const rentTxt = R.to !== f.rent ? rub(f.rent) + ' → <b>' + rub(R.to) + '</b> (+' + Math.round((R.to / f.rent - 1) * 100) + '%)' : rub(f.rent) + ', без изменений';
+  return '<div class="box" style="border-color:var(--ink)"><b>Договор до ' + L.end + '</b>' +
+    (R.st === 'offer' ? '<div class="small">' + f.owner + (R.counter ? ' готов' + ga(f, 'а') + ' уступить: ' : ' предлагает продлить на ' + R.term + ' мес. ') + 'Аренда ' + rentTxt + '</div>' +
+        (R.to !== f.rent ? '<div class="small muted">Похожие квартиры в районе сейчас ≈ ' + rub(simAvg(f)) + ' в месяц. Можно предложить свою сумму</div>' : '') +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:44px;font-size:13px" data-act="rn-other">' + (R.counter ? 'Не продлеваем' : 'Другие условия') + '</button><button class="btn p" style="height:44px;font-size:13px" data-act="rn-yes">Продлить</button></div>'
+      : R.st === 'wait' ? '<div class="small muted">Предложили: ' + R.term + ' мес., аренда ' + rub(R.ask) + '. Ждём ответа ' + gen(f) + '…</div>'
+      : R.st === 'sign' ? '<div class="small">Договорились: ' + R.term + ' мес., аренда ' + rub(R.to) + '. Осталось подписать допсоглашение</div><button class="btn p" style="height:44px" data-act="rn-sign">Подписать допсоглашение по СМС</button>'
+      : R.st === 'done' ? '<div class="small">✓ Договор продлён до ' + R.till + '. Аренда с ' + L.end + ': ' + rub(R.to) + '</div><button class="link small" style="align-self:flex-start" data-act="contract-pdf">Допсоглашение</button>'
+      : '<div class="small">Вы не продлеваете. Договор закончится ' + L.end + '</div><button class="btn s" style="height:44px" data-act="mo">Оформить выезд</button>') + '</div>'; }
+SH.rn = () => { const f = liveF(), R = S.live.rn, mid = r500((f.rent + R.to) / 2), am = R.to !== f.rent ? [[f.rent, 'Без повышения'], [mid, rub(mid)], [R.to, rub(R.to)]] : [];
+  return sheet('<div class="h1" style="font-size:17px">Условия продления</div>' +
+    '<div class="lbl">Срок</div><div class="chips">' + [6, 11, 12].map(n => '<button class="chip' + (S.rnT === n ? ' on' : '') + '" data-act="rn-t" data-v="' + n + '">' + n + ' мес.</button>').join('') + '</div>' +
+    (am.length ? '<div class="lbl">Аренда в месяц</div><div class="chips">' + am.map(([v, l]) => '<button class="chip' + (S.rnA === v ? ' on' : '') + '" data-act="rn-a" data-v="' + v + '">' + l + '</button>').join('') + '</div><div class="small muted">Похожие квартиры в районе ≈ ' + rub(simAvg(f)) + '</div>' : '') +
+    '<button class="btn p" data-act="rn-send">Предложить ' + datv(f) + '</button><button class="btn s" data-act="rn-no">Не будем продлевать</button>'); };
+Object.assign(A, {
+  'rn-yes'(){ const f = liveF(), R = S.live.rn; R.st = 'sign'; chatOf(f).push({me:true, t:'Согласны продлить: ' + R.term + ' мес., ' + rub(R.to) + ' в месяц.'}); render(); toast('Осталось подписать допсоглашение'); },
+  'rn-other'(){ const R = S.live.rn; if(R.counter) return A['rn-no'](); S.rnT = R.term; S.rnA = R.to; S.sheet = 'rn'; render(); },
+  'rn-t'(v){ S.rnT = +v; render(); },
+  'rn-a'(v){ S.rnA = +v; render(); },
+  'rn-send'(){ const f = liveF(), R = S.live.rn; R.term = S.rnT; R.ask = S.rnA || R.to; R.st = 'wait'; S.sheet = null; chatOf(f).push({me:true, t:'Предлагаем продлить на ' + R.term + ' мес. по ' + rub(R.ask) + ' в месяц.'}); render(); toast('Отправили ' + datv(f));
+    const mid = r500((f.rent + R.to) / 2);
+    later(1200, () => { if(R.ask >= mid || R.counter){ ownerSay(f, 'Хорошо, договорились: ' + R.term + ' мес. по ' + rub(R.ask) + '.', () => { R.to = R.ask; R.st = 'sign'; pushNote(f.owner + ' согласил' + (f.ownerG === 'f' ? 'ась' : 'ся'), 'Подпишите допсоглашение', {to:'home'}); }); }
+      else ownerSay(f, 'Совсем без повышения не могу, цены выросли. Давайте ' + rub(mid) + '?', () => { R.to = mid; R.counter = true; R.st = 'offer'; pushNote(f.owner + ' предлагает ' + rub(mid), 'Ответьте в «Моём доме»', {to:'home'}); }); }); },
+  'rn-sign'(){ const f = liveF(), R = S.live.rn; R.st = 'done'; R.till = dTxtY(mAdd(S.live.endD, R.term)); S.live.rentNext = R.to; chatOf(f).push({sys:true, t:'Допсоглашение подписано: договор продлён до ' + R.till + ', аренда ' + rub(R.to)}); render(); toast('Договор продлён до ' + R.till); },
+  'rn-no'(){ const f = liveF(), R = S.live.rn; R.st = 'no'; S.sheet = null; const M0 = moOf(); M0.date = S.live.end; chatOf(f).push({me:true, t:'Спасибо, но продлевать не будем. Съедем ' + S.live.end + '.'}); render(); toast('Предупредили ' + datv(f)); }
+});
+/* owner side: renewal */
+function oRnBox(L, i){ const T = L.tenant, R = T.rn; if(!R) return ''; const rent = +L.form.price || 42000, pc = [[0, 'Те же условия'], [3, '+3%'], [5, '+5%'], [10, '+10%']];
+  return '<div class="box" style="background:var(--soft)"><b>Договор заканчивается ' + T.till + '</b>' +
+    (R.st === 'ask' ? '<div class="small muted">Продлить с семьёй? Об изменении аренды по договору нужно предупредить за месяц. Похожие квартиры в районе ≈ ' + rub(r500(rent * 1.04)) + '</div><div class="chips">' + pc.map(([p, l]) => '<button class="chip' + (R.p === p ? ' on' : '') + '" data-act="orn-p" data-v="' + i + ':' + p + '">' + l + (p ? ' · ' + rub(r500(rent * (1 + p / 100))) : '') + '</button>').join('') + '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:42px;font-size:13px" data-act="orn-no" data-v="' + i + '">Не продлевать</button><button class="btn p" style="height:42px;font-size:13px" data-act="orn-send" data-v="' + i + '"' + (R.p === undefined ? ' disabled' : '') + '>Предложить</button></div>'
+      : R.st === 'wait' ? '<div class="small muted">Предложили продлить' + (R.p ? ' с повышением на ' + R.p + '%' : ' на тех же условиях') + '. Ждём ответа семьи…</div>'
+      : R.st === 'counter' ? '<div class="small">Семья просит +5% вместо +10%: ' + rub(r500(rent * 1.05)) + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:42px;font-size:13px" data-act="orn-keep" data-v="' + i + '">Оставить +10%</button><button class="btn p" style="height:42px;font-size:13px" data-act="orn-agree" data-v="' + i + '">Согласиться</button></div>'
+      : '<div class="small">' + R.res + '</div>') + '</div>'; }
+Object.assign(A, {
+  'orn-p'(v){ const [i, p] = v.split(':'); S.own.list[+i].tenant.rn.p = +p; render(); },
+  'orn-send'(v){ const L = S.own.list[+v], T = L.tenant, R = T.rn, rent = +L.form.price || 42000; R.st = 'wait'; render(); toast('Отправили предложение семье');
+    later(3500, () => { if(R.p > 5){ R.st = 'counter'; pushNote(T.who + ' ответили', 'Просят повысить аренду на 5%, а не на 10%', {to:'otenants'}); }
+      else { R.st = 'done'; R.res = '✓ Семья согласилась. Допсоглашение подписано: договор до ' + dTxtY(mAdd(T.tillD, 12)) + ', аренда ' + rub(r500(rent * (1 + R.p / 100))); pushNote(T.who + ' продлили договор', 'Допсоглашение подписано', {to:'otenants'}); } }); },
+  'orn-agree'(v){ const L = S.own.list[+v], R = L.tenant.rn, rent = +L.form.price || 42000; R.st = 'done'; R.res = '✓ Допсоглашение подписано: договор до ' + dTxtY(mAdd(L.tenant.tillD, 12)) + ', аренда ' + rub(r500(rent * 1.05)); render(); toast('Договор продлён'); },
+  'orn-keep'(v){ const T = S.own.list[+v].tenant, R = T.rn; R.st = 'done'; R.res = 'Семья не готова к +10% и съедет ' + T.till + '. За две недели до выезда снова опубликуем объявление'; render(); },
+  'orn-no'(v){ const T = S.own.list[+v].tenant, R = T.rn; R.st = 'done'; R.res = 'Предупредили семью: договор не продлевается, выезд ' + T.till + '. Объявление снова опубликуем за две недели до выезда'; render(); toast('Семья предупреждена'); }
+});
+
+/* ---------- 6. Отзывы с двух сторон ---------- */
+const famRevs = () => S.famRevs = S.famRevs || [];
+const FAM_RATE = {'Семья Петровых':[['Ирина', 'Казань', 5, 'Аккуратные, платили день в день. Квартиру вернули чище, чем была'], ['Олег', 'Самара', 5, 'Всё по договору, без сюрпризов'], ['Марина', 'Казань', 4, 'Хорошая семья, один раз задержали оплату на два дня, предупредили заранее']]};
+const starsTxt = n => '★★★★★'.slice(0, n) + '☆☆☆☆☆'.slice(0, 5 - n);
+const rateNum = l => (l.reduce((s, v) => s + v[2], 0) / l.length).toFixed(1).replace('.', ',');
+function rvBox(f){ const R = S.rv2 && S.rv2[f.id];
+  if(!R) return '<button class="btn s" style="height:44px" data-act="rv2">Оценить квартиру и ' + (f.ownerG === 'm' ? 'собственника' : 'собственницу') + '</button>';
+  return '<div class="box small" style="gap:6px"><b>' + (R.open ? 'Отзывы опубликованы' : 'Ваш отзыв отправлен') + '</b>' +
+    '<span>Вы: квартира ' + starsTxt(R.flat) + ', ' + f.owner + ' ' + starsTxt(R.own) + (R.t ? ' · «' + esc(R.t) + '»' : '') + '</span>' +
+    (R.open ? '<span>' + f.owner + ' о вашей семье: ' + starsTxt(R.back[2]) + ' «' + R.back[3] + '»</span><button class="link" style="align-self:flex-start;font-weight:700" data-act="go" data-v="family">Все отзывы о нашей семье</button>'
+      : '<span class="muted">Опубликуем, когда ' + f.owner + ' тоже оценит вашу семью, или через 14 дней. Так никто не подстраивает оценку под чужую</span>') + '</div>'; }
+SH.rv2 = () => { const f = liveF(), D = S.rvD, row = (k, l) => '<div style="display:flex;flex-direction:column;gap:6px"><div class="lbl">' + l + '</div><div class="chips">' + [1, 2, 3, 4, 5].map(n => '<button class="chip' + (D[k] === n ? ' on' : '') + '" data-act="rv2-s" data-v="' + k + ':' + n + '" aria-label="' + n + ' из 5">' + n + ' ★</button>').join('') + '</div></div>';
+  return sheet('<div class="h1" style="font-size:17px">Как вам жилось?</div>' + row('flat', 'Квартира: ' + f.short) + row('own', (f.ownerG === 'm' ? 'Собственник' : 'Собственница') + ': ' + f.owner) +
+    '<div style="display:flex;flex-direction:column;gap:6px"><label class="lbl" for="rv2t">Пара слов для следующей семьи</label><input id="rv2t" class="field" type="text" autocomplete="off" placeholder="Что понравилось, что нет" value="' + esc(D.t) + '"></div>' +
+    '<div class="small muted">' + f.owner + ' тоже оценит вашу семью. Оба отзыва откроются одновременно</div><button class="btn p" data-act="rv2-send">Отправить</button>'); };
+Object.assign(A, {
+  rv2(){ S.rvD = {flat:5, own:5, t:''}; S.sheet = 'rv2'; render(); },
+  'rv2-s'(v){ const [k, n] = v.split(':'); S.rvD[k] = +n; render(); },
+  'rv2-send'(){ const f = liveF(), D = S.rvD, el = $('#rv2t'); if(el) D.t = el.value.trim(); if(MAT.test((D.t || '').toLowerCase())){ toast('Уберите, пожалуйста, грубые слова'); return; }
+    S.rv2 = S.rv2 || {}; const R = S.rv2[f.id] = {flat:D.flat, own:D.own, t:D.t, open:false}; S.myRev[f.id] = [S.user ? S.user.name : 'Вы', DMN[CM] + ' ' + TODAY.getFullYear(), D.flat, D.t || 'Без комментария']; S.sheet = null; render(); toast('Отзыв отправлен');
+    later(4000, () => { R.back = [f.owner, S.anketa.city, 5, 'Аккуратная семья, платили вовремя, квартиру вернули в порядке. Рекомендую']; R.open = true; famRevs().unshift(R.back); pushNote('Отзывы опубликованы', f.owner + ' оценил' + ga(f, 'а') + ' вашу семью на 5 ★', {to:'moveout'}); }); }
+});
+function famRevBox(){ const l = famRevs();
+  return '<div class="box" style="margin-top:14px;gap:8px"><div class="row"><b>Отзывы о нашей семье</b>' + (l.length ? '<span class="small" style="font-weight:700">★ ' + rateNum(l) + ' · ' + l.length + '</span>' : '') + '</div>' +
+    (l.length ? l.map(v => '<div class="small"><b>' + v[0] + '</b>, собственник · ' + v[1] + ' ' + starsTxt(v[2]) + '<div>' + esc(v[3]) + '</div></div>').join('')
+      : '<div class="small muted">Пока нет. После выезда собственник оценит вашу семью. Эти отзывы видят собственники, когда вы просите о просмотре: хорошие оценки помогают договориться быстрее</div>') + '</div>'; }
+const oFamRate = x => { const l = FAM_RATE[x.who]; return l ? '<button class="link small" style="align-self:flex-start;font-weight:700" data-act="ofam" data-v="' + x.who + '">★ ' + rateNum(l) + ' · ' + l.length + ' отзыва собственников</button>' : '<div class="small muted">Новые на «Дворе», отзывов от собственников пока нет</div>'; };
+SH.ofam = () => { const l = FAM_RATE[S.ofam] || []; return sheet('<div class="h1" style="font-size:17px">' + S.ofam + '</div><div class="small muted">Отзывы собственников, у которых семья снимала через «Двор»</div>' +
+  l.map(v => '<div class="small"><b>' + v[0] + '</b> · ' + v[1] + ' ' + starsTxt(v[2]) + '<div>' + esc(v[3]) + '</div></div>').join('') + '<button class="btn s" data-act="close-sheet">Закрыть</button>'); };
+A.ofam = v => { S.ofam = v; S.sheet = 'ofam'; render(); };
+/* owner rates the family after move-out */
+const OREV_TAGS = ['Платили вовремя', 'Аккуратные', 'Всегда на связи', 'Вернули квартиру в порядке'];
+function oRevBox(L, i){ const T = L.tenant, O = T.out; if(!O || !O.res) return ''; const R = T.rv = T.rv || {st:'new', stars:5, tags:[]};
+  return '<div class="box" style="background:var(--soft)"><b>Оцените семью</b>' +
+    (R.st === 'new' ? '<div class="chips">' + [1, 2, 3, 4, 5].map(n => '<button class="chip' + (R.stars === n ? ' on' : '') + '" data-act="orv-s" data-v="' + i + ':' + n + '">' + n + ' ★</button>').join('') + '</div>' +
+        '<div class="chips">' + OREV_TAGS.map((t, k) => '<button class="chip' + (R.tags.includes(k) ? ' on' : '') + '" data-act="orv-t" data-v="' + i + ':' + k + '">' + t + '</button>').join('') + '</div>' +
+        '<div class="small muted">Отзыв увидят другие собственники, когда эта семья попросит о просмотре. Откроем его, когда семья оценит вас, или через 14 дней</div><button class="btn p" style="height:42px" data-act="orv-send" data-v="' + i + '">Отправить отзыв</button>'
+      : R.st === 'wait' ? '<div class="small muted">Отзыв отправлен: ' + starsTxt(R.stars) + '. Ждём, когда семья оценит вас…</div>'
+      : '<div class="small">✓ Отзывы опубликованы. Вы: ' + starsTxt(R.stars) + '. Семья о вас: ★★★★★ «Отзывчивый собственник, всё решали быстро»</div>') + '</div>'; }
+Object.assign(A, {
+  'orv-s'(v){ const [i, n] = v.split(':'); S.own.list[+i].tenant.rv.stars = +n; render(); },
+  'orv-t'(v){ const [i, k] = v.split(':').map(Number), R = S.own.list[i].tenant.rv; R.tags = R.tags.includes(k) ? R.tags.filter(x => x !== k) : R.tags.concat(k); render(); },
+  'orv-send'(v){ const T = S.own.list[+v].tenant, R = T.rv; R.st = 'wait'; render(); toast('Отзыв отправлен'); later(3500, () => { R.st = 'open'; pushNote('Отзывы опубликованы', T.who + ' оценили вас на 5 ★', {to:'otenants'}); }); }
+});
+
+/* ---------- 8. Регистрация, поликлиника, сад, школа ---------- */
+const GOS = {
+  reg:{t:'Временная регистрация', why:'Нужна, чтобы записать ребёнка в сад и школу и прикрепиться к поликлинике по новому адресу. Оформляется на срок договора аренды', gu:'Регистрация по месту пребывания', term:'до 3 рабочих дней',
+    docs:['Паспорта взрослых', 'Свидетельства о рождении детей', 'Договор аренды · есть в «Дворе»']},
+  clinic:{t:'Поликлиника', why:'Прикрепитесь к поликлинике рядом с домом: взрослые к взрослой, дети к детской. Можно подать заявление на Госуслугах или прийти в регистратуру', gu:'Прикрепление к поликлинике', term:'до 3 рабочих дней',
+    docs:['Полис ОМС', 'Паспорт или свидетельство о рождении', 'СНИЛС']},
+  sad:{t:'Очередь в детский сад', why:'Встать в очередь можно с рождения ребёнка. С временной регистрацией ребёнок получает место в садах по новому адресу', gu:'Запись в детский сад', term:'до 7 рабочих дней', reg:true,
+    docs:['Свидетельство о рождении ребёнка', 'Свидетельство о временной регистрации ребёнка', 'Полис ОМС ребёнка']},
+  school:{t:'Запись в школу', why:'В первый класс записывают с 1 апреля, сначала детей с регистрацией рядом со школой. Перевестись из другой школы можно в любое время года', gu:'Запись в школу', term:'до 5 рабочих дней', reg:true,
+    docs:['Свидетельство о рождении ребёнка', 'Свидетельство о временной регистрации ребёнка', 'Личное дело из прежней школы, при переводе']}
+};
+const gosOf = k => (S.gos = S.gos || {})[k] = S.gos[k] || {st:null, docs:{}, pick:{0:true}, when:'sep', consent:null};
+const sadList = f => [[f.sadName, f.sad], ['Сад № ' + (hashS(f.id + 's1') % 180 + 20), f.sad + 6], ['Сад № ' + (hashS(f.id + 's2') % 180 + 20), f.sad + 11]];
+const gosRes = (k, f) => ({reg:'Регистрация до ' + dTxtY(mAdd(MV1, 11)) + '. Свидетельство в личном кабинете Госуслуг', clinic:'Прикрепили к поликлинике «' + f.clinicName + '». Записаться к врачу можно на Госуслугах',
+  sad:'Вы в очереди: место № 14 в «' + f.sadName + '». Пришлём пуш, когда очередь сдвинется', school:'Школа «' + f.schoolName + '» приняла заявление. Отнесите личное дело в течение недели'})[k];
+const _nearTodo12 = nearTodo;
+nearTodo = f => { const kids = S.anketa.children.filter(Boolean), small = kids.some(k => k !== '7+ лет') || S.anketa.noKids === 'expecting', big = kids.some(k => k === '7+ лет' || k === '3–7 лет');
+  return _nearTodo12(f).filter(x => (x[0] !== 'sad' || small) && (x[0] !== 'school' || big)).map(x => { if(!GOS[x[0]]) return x; const G = gosOf(x[0]), N = S.near || {};
+    if(G.st === 'done' && N.done) N.done[x[0]] = true;
+    return [x[0], x[1], G.st === 'done' ? gosRes(x[0], f) : G.st === 'sent' ? 'Заявление подано, ждём ответа · ' + GOS[x[0]].term : x[2], null]; }); };
+const _vnear12 = V.near;
+V.near = () => { let h = _vnear12(); Object.keys(GOS).forEach(k => { h = h.split('<button class="ckrow" data-act="near-done" data-v="' + k + '"').join('<button class="ckrow" data-act="gos" data-v="' + k + '"'); }); return h; };
+V.gos = () => { const f = liveF(), k = S.gosK, G = GOS[k], g = gosOf(k), reg = gosOf('reg'), addr = (S.anketa.city ? S.anketa.city + ', ' : '') + f.short + ', кв. ' + (hashS(f.id) % 90 + 10);
+  const docs = '<div style="display:flex;flex-direction:column;gap:2px">' + G.docs.map((d, i) => '<button class="ckrow" data-act="gos-doc" data-v="' + i + '" aria-pressed="' + !!g.docs[i] + '"><span class="ck' + (g.docs[i] ? ' on' : '') + '">✓</span><span>' + d + '</span></button>').join('') + '</div>';
+  const n = {v:0}, step = (title, state, body) => '<div class="box">' + stepHead(++n.v, title, state) + body + '</div>';
+  const apply = () => step('Заявление на Госуслугах', g.st ? 'done' : 'now', g.st ? '<div class="small">✓ Подали заявление «' + G.gu + '»</div>' :
+      '<div class="small muted">Отметьте, что документы под рукой</div>' + docs +
+      '<div class="row small" style="gap:8px"><span>Адрес: <b>' + addr + '</b></span><button class="link" data-act="gos-copy" data-v="' + esc(addr) + '">Скопировать</button></div>' +
+      '<a class="btn s" style="height:44px" href="https://www.gosuslugi.ru/" target="_blank" rel="noopener">Открыть Госуслуги ↗</a><div class="small muted">Найдите услугу «' + G.gu + '»</div>' +
+      '<button class="btn p" style="height:44px" data-act="gos-sent">Я подал' + (S.user && S.user.g === 'f' ? 'а' : '') + ' заявление</button>');
+  const res = () => step('Результат', g.st === 'done' ? 'done' : g.st ? 'now' : '', g.st === 'done' ? '<div class="small" style="font-weight:700">✓ ' + gosRes(k, f) + '</div>' : g.st ? '<div class="small muted">Ждём ответа, обычно ' + G.term + '. Пришлём пуш</div>' : '<div class="small muted">Срок: ' + G.term + '</div>');
+  let body = '';
+  if(k === 'reg') body = step('Согласие ' + gen(f), g.consent === 'ok' ? 'done' : 'now', g.consent === 'ok' ? '<div class="small">✓ ' + f.owner + ' подтвердит согласие на Госуслугах, когда придёт уведомление</div>'
+      : g.consent === 'ask' ? '<div class="small muted">Спросили ' + gen(f) + ', ждём ответа…</div>' : '<div class="small muted">Собственник должен согласиться на вашу регистрацию. Без этого заявление не примут</div><button class="btn p" style="height:44px" data-act="gos-consent">Попросить согласие у ' + gen(f) + '</button>') + apply() + res();
+  else if(k === 'sad') body = step('Выберите до трёх садов', g.st ? 'done' : 'now', '<div style="display:flex;flex-direction:column;gap:2px">' + sadList(f).map(([nm, m], i) => '<button class="ckrow" data-act="gos-pick" data-v="' + i + '" aria-pressed="' + !!g.pick[i] + '"><span class="ck' + (g.pick[i] ? ' on' : '') + '">✓</span><span>' + nm + '<div class="small muted">' + m + ' мин пешком' + (i ? '' : ' · закреплён за домом') + '</div></span></button>').join('') + '</div>' +
+      '<div class="lbl">Когда нужен сад</div><div class="chips">' + [['sep', 'С 1 сентября'], ['asap', 'Как можно скорее']].map(([v, l]) => '<button class="chip' + (g.when === v ? ' on' : '') + '" data-act="gos-when" data-v="' + v + '">' + l + '</button>').join('') + '</div>') + apply() + res();
+  else body = apply() + res();
+  return topBack(G.t) + '<div class="body" style="gap:12px"><div class="small">' + G.why + '</div>' +
+    (G.reg && reg.st !== 'done' ? '<div class="box small" style="border-color:var(--ink)"><b>Сначала временная регистрация</b><span class="muted">' + (reg.st ? 'Заявление на регистрацию подано. Когда она будет готова, подавайте это заявление' : 'Без неё заявление по новому адресу не примут') + '</span>' + (reg.st ? '' : '<button class="link" style="align-self:flex-start;font-weight:700" data-act="gos" data-v="reg">Оформить регистрацию</button>') + '</div>' : '') +
+    body + '</div>'; };
+Object.assign(A, {
+  gos(v){ S.gosK = v; gosOf(v); go('gos'); },
+  'gos-doc'(v){ const g = gosOf(S.gosK); g.docs[v] = !g.docs[v]; render(); },
+  'gos-pick'(v){ const g = gosOf(S.gosK); if(!g.pick[v] || Object.values(g.pick).filter(Boolean).length > 1) g.pick[v] = !g.pick[v]; render(); },
+  'gos-when'(v){ gosOf(S.gosK).when = v; render(); },
+  'gos-copy'(v){ try { navigator.clipboard.writeText(v).catch(() => {}); } catch(e){} toast('Адрес скопирован'); },
+  'gos-consent'(){ const f = liveF(), g = gosOf('reg'); g.consent = 'ask'; chatOf(f).push({me:true, t:'Здравствуйте! Мы оформляем временную регистрацию на Госуслугах. Подтвердите, пожалуйста, согласие, когда придёт уведомление.'}); render(); toast('Попросили ' + gen(f));
+    later(800, () => ownerSay(f, 'Да, конечно, подтвержу.', () => { g.consent = 'ok'; pushNote(f.owner + ' согласил' + (f.ownerG === 'f' ? 'ась' : 'ся'), 'Можно подавать заявление на регистрацию', {to:'gos'}); })); },
+  'gos-sent'(){ const f = liveF(), k = S.gosK, g = gosOf(k); g.st = 'sent'; render(); toast('Отметили: заявление подано');
+    later(5000, () => { g.st = 'done'; if(S.near) S.near.done[k] = true; butlerSay(GOS[k].t + ': ' + gosRes(k, f) + '.'); pushNote(GOS[k].t + ': готово', gosRes(k, f), {to:'near'}); }); }
+});
+
+/* ---------- home, move-out, family, owner screens ---------- */
+const _vhome12 = V.home;
+V.home = () => { const f = liveF(); let h = _vhome12();
+  h = h.replace('<div class="box"><div style="font-weight:800">Договор, акт и залог</div>', fixBox(f) + '<div class="box"><div style="font-weight:800">Договор, акт и залог</div>');
+  if(S.live.rn) h = h.replace('<div class="top"><span class="t">Мой дом</span></div><div class="body" style="gap:12px">', '<div class="top"><span class="t">Мой дом</span></div><div class="body" style="gap:12px">' + rnBox(f));
+  if(S.live.rentNext && S.live.rn && S.live.rn.st === 'done') h = h.replace(depRow(f), depRow(f) + '<div class="row"><span>Аренда с ' + S.live.end + '</span><b>' + rub(S.live.rentNext) + '</b></div>');
+  return h; };
+const _vmo12 = V.moveout;
+V.moveout = () => _vmo12().replace('<button class="btn s" style="height:44px" data-act="live-rev">Оставить отзыв о квартире</button>', rvBox(liveF()));
+const _vfam12 = V.family;
+V.family = () => _vfam12().replace('<button class="link small" style="margin-top:14px;align-self:flex-start" data-act="edit-anketa">', famRevBox() + '<button class="link small" style="margin-top:14px;align-self:flex-start" data-act="edit-anketa">');
+const _oOut12 = oOutBox;
+oOutBox = (L, i) => oFixBox(L, i) + oRnBox(L, i) + _oOut12(L, i) + oRevBox(L, i);
+
+/* ---------- moderator: states and tasks ---------- */
+Object.assign(MA, {
+  'm-fixself'(){ MV12.fixSelf = !MV12.fixSelf; if(MV12.fixSelf){ MV12.fixBlame = false; MV12.fixNo = false; } renderMod(); },
+  'm-fixno'(){ MV12.fixNo = !MV12.fixNo; if(MV12.fixNo){ MV12.fixBlame = false; MV12.fixSelf = false; } renderMod(); },
+  'm-fixblame'(){ MV12.fixBlame = !MV12.fixBlame; if(MV12.fixBlame){ MV12.fixNo = false; MV12.fixSelf = false; } renderMod(); },
+  'm-raise'(){ MV12.raise = !MV12.raise; renderMod(); },
+  'm-renew'(){ if(!S.live) MA['m-live'](); const f = liveF(), d = dos(f); S.push = null; S.live.endD = mAdd(MV1, d.term); S.live.end = dTxtY(S.live.endD); S.live.rn = {st:'offer', term:d.term, to:MV12.raise ? r500(f.rent * 1.05) : f.rent};
+    chatOf(f).push({me:false, t:'Здравствуйте! Договор заканчивается ' + S.live.end + '. Предлагаю продлить на ' + d.term + ' мес.' + (MV12.raise ? ' Цены выросли, аренда будет ' + rub(S.live.rn.to) + '.' : ' Условия те же.')});
+    S.tab = 'home'; S.stack = []; S.screen = 'home'; pushNote('До конца договора месяц', f.owner + ' предлагает продлить' + (MV12.raise ? ' с повышением' : ''), {to:'home'}); },
+  'm-ofix'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.fix = {t:'течёт кран на кухне', ph:fShot('Кухня'), st:'new', d:'сегодня'}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; pushNote(L.tenant.who + ': поломка', 'Течёт кран на кухне', {to:'otenants'}); },
+  'm-orenew'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.tillD = mAdd(TODAY, 1); L.tenant.till = dTxtY(L.tenant.tillD); L.tenant.rn = {st:'ask'}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; pushNote('Договор с ' + L.tenant.who.replace('Семья ', 'семьёй ') + ' заканчивается', 'Решите, продлевать ли', {to:'otenants'}); },
+  'm-orev'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.out = {date:dTxt(TODAY), n:12, res:'✓ Акт выезда подписан. ' + (L.tenant.dep === 'dvor' ? 'Залог вернули семье с залогового счёта «Двора»' : 'Залог вернули семье')}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; render(); }
+});
+const _mg12 = modGroups;
+modGroups = opt => { const btn = (act, label, on) => '<button class="s"' + (on === false ? ' disabled style="opacity:.5"' : '') + ' data-act="' + act + '">' + label + '</button>', open = !!M.grp.home12, on = [MV12.fixSelf, MV12.fixNo, MV12.fixBlame, MV12.raise].filter(Boolean).length;
+  const body = '<div class="small muted">Поломка: семья сообщает в «Мой дом» → «Что-то сломалось». По умолчанию собственник присылает мастера</div>' +
+    opt('m-fixself', 'Собственник просит починить самим', MV12.fixSelf, 'семья платит мастеру, «Двор» возвращает деньги по чеку') + opt('m-fixno', 'Собственник не отвечает на заявку', MV12.fixNo, 'через сутки напоминание, через двое — поддержка') +
+    opt('m-fixblame', 'Собственник винит семью в поломке', MV12.fixBlame, 'семья может оспорить, поддержка сравнит с актом') + opt('m-raise', 'Собственник поднимает аренду при продлении', MV12.raise, '+5%, семья может предложить свою сумму') +
+    btn('m-renew', 'Договор заканчивается через месяц (семья)') + btn('m-ofix', 'Жильцы сообщили о поломке (собственник)') + btn('m-orenew', 'Договор с жильцами заканчивается (собственник)') + btn('m-orev', 'Жильцы съехали, оценить семью (собственник)');
+  return _mg12(opt) + '<div class="mgrp' + (open ? ' open' : '') + '"><button class="mgh" data-act="m-grp" data-v="home12"><b>Поломки, продление, отзывы</b><span class="small muted">' + (on ? 'вкл: ' + on + ' · ' : '') + (open ? 'свернуть' : 'открыть') + '</span></button>' + (open ? '<div class="mgb">' + body + '</div>' : '') + '</div>'; };
+TASKS.push(
+  ['Т11', '«Вы живёте в квартире, и на кухне потёк кран. Сообщи собственнику и договорись о ремонте.»', 't11', 'участник отправил заявку с описанием и подтвердил время мастера'],
+  ['Т12', '«Вы только заехали. Запиши ребёнка в очередь в детский сад рядом с домом.»', 't12', 'участник открыл «Очередь в детский сад», выбрал сады и отметил, что подал заявление']
+);
+const _setupTask12 = setupTask;
+setupTask = t => { if(!['t11', 't12'].includes(t)) return _setupTask12(t);
+  MA['m-live'](); S.push = null; S.toast = null; if(!S.anketa.children.filter(Boolean).length) S.anketa.children = ['3–7 лет'];
+  if(t === 't12'){ S.tab = 'near'; S.screen = 'near'; } render(true); };
+
+/* ---------- Дворецкий and help ---------- */
+const _butAns12 = butAns;
+butAns = t => { const q = findTxt(t), f = S.live && liveF();
+  if(/слома|полом|теч[её]т|протек|протёк|капает|не работа|мастер|сантехник|электрик|розетк/.test(q)) return f ? 'Откройте «Мой дом» → «Что-то сломалось»: выберите, что сломалось, опишите и сфотографируйте. Я передам ' + datv(f) + '. По договору: ' + dos(f).fix + ' Если течёт сильно, сначала перекройте воду у счётчиков. Если ' + f.owner + ' не ответит за сутки, напомню, через двое подключу поддержку.'
+    : 'Когда заедете, в «Моём доме» будет кнопка «Что-то сломалось». Заявка уходит собственнику, а если он не отвечает двое суток, подключается поддержка «Двора».';
+  if(/продл|продолж.*договор|повыс|подня.*аренд|повышен/.test(q)) return 'За месяц до конца договора «Двор» спросит обе стороны, продлеваете ли вы. Если собственник поднимает аренду, покажем, сколько стоят похожие квартиры в районе, и можно предложить свою сумму. Продление — это допсоглашение, его подписывают в приложении.' + (f && S.live.rn ? ' Предложение ' + gen(f) + ' уже в «Моём доме».' : '');
+  if(/отзыв|оцен.*сем|рейтинг/.test(q)) return 'После выезда вы оцениваете квартиру и собственника, а собственник — вашу семью. Отзывы откроются, когда оценят обе стороны, или через 14 дней. Отзывы о вашей семье видят собственники, когда вы просите о просмотре.';
+  if(/сад|садик|школ|поликлин|регистрац|прописк/.test(q)) return f ? 'Во вкладке «Рядом» есть пошаговые инструкции: временная регистрация, поликлиника, сад и школа. Начните с регистрации: без неё сад и школа по новому адресу заявление не примут. Согласие ' + gen(f) + ' попросим прямо в приложении.'
+    : 'После заезда во вкладке «Рядом» будут пошаговые инструкции: временная регистрация, поликлиника, сад и школа. В карточке квартиры уже видно, какие сад, школа и поликлиника рядом.';
+  return _butAns12(t); };
+FAQ.push(
+  ['Что делать, если в квартире что-то сломалось?', 'В «Моём доме» нажмите «Что-то сломалось»: выберите, что сломалось, опишите и приложите фото. Заявка уйдёт собственнику. Если он не ответит за сутки, Дворецкий напомнит, через двое подключится поддержка. Кто платит, написано в договоре: обычно мелкий ремонт на жильцах, технику и трубы чинит собственник.'],
+  ['Как продлить договор?', 'За месяц до конца договора «Двор» спросит обе стороны. Можно продлить на тех же условиях, предложить другой срок или свою сумму, если собственник поднимает аренду. Продление оформляется допсоглашением в приложении.'],
+  ['Кто видит отзывы о нашей семье?', 'Собственники, когда вы просите о просмотре. Отзыв оставляет собственник после вашего выезда, и он открывается одновременно с вашим отзывом о квартире, чтобы никто не подстраивал оценку.'],
+  ['Как записать ребёнка в сад или школу?', 'После заезда во вкладке «Рядом» есть пошаговые инструкции. Сначала временная регистрация: согласие собственника попросим в приложении. Потом заявление на Госуслугах: адрес и список документов подскажем.']
+);
+
+/* ===================== iteration 12: usability test log in the moderator panel ===================== */
+const LOG = (() => { let d = null; try { d = JSON.parse(localStorage.getItem('dvorTestLog') || 'null'); } catch(e){} return d && d.runs ? d : {who:'Участник 1', runs:[], cur:null}; })();
+const logSave = () => { try { localStorage.setItem('dvorTestLog', JSON.stringify(LOG)); } catch(e){} };
+const SCR_RU = {welcome:'Старт', anketa:'Анкета', results:'Выдача', map:'Карта', card:'Карточка квартиры', fav:'Избранное', compare:'Сравнение', chats:'Чаты', chat:'Чат с собственником', profile:'Профиль', owner:'Собственник', reviews:'Отзывы',
+  butler:'Дворецкий', help:'Помощь', support:'Поддержка', notif:'Уведомления', family:'Анкета семьи', settings:'Настройки', reg:'Регистрация', deal:'Заселение', wallet:'Кошелёк', home:'Мой дом', near:'Рядом', moveout:'Выезд', districts:'Сравнение районов',
+  vcall:'Видеопросмотр', fix:'Новая поломка', fixd:'Поломка', gos:'Госуслуги', cabinet:'Объявления (собственник)', oreq:'Просмотры (собственник)', omsg:'Чаты (собственник)', otenants:'Жильцы (собственник)', othread:'Чат (собственник)', ocall:'Видеопросмотр (собственник)'};
+const scrRu = () => (SCR_RU[S.screen] || S.screen) + (S.sheet ? ' · окно ' + S.sheet : '');
+const BACK_ACTS = ['back', 'close-sheet', 'edit-cancel', 'step-prev', 'to-welcome'];
+const mmss = ms => { const s = Math.round(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function logStart(k){ const T = TASKS.find(t => t[2] === k); if(LOG.cur) logEnd('прервано'); const now = Date.now();
+  LOG.cur = {who:LOG.who, task:T ? T[0] : k, t0:now, last:now, taps:0, miss:0, backs:0, pauses:0, hints:0, path:[], ev:[]}; logSave(); }
+function logEnd(res){ const c = LOG.cur; if(!c) return; c.t1 = Date.now(); c.res = res; LOG.runs.push(c); LOG.cur = null; logSave(); }
+const missTxt = e => { const r = document.getElementById('phone').getBoundingClientRect(), t = e.target.childElementCount ? '' : (e.target.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+  return 'точка ' + Math.round(e.clientX - r.left) + '×' + Math.round(e.clientY - r.top) + (t ? ' · «' + t + '»' : ''); };
+function logScreen(){ const c = LOG.cur; if(!c) return; const s = scrRu(); if(c.path[c.path.length - 1] !== s){ c.path.push(s); logSave(); } }
+document.getElementById('phone').addEventListener('click', e => { const c = LOG.cur; if(!c) return;
+  let el = e.target.closest('[data-act], a[href], label[for], input, .wi'); if(el && el.dataset.act === 'close-sheet' && e.target.closest('[data-stop]')) el = null; const now = Date.now(), gap = now - c.last, at = ((now - c.t0) / 1000).toFixed(1);
+  if(gap > 15000){ c.pauses++; c.ev.push({at:((c.last - c.t0) / 1000).toFixed(1), type:'пауза', scr:scrRu(), act:'', v:'', txt:'нет нажатий ' + Math.round(gap / 1000) + ' с'}); }
+  c.last = now; c.taps++;
+  const act = el ? (el.dataset.act || (el.tagName === 'A' ? 'ссылка' : el.tagName === 'LABEL' ? 'файл' : el.tagName === 'INPUT' ? 'поле' : 'колесо')) : '';
+  const back = el && (BACK_ACTS.includes(act) || el.getAttribute('aria-label') === 'Назад');
+  if(!el) c.miss++; if(back) c.backs++;
+  c.ev.push({at, type:!el ? 'мимо' : back ? 'назад' : 'нажатие', scr:scrRu(), act, v:el && el.dataset.v || '', txt:el ? (el.textContent || el.getAttribute('aria-label') || '').trim().replace(/\s+/g, ' ').slice(0, 50) : missTxt(e)});
+  logSave(); }, true);
+const _render12 = render;
+render = r => { _render12(r); logScreen(); };
+const _mtask12 = MA['m-task'];
+MA['m-task'] = v => { logStart(v); _mtask12(v); logScreen(); renderMod(); };
+const csvCell = x => { x = String(x === undefined || x === null ? '' : x); return /[";\n\r]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
+function csvDl(name, rows){ const s = '﻿' + rows.map(r => r.map(csvCell).join(';')).join('\r\n'), a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([s], {type:'text/csv;charset=utf-8'})); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
+const runRow = r => [r.who, r.task, r.res, Math.round(((r.t1 || Date.now()) - r.t0) / 1000), r.taps, r.backs, r.miss, r.pauses, r.hints, r.path.join(' → '), new Date(r.t0).toLocaleString('ru-RU')];
+Object.assign(MA, {
+  'm-log-end'(v){ logEnd(v); renderMod(); },
+  'm-log-hint'(){ if(!LOG.cur) return; LOG.cur.hints++; LOG.cur.ev.push({at:((Date.now() - LOG.cur.t0) / 1000).toFixed(1), type:'подсказка', scr:scrRu(), act:'', v:'', txt:'модератор подсказал'}); logSave(); renderMod(); },
+  'm-log-next'(){ if(LOG.cur) logEnd('прервано'); const n = +(LOG.who.match(/\d+$/) || [0])[0]; LOG.who = n ? LOG.who.replace(/\d+$/, n + 1) : LOG.who + ' 2'; logSave(); setupTask('t1'); renderMod(); },
+  'm-log-csv'(){ csvDl('dvor-zadaniya.csv', [['Участник', 'Задание', 'Итог', 'Время, с', 'Нажатий', 'Назад', 'Мимо', 'Паузы > 15 с', 'Подсказки', 'Путь по экранам', 'Начало']].concat(LOG.runs.map(runRow))); },
+  'm-log-csv2'(){ const rows = [['Участник', 'Задание', 'Секунда от начала', 'Тип', 'Экран', 'Действие', 'Значение', 'Текст']];
+    LOG.runs.concat(LOG.cur ? [LOG.cur] : []).forEach(r => r.ev.forEach(e => rows.push([r.who, r.task, String(e.at).replace('.', ','), e.type, e.scr, e.act, e.v, e.txt]))); csvDl('dvor-nazhatiya.csv', rows); },
+  'm-log-clear'(){ if(!M.logClear){ M.logClear = true; renderMod(); setTimeout(() => { M.logClear = false; renderMod(); }, 4000); return; } M.logClear = false; LOG.runs = []; LOG.cur = null; logSave(); renderMod(); }
+});
+document.addEventListener('input', e => { if(e.target.id === 'logwho'){ LOG.who = e.target.value; if(LOG.cur) LOG.cur.who = LOG.who; logSave(); } });
+function logPanel(){ const c = LOG.cur, rs = LOG.runs.slice(-8).reverse(), sb = 'style="flex:1;min-width:0"';
+  return '<h3>Протокол теста</h3><div style="display:flex;gap:6px;align-items:center"><input id="logwho" type="text" autocomplete="off" value="' + esc(LOG.who) + '" aria-label="Кто проходит тест" style="flex:1;min-width:0;height:36px;border:1px solid #D0D3D9;border-radius:8px;padding:0 10px;font:inherit"><button class="s" data-act="m-log-next">Следующий</button></div>' +
+    (c ? '<div style="display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid #16181D;border-radius:10px"><div class="row"><b>' + c.task + ' идёт</b><b id="logtm">' + mmss(Date.now() - c.t0) + '</b></div>' +
+        '<div class="small muted" id="logst">' + c.taps + ' нажатий · назад ' + c.backs + ' · мимо ' + c.miss + ' · пауз ' + c.pauses + ' · подсказок ' + c.hints + '</div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" ' + sb + ' data-act="m-log-end" data-v="выполнено">Выполнено</button><button class="s" ' + sb + ' data-act="m-log-hint">Подсказал</button><button class="s" ' + sb + ' data-act="m-log-end" data-v="не справился">Не справился</button></div></div>'
+      : '<div class="small muted">Нажмите карточку задания: время, нажатия, возвраты назад, нажатия мимо кнопок и паузы дольше 15 секунд начнут записываться. Протокол хранится в этом браузере.</div>') +
+    (rs.length ? '<div style="display:flex;flex-direction:column;gap:4px">' + rs.map(r => '<div class="small" style="display:flex;justify-content:space-between;gap:8px"><span><b>' + r.task + '</b> · ' + esc(r.who) + ' · ' + r.res + '</span><span class="muted" style="white-space:nowrap">' + mmss(r.t1 - r.t0) + ' · ' + r.taps + ' наж.</span></div>').join('') + '</div>' : '') +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" ' + sb + ' data-act="m-log-csv"' + (LOG.runs.length ? '' : ' disabled style="opacity:.5;flex:1"') + '>CSV: задания</button><button class="s" ' + sb + ' data-act="m-log-csv2"' + (LOG.runs.length || c ? '' : ' disabled style="opacity:.5;flex:1"') + '>CSV: все нажатия</button>' +
+      (LOG.runs.length ? '<button class="s" ' + sb + ' data-act="m-log-clear">' + (M.logClear ? 'Точно очистить?' : 'Очистить') + '</button>' : '') + '</div>'; }
+setInterval(() => { const c = LOG.cur, t = document.getElementById('logtm'), st = document.getElementById('logst'); if(!c || !t) return; t.textContent = mmss(Date.now() - c.t0);
+  if(st) st.textContent = c.taps + ' нажатий · назад ' + c.backs + ' · мимо ' + c.miss + ' · пауз ' + c.pauses + ' · подсказок ' + c.hints; }, 1000);
+
 function renderMod(){
-  const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
-  m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор';
+  const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && ['wozt', 'logwho'].includes(document.activeElement.id) && document.activeElement.id;
+  m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор'; document.body.classList.toggle('modrun', !!(LOG.cur && !M.open));
   if(!M.open) return;
   const opt = (act, label, on, hint) => '<button class="opt" data-act="' + act + '" aria-pressed="' + on + '"><span><b>' + label + '</b>' + (hint?'<br><span class="muted small">' + hint + '</span>':'') + '</span><span class="tgl' + (on?' on':'') + '"></span></button>';
   const waiting = Object.values(S.booking).some(b => b.status === 'wait');
   m.innerHTML = '<div class="row"><h2>Панель модератора</h2><button class="small muted link" data-act="m-close">Скрыть</button></div>' +
     '<div class="muted small">Участник видит только телефон. Перед каждым заданием нажмите его карточку: экран и данные встанут в начальное состояние. Когда задание выполнено, скажите участнику «Спасибо, задание выполнено» и переходите к следующему.</div>' +
-    '<h3>Задания · Т1–Т5 план теста, слайд 06 · Т6–Т10 новые сценарии</h3>' +
+    logPanel() + '<h3>Задания · Т1–Т5 план теста, слайд 06 · Т6–Т12 новые сценарии</h3>' +
     TASKS.map(([n,t,k,done]) => '<button class="task" data-act="m-task" data-v="' + k + '"><b class="n">' + n + '</b><span>' + t + '<br><span class="muted small">Готово, когда ' + done + '</span></span></button>').join('') +
     '<h3>Состояния по сценариям теста</h3>' + modGroups(opt) +
     '<button class="s" data-act="m-reset">Начать заново</button>';
-  if(wf){ const w = $('#wozt'); if(w){ w.focus(); w.setSelectionRange(w.value.length, w.value.length); } }
+  if(wf){ const w = document.getElementById(wf); if(w){ w.focus(); w.setSelectionRange(w.value.length, w.value.length); } }
 }
 $('#modbtn').addEventListener('click', () => { M.open = !M.open; renderMod(); });
 function modHash(){ if(location.hash === '#moderator'){ M.open = true; document.body.classList.add('modmode'); renderMod(); } }
+/* phone mode: on small screens the moderator button shrinks to a dot while a task runs; three quick taps on the screen title open the panel */
+let modTaps = [];
+document.getElementById('phone').addEventListener('click', e => { if(!document.body.classList.contains('modmode') || !e.target.closest('.top span.t')) return; const now = Date.now(); modTaps = modTaps.filter(t => now - t < 700).concat(now);
+  if(modTaps.length >= 3){ modTaps = []; M.open = true; renderMod(); } });
+
 modHash(); window.addEventListener('hashchange', modHash);
 
 render();
