@@ -829,6 +829,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .leaflet-tile-pane{filter:grayscale(1) contrast(.95)}
 .lroute{stroke:var(--ink)}
 .lmk{background:none;border:0}
+.ph .sch .leaflet-tile-pane{filter:invert(1) grayscale(1) contrast(1.45) brightness(.72)}
+.ph[data-theme=light] .sch .leaflet-tile-pane{filter:grayscale(1) contrast(1.45) brightness(1.06)}
 .ph .lmk .poi.on{background:var(--mint);color:var(--dark);border-color:var(--mint)}
 .lmk .pin,.lmk .poi,.lmk .walk{position:absolute}
 .leaflet-control-attribution{font-size:9px!important;line-height:12px}
@@ -1603,16 +1605,14 @@ function mapMount(){
     LF.alt = () => { if(LF.isAlt) return false; LF.isAlt = true; LF.errs = 0; t.setUrl('https://tile.openstreetmap.de/{z}/{x}/{y}.png'); setTimeout(() => { if(!LF.loads){ LF.ok = false; if(S.screen === 'map') render(); } }, 7000); return true; };
     t.on('tileerror', () => { LF.errs++; if(!LF.loads && LF.errs >= 4 && !LF.alt()){ LF.ok = false; if(S.screen === 'map') render(); } });
     setTimeout(() => { if(!LF.loads && !LF.alt()){ LF.ok = false; if(S.screen === 'map') render(); } }, 6000);
-    LF.osm = t; LF.sch = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {subdomains:'abcd', maxZoom:19, attribution:'© OpenStreetMap © CARTO'});
-    LF.sch.on('tileload', () => { LF.loads++; LF.ok = true; });
-    LF.layer = L.layerGroup().addTo(LF.map); }
-  { const sch = S.mapMode === 'schema', on = sch ? LF.sch : LF.osm, off = sch ? LF.osm : LF.sch; if(LF.map.hasLayer(off)) LF.map.removeLayer(off); if(!LF.map.hasLayer(on)) on.addTo(LF.map); }
+        LF.layer = L.layerGroup().addTo(LF.map); }
+  LF.el.classList.toggle('sch', S.mapMode === 'schema');
   host.appendChild(LF.el); LF.map.invalidateSize(false);
   const ico = (h, z) => ({icon:L.divIcon({className:'lmk', html:h, iconSize:[0, 0]}), interactive:false, keyboard:false, zIndexOffset:z || 0});
   const sig = JSON.stringify([D.r.map(f => f.id), D.sel && D.sel.id, D.pks, D.sel ? D.pks.map(k => typeof LF.routes[D.sel.id + ':' + k]) : 0]);
   if(sig === LF.sig && LF.layer.getLayers().length) return; LF.sig = sig;
   LF.layer.clearLayers();
-  Object.entries(POI).forEach(([k, [nk, PP, ic]]) => Object.entries(PP).forEach(([n, [x, y]]) => { const on = D.sel && D.pks.includes(k) && D.sel[nk] === n;
+  Object.entries(POI).forEach(([k, [nk, PP, ic]]) => Object.entries(PP).forEach(([n, [x, y]]) => { const on = D.sel && D.pks.includes(k) && D.sel[nk] === n; if(RG.R && D.sel && !on) return;
     L.marker(LL(x, y), ico('<span class="poi' + (k === 'sad' ? ' sad' : '') + (on ? ' on' : '') + '" style="' + (on ? '' : D.sel ? 'opacity:.4' : !D.pks.includes(k) ? 'opacity:.55' : '') + '">' + ic + ' ' + poiShort(n) + '</span>', on ? 500 : 0)).addTo(LF.layer); }));
   if(D.sel) D.pks.forEach(k => { const p = POI[k][1][D.sel[POI[k][0]]]; if(!p) return;
     const key = D.sel.id + ':' + k, osm = LF.routes[key], w = walkPath([D.sel.x, D.sel.y], p), line = Array.isArray(osm) ? osm : RG.R ? [LL(D.sel.x, D.sel.y), LL(p[0], p[1])] : w.map(q => LL(q[0], q[1]));
@@ -1624,7 +1624,8 @@ function mapMount(){
   D.r.forEach(f => { const on = D.sel && D.sel.id === f.id, m = ico('<button class="pin' + (on ? ' sel' : '') + '" data-act="pin" data-v="' + f.id + '" aria-label="' + f.short + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>', on ? 1000 : 100); m.interactive = true;
     L.marker(LL(f.x, f.y), m).addTo(LF.layer); });
   if(!LF.first && D.r.length){ LF.first = true; LF.map.fitBounds(D.r.map(f => LL(f.x, f.y)), {padding:[34, 34], maxZoom:15}); }
-  if(D.sel && LF.lastSel !== D.sel.id){ LF.lastSel = D.sel.id; LF.map.panTo(LL(D.sel.x, D.sel.y)); }
+  if(D.sel && LF.lastSel !== D.sel.id){ LF.lastSel = D.sel.id; const ov = document.querySelector('#phone .mapov'), hb = ov ? ov.offsetHeight + 24 : 30;
+    LF.map.fitBounds([LL(D.sel.x, D.sel.y)].concat(D.pks.map(k => POI[k][1][D.sel[POI[k][0]]]).filter(Boolean).map(q => LL(q[0], q[1]))), {paddingTopLeft:[36, 36], paddingBottomRight:[36, hb], maxZoom:16}); }
   if(!D.sel) LF.lastSel = null;
 }
 const DAYS = [dDay(dAdd(1)), dDay(dAdd(2)), dDay(dAdd(3))];
@@ -3998,7 +3999,7 @@ function rgReset(){ rgBase(); FLATS.forEach(f => { Object.assign(f, RG.base.f[f.
   setDict(SADS, RG.base.P.sad); setDict(SCHOOLS, RG.base.P.school); setDict(CLINICS, RG.base.P.clinic); RG.R = null; }
 function rgApply(R){ RG.R = R; const home = GEO.key === HAS.city + '|' + HAS.district;
   ['sad', 'school', 'clinic'].forEach(k => setDict(POI[k][1], Object.fromEntries(Object.entries(R.poi[k]).map(([n, ll]) => [n, toXY(ll[0], ll[1])]))));
-  FLATS.forEach(f => { const h = R.flats[f.id]; if(!h) return; const d = dos(f);
+  FLATS.forEach(f => { const h = R.flats[f.id]; if(!h) return; const d = DOS[f.id] || (DOS[f.id] = {});
     f.lat = h.ll[0]; f.lng = h.ll[1]; [f.x, f.y] = toXY(f.lat, f.lng); f.short = h.addr;
     ['sad', 'school', 'clinic'].forEach(k => { f[POI[k][0]] = h[k][0]; f[k] = h[k][1]; });
     if(h.stop){ d.stopName = h.stop[0]; f.stop = h.stop[1]; }
