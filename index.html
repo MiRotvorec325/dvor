@@ -861,6 +861,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 @keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-3px);opacity:1}}
 @media (prefers-reduced-motion:reduce){.typing b,.typing i{animation:none}}
+
+.poi.metro,.ph .poi.metro{border-color:#E5484D;color:#E5484D;z-index:3}
+.poi.metro b{display:inline-grid;place-items:center;width:13px;height:13px;border-radius:50%;background:#E5484D;color:#FFFFFF;font-size:8px;font-weight:800}
 </style>
 
 <div class="desk">
@@ -1277,10 +1280,12 @@ function mapMount(){
   if(!LF.map){ LF.el = document.createElement('div'); LF.el.style.cssText = 'position:absolute;inset:0';
     LF.map = L.map(LF.el, {zoomControl:false, attributionControl:true, zoomSnap:.5}).setView(LL(55, 55), 14);
     LF.map.attributionControl.setPrefix(false);
-    const t = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(LF.map);
+    LF.isAlt = location.protocol === 'file:' || location.origin === 'null';
+    const t = L.tileLayer(LF.isAlt ? 'https://tile.openstreetmap.de/{z}/{x}/{y}.png' : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(LF.map);
     t.on('tileload', () => { LF.loads++; LF.ok = true; });
-    t.on('tileerror', () => { LF.errs++; if(!LF.loads && LF.errs >= 4){ LF.ok = false; if(S.screen === 'map') render(); } });
-    setTimeout(() => { if(!LF.loads){ LF.ok = false; if(S.screen === 'map') render(); } }, 7000);
+    LF.alt = () => { if(LF.isAlt) return false; LF.isAlt = true; LF.errs = 0; t.setUrl('https://tile.openstreetmap.de/{z}/{x}/{y}.png'); setTimeout(() => { if(!LF.loads){ LF.ok = false; if(S.screen === 'map') render(); } }, 7000); return true; };
+    t.on('tileerror', () => { LF.errs++; if(!LF.loads && LF.errs >= 4 && !LF.alt()){ LF.ok = false; if(S.screen === 'map') render(); } });
+    setTimeout(() => { if(!LF.loads && !LF.alt()){ LF.ok = false; if(S.screen === 'map') render(); } }, 6000);
     LF.layer = L.layerGroup().addTo(LF.map); }
   host.appendChild(LF.el); LF.map.invalidateSize(false);
   const ico = (h, z) => ({icon:L.divIcon({className:'lmk', html:h, iconSize:[0, 0]}), interactive:false, keyboard:false, zIndexOffset:z || 0});
@@ -1295,6 +1300,7 @@ function mapMount(){
     L.polyline(line, {className:'lroute', color:'#16181D', weight:4, opacity:.9, dashArray:'7 6', lineJoin:'round', interactive:false}).addTo(LF.layer);
     const mid = Array.isArray(osm) ? osm[Math.floor(osm.length / 2)] : (m => LL(m[0], m[1]))(walkMid(w));
     L.marker(mid, ico('<span class="walk">' + POI[k][2] + ' ' + D.sel[k] + ' мин</span>', 600)).addTo(LF.layer); });
+  metroPts().forEach(([n, [x, y]]) => L.marker(LL(x, y), ico('<span class="poi metro"><b>М</b>' + n + '</span>', 400)).addTo(LF.layer));
   D.r.forEach(f => { const on = D.sel && D.sel.id === f.id, m = ico('<button class="pin' + (on ? ' sel' : '') + '" data-act="pin" data-v="' + f.id + '" aria-label="' + f.short + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>', on ? 1000 : 100); m.interactive = true;
     L.marker(LL(f.x, f.y), m).addTo(LF.layer); });
   if(!LF.first && D.r.length){ LF.first = true; LF.map.fitBounds(D.r.map(f => LL(f.x, f.y)), {padding:[34, 34], maxZoom:15}); }
@@ -1322,7 +1328,7 @@ function fresh(){
     loading:null, nearLoading:false, aiState:'ok', notif:{flats:true, owners:true}, faq:-1,
     district:'Ново-Савиновский', mapSel:null, subscribed:false, mapPoi:'sad', theme:THEME0, set:{vibro:true, sound:true, mapStart:false},
     live:null, myRev:{}, own:null, mode:'tenant', wallet:{bal:0, card:'Мир ·· 4417', auto:false, hist:[]}, insp:{},
-    support:[{me:false, t:'Здравствуйте! Я Анна из поддержки «Двора». Помогу с поиском, объявлением, жильцами или аккаунтом.'}], mapPois:['sad'], mapZoom:1, workQ:'',
+    support:[{me:false, t:'Здравствуйте! Я Анна из поддержки «Двора». Помогу с поиском, объявлением, жильцами или аккаунтом.'}], mapPois:['sad'], mapZoom:1.5, workQ:'',
     butler:[{me:false, t:'Я Дворецкий, помощник «Двора». Здесь напомню о просмотрах и подскажу, что взять с собой. Спросите, например: «Когда ближайший просмотр?»'}]
   };
 }
@@ -1402,6 +1408,8 @@ function geoApply(){ const city = S.anketa.city || HAS.city, dist = S.district |
   if(kazan && KZN_D[dist]) [lat, lng] = KZN_D[dist];
   else if(C){ lat = C[2]; lng = C[3]; const i = ds.indexOf(dist); if(i > 0){ const a = i * 2 * Math.PI / (ds.length - 1); lat += .03 * Math.sin(a); lng += .05 * Math.cos(a) * Math.cos(55.84 * Math.PI / 180) / Math.cos(lat * Math.PI / 180); } }
   GEO.ll = !!C; if(C){ GEO.k = Math.cos(55.84 * Math.PI / 180) / Math.cos(lat * Math.PI / 180); GEO.o = [lat + .015, lng - .0475 * GEO.k]; } }
+const METRO_POS = [[16, 24], [84, 34], [50, 92]];
+const metroPts = () => [...new Set(FLATS.map(f => dos(f).metro).filter(Boolean))].slice(0, 3).map((n, i) => [n, METRO_POS[i]]);
 const geoSt = (stem, pre) => GEO.st ? 'ул. ' + GEO.st[stem] : pre + stem;
 const workStreets = () => S.anketa.city === HAS.city ? STREETS : GEO_ST.slice(0, 14).map((s, i) => 'ул. ' + s + ', ' + (i * 7 % 40 + 1));
 const capCity = s => s.trim().replace(/(^|[\s-])([а-яёa-z])/g, (m, a, b) => a + b.toUpperCase());
@@ -2100,12 +2108,13 @@ V.map = () => {
       return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline class="sroute" points="' + w.map(q => q.join(',')).join(' ') + '" fill="none" stroke-linejoin="round" stroke="#16181D" stroke-dasharray="5 4" vector-effect="non-scaling-stroke" style="stroke-width:2.5px"/></svg>' +
       '<span class="walk" style="left:' + m[0] + '%;top:' + m[1] + '%">' + POI[k][2] + ' ' + sel[k] + ' мин</span>'; }).join('') +
     Object.entries(POI).map(([k, [nkk, PP, ic]]) => Object.entries(PP).map(([n,[x,y]]) => '<span class="poi' + (k === 'sad' ? ' sad' : '') + '" style="left:' + x + '%;top:' + y + '%' + (sel && pks.includes(k) && sel[nkk]===n ? ';border-color:var(--ink);color:var(--ink);background:var(--soft);z-index:2' : !pks.includes(k) ? ';opacity:.55' : '') + '">' + ic + ' ' + poiShort(n) + '</span>').join('')).join('') +
+    metroPts().map(([n, [x, y]]) => '<span class="poi metro" style="left:' + x + '%;top:' + y + '%"><b>М</b>' + n + '</span>').join('') +
     pos.map(([f, y]) => '<button class="pin' + (sel&&sel.id===f.id?' sel':'') + '" style="left:' + f.x + '%;top:' + y + '%' + (sel&&sel.id===f.id?';z-index:4':'') + '" data-act="pin" data-v="' + f.id + '" aria-label="' + f.short + ', ' + rub(f.rent) + '">' + tys(f.rent) + '</button>').join('') +
     '</div>') + '</div>' +
     (!r.length ? '<div class="mapov box small">Под фильтры квартир нет. Ослабьте фильтр в списке.</div>' : sel ? '<div class="mapov box"><div class="row" style="align-items:flex-start"><div class="small" style="font-weight:700">' + sel.short + '</div><button class="mapx" data-act="pin-close" aria-label="Закрыть карточку">✕</button></div><div class="row"><b>' + rub(sel.rent) + '/мес</b>' + heart(sel) + '</div><div class="small">Въезд ' + rub(sel.entry) + '</div>' +
         routes.map(([k, n]) => '<div class="small">' + POI[k][2] + ' ' + n + ' пешком ' + sel[k] + ' мин' + (k === 'clinic' ? '' : (k === 'school' ? ' · закреплена' : ' · закреплён')) + '</div>').join('') +
         (pk !== 'clinic' && nearest !== tn ? '<div class="small muted">Ближе по прямой ' + poiShort(nearest) + ', но дом закреплён за ' + tn.replace('Сад', 'садом').replace('Школа', 'школой') + ', поэтому путь до него</div>' : '') +
-        '<button class="btn p" style="height:40px" data-act="open" data-v="' + sel.id + '">Открыть квартиру</button></div>'
+        (dos(sel).metro ? '<div class="small">Метро «' + dos(sel).metro + '» пешком ' + dos(sel).metroMin + ' мин</div>' : '') + '<button class="btn p" style="height:40px" data-act="open" data-v="' + sel.id + '">Открыть квартиру</button></div>'
          : '<div class="mapov maphint small">' + kv(r.length) + ' на карте. Нажмите на цену, чтобы увидеть путь до ' + pgen + '</div>') + '</div>' +
     '<button class="btn s" style="height:40px" data-act="tab" data-v="search">Списком</button></div>' + tabs();
 };
@@ -2454,8 +2463,8 @@ const A = {
   butler(){ S.chatBottom = true; go('butler'); },
   'but-quick'(v){ butSend(v); },
   'obut-quick'(v, el){ obutSend(v, el ? el.textContent : v); },
-  'map-mode'(){ if(S.mapMode === 'schema' || LF.ok === false){ S.mapMode = 'real'; if(LF.ok === false){ LF.ok = null; LF.errs = 0; LF.loads = 0; if(LF.map) LF.map.eachLayer(l => l.redraw && l.redraw()); setTimeout(() => { if(!LF.loads){ LF.ok = false; if(S.screen === 'map'){ render(); toast('Карта не загрузилась, показываем схему'); } } }, 5000); } } else S.mapMode = 'schema'; render(); },
-  'map-zoom'(v){ if(LF.map && document.querySelector('#phone .lmap-host')){ +v > 0 ? LF.map.zoomIn() : LF.map.zoomOut(); return; } S.mapZoom = Math.max(.5, Math.min(3, (S.mapZoom || 1) + (+v))); render(); },
+  'map-mode'(){ if(!GEO.ll){ toast('Для этого города пока только схема'); return; } if(S.mapMode === 'schema' || LF.ok === false){ S.mapMode = 'real'; if(LF.ok === false){ LF.ok = null; LF.errs = 0; LF.loads = 0; if(LF.map) LF.map.eachLayer(l => l.redraw && l.redraw()); setTimeout(() => { if(!LF.loads && !(LF.alt && LF.alt())){ LF.ok = false; if(S.screen === 'map'){ render(); toast('Карта не загрузилась, показываем схему'); } } }, 5000); } } else S.mapMode = 'schema'; render(); },
+  'map-zoom'(v){ if(LF.map && document.querySelector('#phone .lmap-host')){ +v > 0 ? LF.map.zoomIn() : LF.map.zoomOut(); return; } const z0 = S.mapZoom || 1, z1 = Math.max(1, Math.min(3, z0 + (+v))); if(z1 === z0){ toast(+v > 0 ? 'Ближе уже некуда' : 'Это вся схема района'); return; } S.mapZoom = z1; render(); },
   'set-sort'(v){ S.sort = v; S.sheet = null; S.scroll.results = 0; render(); },
   district(){ S.sheet = 'district'; S.placeQ = ''; render(); },
   'place-d'(v){ S.district = v; S.placeQ = ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
