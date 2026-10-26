@@ -2879,11 +2879,23 @@ V.wallet = () => { const W = S.wallet, own = S.mode === 'owner', f = liveF(), L 
     (L && !own ? commBars(f) : '') +
     '<div class="box"><div style="font-weight:800">История</div>' + (W.hist.length ? W.hist.map(h => '<div class="row" style="align-items:flex-start"><span>' + h.t + '<div class="small muted">' + h.d + '</div></span><b style="white-space:nowrap">' + (h.s > 0 ? '+' : '−') + ' ' + rub(Math.abs(h.s)) + '</b></div>').join('') : '<div class="small muted">Операций пока нет</div>') + '</div>' +
     '<div class="small muted">Деньги на кошельке хранятся на счёте «Двора» в банке-партнёре. Вывести их на свою карту можно в любой момент.</div></div>'; };
-SH.wtop = () => { const a = S.wDraft || (S.live && S.live.pay === 'wallet' ? liveF().rent : 10000);
-  return sheet('<div class="h1" style="font-size:17px">Пополнить кошелёк</div><div class="chips">' + [...new Set([S.live ? liveF().rent : 0, 10000, 25000, 50000])].filter(Boolean).map(v => '<button class="chip' + (v === a ? ' on' : '') + '" data-act="wamt" data-v="' + v + '">' + rub(v) + '</button>').join('') + '</div>' +
-    '<label class="lbl" for="wamt">Своя сумма</label><input id="wamt" class="field" type="number" inputmode="numeric" min="100" step="100" value="' + a + '" autocomplete="off"><div class="small muted">С карты ' + S.wallet.card + ', без комиссии</div>' +
-    '<button class="btn p" data-act="wtop-do">Пополнить на ' + rub(a) + '</button>'); };
-SH.wout = () => sheet('<div class="h1" style="font-size:17px">Вывести на карту</div><div class="small muted">Всё, что на кошельке, придёт на карту ' + S.wallet.card + ' в течение минуты</div><div class="wbal">' + rub(S.wallet.bal) + '</div><button class="btn p" data-act="wout-do">Вывести ' + rub(S.wallet.bal) + '</button>');
+/* суммы кошелька: пополнить и вывести можно любую сумму от 100 ₽; вывести не больше, чем лежит, держать в кошельке не больше 600 000 ₽ */
+const W_MIN = 100, W_MAX = 600000;
+const wRoom = () => Math.max(0, W_MAX - S.wallet.bal);
+const wErr = (k, a) => a < W_MIN ? 'Минимум ' + rub(W_MIN) : k === 'out' ? (a > S.wallet.bal ? 'На кошельке ' + rub(S.wallet.bal) + ', больше вывести нельзя' : '')
+  : a > wRoom() ? (wRoom() < W_MIN ? 'Кошелёк полон: в нём можно держать до ' + rub(W_MAX) : 'В кошельке можно держать до ' + rub(W_MAX) + (S.wallet.bal ? ', добавить можно ещё ' + rub(wRoom()) : '')) : '';
+const wDef = k => k === 'out' ? S.wallet.bal : Math.min(S.live && S.live.pay === 'wallet' ? liveF().rent : 10000, wRoom());
+const wAmt = k => S.wDraft === null || S.wDraft === undefined ? wDef(k) : S.wDraft;
+const wBtn = (k, a) => '<button class="btn p" data-act="' + (k === 'out' ? 'wout-do' : 'wtop-do') + '"' + (wErr(k, a) ? ' disabled' : '') + '>' + (k === 'out' ? 'Вывести ' : 'Пополнить на ') + rub(a) + '</button>';
+const wField = (k, a) => '<label class="lbl" for="wamt">' + (k === 'out' ? 'Сумма' : 'Своя сумма') + '</label><input id="wamt" data-k="' + k + '" class="field" type="number" inputmode="numeric" min="' + W_MIN + '" step="100" value="' + (a || '') + '" autocomplete="off">' +
+  '<div class="small" id="werr" style="color:#E5484D' + (wErr(k, a) ? '' : ';display:none') + '">' + wErr(k, a) + '</div>';
+SH.wtop = () => { const a = wAmt('top');
+  return sheet('<div class="h1" style="font-size:17px">Пополнить кошелёк</div><div class="chips">' + [...new Set([S.live ? liveF().rent : 0, 10000, 25000, 50000])].filter(v => v && v <= wRoom()).map(v => '<button class="chip' + (v === a ? ' on' : '') + '" data-act="wamt" data-v="' + v + '">' + rub(v) + '</button>').join('') + '</div>' +
+    wField('top', a) + '<div class="small muted">С карты ' + S.wallet.card + ', без комиссии · сейчас на кошельке ' + rub(S.wallet.bal) + '</div>' + wBtn('top', a)); };
+SH.wout = () => { const a = wAmt('out'), b = S.wallet.bal;
+  return sheet('<div class="h1" style="font-size:17px">Вывести на карту</div><div class="small muted">На кошельке ' + rub(b) + '. Деньги придут на карту ' + S.wallet.card + ' в течение минуты</div><div class="chips">' +
+    [...new Set([b, Math.floor(b / 2 / 100) * 100])].filter(v => v >= W_MIN).map((v, i) => '<button class="chip' + (v === a ? ' on' : '') + '" data-act="wamt" data-v="' + v + '">' + (i ? 'Половину, ' : 'Всё, ') + rub(v) + '</button>').join('') + '</div>' +
+    wField('out', a) + wBtn('out', a)); };
 
 /* payments box in «Мой дом» */
 function payBox(f){ const L = S.live, d = dos(f), pm = L.pay || 'sbp', day = payDayOf(), W = S.wallet;
@@ -2958,12 +2970,12 @@ Object.assign(A, {
   'insp-del'(v){ const [k, j] = v.split(':'), I = inspOf(S.cur); I.ph[k].splice(+j, 1); render(); },
   'insp-save'(){ const f = byId(S.cur), I = inspOf(f.id), n = Object.values(I.ph).flat().length; I.saved = true;
     chatOf(f).push({sys:true, t:'Осмотр сохранён: отмечено ' + Object.values(I.ck).filter(Boolean).length + ', фото ' + n + '. ' + f.owner + ' увидит их в акте приёма-передачи'}); S.chatBottom = true; back(); toast('Осмотр сохранён'); },
-  wtop(){ S.wDraft = 0; S.sheet = 'wtop'; render(); },
+  wtop(){ S.wDraft = null; S.sheet = 'wtop'; render(); },
   wamt(v){ S.wDraft = +v; render(); },
-  'wtop-do'(){ const a = S.wDraft || (S.live && S.live.pay === 'wallet' ? liveF().rent : 10000); if(a < 100) return; wAdd('Пополнение с карты ' + S.wallet.card, a); if(S.live && S.live.late && S.wallet.bal >= liveF().rent) MA['m-payday-do']();
+  'wtop-do'(){ const a = wAmt('top'); if(wErr('top', a)) return; wAdd('Пополнение с карты ' + S.wallet.card, a); if(S.live && S.live.late && S.wallet.bal >= liveF().rent) MA['m-payday-do']();
     S.sheet = null; render(); toast('Кошелёк пополнен на ' + rub(a)); },
-  wout(){ S.sheet = 'wout'; render(); },
-  'wout-do'(){ const a = S.wallet.bal; wAdd('Вывод на карту ' + S.wallet.card, -a); S.sheet = null; render(); toast(rub(a) + ' отправили на карту'); },
+  wout(){ S.wDraft = null; S.sheet = 'wout'; render(); },
+  'wout-do'(){ const a = wAmt('out'); if(wErr('out', a)) return; wAdd('Вывод на карту ' + S.wallet.card, -a); S.sheet = null; render(); toast(rub(a) + ' отправили на карту'); },
   wauto(){ S.wallet.auto = !S.wallet.auto; render(); toast(S.wallet.auto ? 'Автопополнение включено' : 'Автопополнение выключено'); },
   paym(){ S.sheet = 'paym'; render(); },
   'paym-set'(v){ const f = liveF(), was = S.live.pay; S.live.pay = v; S.sheet = null; if(v !== was){ S.live.paid = false; S.live.late = false; }
@@ -2992,7 +3004,10 @@ Object.assign(A, {
 document.addEventListener('change', e => { const t = e.target;
   if(t.id && t.id.startsWith('inspf-') && t.files.length) inspFiles(t);
   if(t.id === 'rcpt' && t.files.length && S.live){ S.live.paid = true; S.live.receipt = true; const f = liveF(); chatOf(f).push({me:true, t:'Оплатил' + (S.user && /а$/.test(S.user.name) ? 'а' : '') + ' аренду по СБП, чек во вложении.'}); render(); toast('Чек приложен, ' + f.owner + ' его увидит'); } });
-document.addEventListener('input', e => { if(e.target.id === 'wamt'){ S.wDraft = +e.target.value || 0; const b = document.querySelector('#phone [data-act="wtop-do"]'); if(b) b.textContent = 'Пополнить на ' + rub(S.wDraft || 0); } });
+document.addEventListener('input', e => { if(e.target.id === 'wamt'){ const k = e.target.dataset.k || 'top'; S.wDraft = Math.floor(+e.target.value || 0);
+  const b = document.querySelector('#phone [data-act="' + (k === 'out' ? 'wout-do' : 'wtop-do') + '"]'), er = document.getElementById('werr'), t = wErr(k, S.wDraft);
+  if(b){ b.textContent = (k === 'out' ? 'Вывести ' : 'Пополнить на ') + rub(S.wDraft); b.disabled = !!t; } if(er){ er.textContent = t; er.style.display = t ? '' : 'none'; }
+  document.querySelectorAll('#phone [data-act="wamt"]').forEach(c => c.classList.toggle('on', +c.dataset.v === S.wDraft)); } });
 
 Object.assign(MA, {
   'm-viewday'(){ M.viewDay = !M.viewDay; const bk = Object.entries(S.booking).find(([, b]) => b.status === 'ok');
