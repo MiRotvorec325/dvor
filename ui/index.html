@@ -1048,6 +1048,23 @@ body{--desk:#E9E2D8}
 
 .poi.metro,.ph .poi.metro{border-color:#E5484D;color:#E5484D;z-index:3}
 .poi.metro b{display:inline-grid;place-items:center;width:13px;height:13px;border-radius:50%;background:#E5484D;color:#FFFFFF;font-size:8px;font-weight:800}
+
+/* «Рядом» */
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:12px;background:var(--soft);flex:none}
+.seg button{height:36px;border-radius:9px;font-size:14px;font-weight:700;color:var(--mute);text-align:center}
+.seg button.on{background:var(--paper);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.nitem{gap:6px}
+.nbtn{height:42px;margin-top:4px;text-decoration:none}
+a.btn{display:flex}
+.ckline{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ckline .link{white-space:nowrap;padding-top:6px}
+a.link{color:inherit}
+.ph .ck{border-color:#6E675E}
+.ph[data-theme=light] .ck{border-color:#B8AFA3}
+
+.ph .seg{background:var(--soft);border-radius:22px}
+.ph .seg button{border-radius:18px}
+.ph .seg button.on{background:var(--fill);box-shadow:none}
 </style>
 
 <div class="desk">
@@ -1089,6 +1106,7 @@ const ICP = {
   kid:'<circle cx="12" cy="12" r="8.5"/><path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2M9.3 9.8v.2M14.7 9.8v.2"/>',
   book:'<path d="M3.5 6.2c2.8-1.1 5.6-.9 8.5 1 2.9-1.9 5.7-2.1 8.5-1v12c-2.8-1.1-5.6-.9-8.5 1-2.9-1.9-5.7-2.1-8.5-1z"/><path d="M12 7.2v12"/>',
   cross:'<path d="M12 5v14M5 12h14"/>',
+  compass:'<circle cx="12" cy="12" r="8.5"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
   wallet:'<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5z"/><circle cx="16" cy="13.5" r="1.2"/>',
   gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6"/>',
   help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 16.8v.2"/>',
@@ -1667,7 +1685,7 @@ function back(){
 }
 function tab(t){
   S.tab = t;
-  const map = {search:'results', map:'map', fav:'fav', chats:'chats', profile:'profile', home:'home', cabinet:'cabinet', oreq:'oreq', omsg:'omsg', otenants:'otenants'};
+  const map = {search:'results', map:'map', fav:'fav', chats:'chats', profile:'profile', home:'home', near:'near', cabinet:'cabinet', oreq:'oreq', omsg:'omsg', otenants:'otenants'};
   saveScroll(); S.stack = []; S.screen = map[t]; S.sheet = null; render();
 }
 const keyOf = () => S.screen + (S.screen==='card'||S.screen==='chat'||S.screen==='owner'||S.screen==='reviews' ? S.cur + (S.revKind||'') : '') + (S.screen==='anketa' ? S.step : '');
@@ -1689,8 +1707,8 @@ function distPick(p, k, v, label, chips){
 }
 function tabs(){
   const items = S.mode === 'owner' ? [['cabinet','Объявления'],['oreq','Просмотры'],['omsg','Чаты'],['otenants','Жильцы'],['profile','Профиль']]
-    : S.live ? [['home','Дом'],['chats','Чаты'],['profile','Профиль']] : [['search','Поиск'],['map','Карта'],['fav','Избранное'],['chats','Чаты'],['profile','Профиль']];
-  return '<nav class="tabs">' + items.map(([k,l]) => '<button data-act="tab" data-v="' + k + '" class="' + (S.tab===k?'cur':'') + '"><i>' + ic({search:'search',map:'map',fav:'heart',chats:'chat',profile:'user',home:'home',cabinet:'list',oreq:'clock',omsg:'chat',otenants:'users'}[k], 22) + '</i>' + l + '</button>').join('') + '</nav>';
+    : S.live ? [['home','Дом'],['near','Рядом'],['chats','Чаты'],['profile','Профиль']] : [['search','Поиск'],['map','Карта'],['fav','Избранное'],['chats','Чаты'],['profile','Профиль']];
+  return '<nav class="tabs">' + items.map(([k,l]) => '<button data-act="tab" data-v="' + k + '" class="' + (S.tab===k?'cur':'') + '"><i>' + ic({search:'search',map:'map',fav:'heart',chats:'chat',profile:'user',home:'home',near:'compass',cabinet:'list',oreq:'clock',omsg:'chat',otenants:'users'}[k], 22) + '</i>' + l + '</button>').join('') + '</nav>';
 }
 function heart(f){ const on = S.fav.includes(f.id); return '<span class="heart" role="button" tabindex="0" data-act="fav" data-v="' + f.id + '" aria-label="' + (on?'Убрать из избранного':'В избранное') + '">' + (on?ic('heartf', 22):ic('heart', 22)) + '</span>'; }
 function cmpBar(){
@@ -3284,7 +3302,7 @@ V.deal = () => { const D = S.deal, f = byId(D.id), d = dos(f), st = dealStage(D)
 V.moved = () => { const f = byId(S.deal.id), D = S.deal;
   return '<div class="body" style="justify-content:center;align-items:center;text-align:center;gap:14px"><div class="okring">' + ic('check', 40) + '</div><div class="h1">Вы заселились!</div>' +
     '<div class="muted" style="font-size:14px;line-height:20px;max-width:300px">' + (D.depAt === 'dvor' ? 'Первый месяц ушёл ' + datv(f) + ', залог ' + rub(f.dep) + ' хранится на залоговом счёте «Двора» и вернётся при выезде.' : 'Акт подписан, копия в чате с ' + instr(f) + '.') + ' Аренда, коммуналка и счётчики теперь в «Моём доме».</div></div>' +
-    '<div class="foot one" style="gap:8px"><button class="btn p" data-act="moved-home">Перейти в «Мой дом»</button></div>'; };
+    '<div class="foot one" style="gap:8px"><button class="btn p" data-act="moved-home">Перейти в «Мой дом»</button><button class="btn s" data-act="moved-near">Что интересного рядом</button></div>'; };
 function dealFinish(){ const D = S.deal, f = byId(D.id), d = dos(f); D.actDone = true;
   S.live = {id:f.id, since:D.moveIn, paid:true, meters:false, pay:D.pay === 'wallet' ? 'wallet' : D.pay, payDay:d.payDay, dep:D.depAt || (D.pay === 'wallet' ? 'dvor' : 'owner'), receipt:D.receipt}; noteFlat(f.id);
   chatOf(f).push({sys:true, t:'Акт подписан обеими сторонами. Добро пожаловать домой!'});
@@ -3434,6 +3452,60 @@ function dNonCashPrep(D, f){ const adv = D.booked === true ? D.adv : 0; D.cashSu
 function dAdvSettle(D, f){ const adv = D.booked === true ? D.adv : 0; if(adv && !D.depW && D.advTo === 'back') wAdd('Возврат аванса · ' + f.short, adv); }
 function dSbpPaid(receipt){ const D = S.deal, f = byId(D.id); dNonCashPrep(D, f); D.paid = true; D.receipt = receipt; dAdvSettle(D, f); }
 const depF = F => +F.dep || +F.price || 0;
+
+/* ---------- «Рядом»: settling in the district and the city after moving in ---------- */
+const AFISHA = {'Москва':'msk','Санкт-Петербург':'spb','Казань':'kazan','Екатеринбург':'ekaterinburg','Новосибирск':'novosibirsk','Нижний Новгород':'nnovgorod','Самара':'samara','Уфа':'ufa','Краснодар':'krasnodar','Пермь':'perm','Воронеж':'voronezh','Челябинск':'chelyabinsk','Омск':'omsk','Тюмень':'tyumen','Сочи':'sochi'};
+const afishaUrl = cat => { const c = AFISHA[S.anketa.city]; return c ? 'https://www.afisha.ru/' + c + '/schedule_' + cat + '/' : 'https://www.afisha.ru/'; };
+const NCAT = [['all','Всё'],['kids','Детям'],['park','Парки'],['master','Мастер-классы'],['cinema','Кино'],['theatre','Театр'],['concert','Концерты']];
+const NLBL = {kids:'секция', park:'парк', master:'мастер-класс', cinema:'кино', theatre:'спектакль', concert:'концерт'};
+function nearItems(f){ const d = dos(f), city = S.anketa.city;
+  return {dist:[
+    {id:'yard', cat:'park', t:'Сквер и детская площадка', p:'во дворе, ' + f.short, w:'1 мин пешком', when:'всегда открыто', price:'бесплатно', age:'0+', act:'route'},
+    {id:'park', cat:'park', t:'Парк Победы', p:'аллеи, пруд, площадки для малышей', w:f.park + ' мин пешком', when:'ежедневно', price:'бесплатно', age:'0+', act:'route'},
+    {id:'foot', cat:'kids', t:'Футбол для детей 5–7 лет', p:f.schoolName + ', спортзал', w:f.school + ' мин пешком', when:'вт, чт · 17:30', price:'от 2 500 ₽ в месяц', age:'5+', act:'signup'},
+    {id:'pool', cat:'kids', t:'Бассейн: группа «Мама и малыш»', p:'бассейн «Дельфин»', w:'12 мин пешком', when:'сб, вс · 10:00', price:'от 600 ₽ за занятие', age:'0+', act:'signup'},
+    {id:'art', cat:'kids', t:'Рисование и лепка', p:'Дом детского творчества', w:'11 мин пешком', when:'пн, ср · 16:00', price:'бесплатно, бюджетная группа', age:'4+', act:'signup'},
+    {id:'clay', cat:'master', t:'Мастер-класс: лепим из глины', p:'детская библиотека', w:'9 мин пешком', when:'сб, 7 ноября · 12:00', price:'500 ₽', age:'4+', act:'signup'},
+    {id:'mall', cat:'cinema', t:'Мультфильмы в кинотеатре рядом', p:'кинотеатр в торговом центре', w:'14 мин пешком', when:'каждый день', price:'от 350 ₽', age:'0+', act:'buy', a:'cinema'}],
+  city:[
+    {id:'cpark', cat:'park', t:'Центральный парк культуры и отдыха', p:'аттракционы, каток зимой', w:'≈ 25 мин на транспорте', when:'ежедневно', price:'вход бесплатный', age:'0+', act:'route'},
+    {id:'puppet', cat:'theatre', t:'Спектакль «Три поросёнка»', p:'Театр кукол', w:'≈ 25 мин на транспорте', when:'вс, 8 ноября · 11:00', price:'от 400 ₽', age:'3+', act:'buy', a:'theatre'},
+    {id:'phil', cat:'concert', t:'Концерт «Музыкальные сказки»', p:'Филармония', w:'≈ 30 мин на транспорте', when:'сб, 14 ноября · 12:00', price:'от 600 ₽', age:'6+', act:'buy', a:'concert'},
+    {id:'cook', cat:'master', t:'Мастер-класс по выпечке для детей и родителей', p:'кулинарная студия в центре', w:'≈ 25 мин на транспорте', when:'сб, 7 ноября · 14:00', price:'1 500 ₽ за двоих', age:'5+', act:'buy', a:'kids'},
+    {id:'circus', cat:'kids', t:'Цирковое представление', p:'Цирк', w:'≈ 30 мин на транспорте', when:'сб, 21 ноября · 15:00', price:'от 800 ₽', age:'0+', act:'buy', a:'kids'},
+    {id:'tour', cat:'kids', t:'Экскурсия «' + city + ' для новичков»', p:'от центральной площади', w:'≈ 25 мин на транспорте', when:'вс, 8 ноября · 12:00', price:'900 ₽', age:'6+', act:'buy', a:'kids'},
+    {id:'drama', cat:'theatre', t:'Вечер для родителей: спектакль в драмтеатре', p:'Драматический театр', w:'≈ 25 мин на транспорте', when:'пт, 6 ноября · 19:00', price:'от 700 ₽', age:'16+', act:'buy', a:'theatre'},
+    {id:'cine', cat:'cinema', t:'Премьеры недели', p:'кинотеатры в центре', w:'≈ 20 мин на транспорте', when:'каждый день', price:'от 350 ₽', age:'0+', act:'buy', a:'cinema'}]}; }
+function nearTodo(f){ const d = dos(f), kids = S.anketa.children.filter(Boolean), school = kids.some(k => k === '7+ лет') || kids.some(k => k === '3–7 лет');
+  return [['reg', 'Оформить временную регистрацию', 'Нужна для сада и поликлиники. Через Госуслуги или МФЦ, ' + f.owner + ' подтвердит согласие', 'https://www.gosuslugi.ru/'],
+    ['clinic', 'Прикрепиться к поликлинике', f.clinicName + ', ' + f.clinic + ' мин пешком. Возьмите полис ОМС', 'https://www.gosuslugi.ru/'],
+    ['sad', 'Встать в очередь в детский сад', f.sadName + ' закреплён за домом, ' + f.sad + ' мин пешком', 'https://www.gosuslugi.ru/'],
+    school ? ['school', 'Узнать про запись в школу', f.schoolName + ' закреплена за домом, ' + f.school + ' мин пешком', null] : null,
+    ['card', 'Купить транспортную карту', 'Остановка «' + d.stopName + '»: ' + d.routes, null],
+    ['shops', 'Найти магазины и аптеку', 'Супермаркет и аптека в 5 минутах от дома', null]].filter(Boolean); }
+V.near = () => { const f = byId(S.live.id), N = S.near = S.near || {scope:'dist', cat:'all', done:{}, signed:{}}, I = nearItems(f), todo = nearTodo(f), dn = todo.filter(x => N.done[x[0]]).length;
+  const list = I[N.scope].filter(x => N.cat === 'all' || x.cat === N.cat);
+  const card = x => '<div class="box nitem"><div class="small muted">' + NLBL[x.cat] + ' · ' + x.age + '</div><b style="font-size:15px;line-height:20px">' + esc(x.t) + '</b>' +
+    '<div class="small">' + esc(x.p) + ' · ' + x.w + '</div><div class="row small"><span class="muted">' + x.when + '</span><span style="font-weight:700;text-align:right">' + x.price + '</span></div>' +
+    (x.act === 'buy' ? '<a class="btn p nbtn" href="' + afishaUrl(x.a) + '" target="_blank" rel="noopener">Купить билет на Афише ↗</a>'
+      : x.act === 'signup' ? (N.signed[x.id] ? '<div class="small" style="font-weight:800">✓ Вы записаны. Напомним за день</div>' : '<button class="btn p nbtn" data-act="near-sign" data-v="' + x.id + '">Записаться</button>')
+      : '<button class="btn s nbtn" data-act="near-route" data-v="' + x.id + '">Как дойти</button>') + '</div>';
+  return '<div class="top"><span class="t">Рядом</span><span class="small muted">' + f.short + '</span></div><div class="body" style="gap:12px">' +
+    '<div class="seg">' + [['dist', 'Мой район'], ['city', 'Весь город']].map(([k, l]) => '<button class="' + (N.scope === k ? 'on' : '') + '" data-act="near-scope" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
+    (N.scope === 'dist' ? '<div class="box"><div class="row"><b>Обжиться на новом месте</b><span class="small muted">' + dn + ' из ' + todo.length + '</span></div><div class="prog"><div style="width:' + Math.round(dn / todo.length * 100) + '%"></div></div>' +
+      todo.map(([k, t, sub, url]) => '<div class="ckline"><button class="ckrow" data-act="near-done" data-v="' + k + '" aria-pressed="' + !!N.done[k] + '"><span class="ck' + (N.done[k] ? ' on' : '') + '">✓</span><span style="display:flex;flex-direction:column;gap:2px"><span' + (N.done[k] ? ' class="muted" style="text-decoration:line-through"' : '') + '>' + t + '</span><span class="small muted">' + esc(sub) + '</span></span></button>' +
+        (url && !N.done[k] ? '<a class="link small" href="' + url + '" target="_blank" rel="noopener">Госуслуги ↗</a>' : '') + '</div>').join('') + '</div>' : '') +
+    '<div class="chips" style="flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -20px;padding:0 20px">' + NCAT.map(([k, l]) => '<button class="chip' + (N.cat === k ? ' on' : '') + '" data-act="near-cat" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
+    (list.length ? list.map(card).join('') : '<div class="small muted">' + (N.scope === 'dist' ? 'В вашем районе в этой категории пока ничего. Посмотрите весь город' : 'Пока ничего не нашли') + '</div>') +
+    '<div class="small muted">Билеты продаёт Афиша, «Двор» не берёт комиссию. Подборка обновляется каждую неделю по вашей анкете: возраст детей и район.</div></div>' + tabs(); };
+Object.assign(A, {
+  'near-scope'(v){ S.near.scope = v; S.near.cat = 'all'; render(true); },
+  'near-cat'(v){ S.near.cat = v; render(); },
+  'near-done'(v){ S.near.done[v] = !S.near.done[v]; render(); },
+  'near-sign'(v){ const x = nearItems(byId(S.live.id)).dist.concat(nearItems(byId(S.live.id)).city).find(i => i.id === v); S.near.signed[v] = true; butlerSay('Записал вас: ' + x.t + ', ' + x.when + ', ' + x.p + '. Напомню накануне.'); render(); toast('Записали: ' + x.t); },
+  'near-route'(v){ const x = nearItems(byId(S.live.id)).dist.concat(nearItems(byId(S.live.id)).city).find(i => i.id === v); toast(x.t + ': ' + x.w + ' от дома'); },
+  'moved-near'(){ S.stack = []; S.tab = 'near'; S.screen = 'near'; render(true); }
+});
 
 function renderMod(){
   const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
