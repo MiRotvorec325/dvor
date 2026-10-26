@@ -3729,7 +3729,7 @@ Object.assign(A, {
   'place-ok'(){ S.placeReset = true; placeApply(...S.placePend); if(S.screen === 'districts' && S.district === S.placePend[1]){ S.stack = []; S.tab = 'search'; S.screen = 'results'; render(true); } },
   districts(){ S.sheet = null; go('districts'); }
 });
-const distLink = () => cityDists(S.anketa.city) ? '<button class="dlink" data-act="districts"><span><b>Не знаете ' + (S.anketa.city === 'Москва' ? 'Москву' : 'город') + '? Сравните районы</b><div class="small muted">Сады, школы, дорога до работы, парки, шум и цены</div></span><span>' + ic('chev', 18) + '</span></button>' : '';
+const distLink = () => cityDists(S.anketa.city) ? '<button class="dlink" data-act="districts"><span><b>Не знаете город? Сравните районы</b><div class="small muted">Сады, школы, дорога до работы, парки, шум и цены</div></span><span>' + ic('chev', 18) + '</span></button>' : '';
 
 /* ---------- 2. viewing by video ---------- */
 function vShot(f, room){ const c = document.createElement('canvas'); c.width = 320; c.height = 240; const g = c.getContext('2d'), hue = (hashS(room) % 360);
