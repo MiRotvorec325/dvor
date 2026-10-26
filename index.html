@@ -1895,6 +1895,7 @@ const chatOf = f => S.chats[ck(f.id)] = S.chats[ck(f.id)] || [];
 function noteFlat(id){ const c = (S.cf = S.cf || {})[ck(id)] = S.cf[ck(id)] || []; if(!c.includes(id)) c.push(id); }
 const chatFlats = k => ((S.cf || {})[k] || [k]).map(id => byId(id).short).join(', ');
 const datv = f => f.ownerG === 'm' ? f.owner + 'у' : f.owner.replace(/а$/, 'е');
+const accF = f => f.ownerG === 'm' ? gen(f) : f.owner.replace(/а$/, 'у').replace(/я$/, 'ю');
 function flatInText(f, text){ const q = findTxt(text), fs = ownerFlats(f); if(fs.length < 2) return f;
   const hit = fs.filter(x => { const [st, n] = findTxt(x.short).split(', '), stem = st.slice(0, 5); if(!q.includes(stem)) return false;
     return fs.filter(y => findTxt(y.short).startsWith(stem)).length < 2 || new RegExp(stem + '\\D{0,14}' + n + '(\\D|$)').test(q); });
@@ -2991,7 +2992,9 @@ Object.assign(MA, {
   'm-datecounter'(){ M.dateCounter = !M.dateCounter; renderMod(); },
   'm-cardfail'(){ M.cardFail = !M.cardFail; renderMod(); },
   'm-live'(){ clearTimers(); const th = S.theme; S = fresh(); S.theme = th; S.user = {...DEMO_USER}; S.anketa.city = HAS.city; S.district = HAS.district;
-    S.liveId = 'B'; A['live-do'](); wAdd('Пополнение с карты ' + S.wallet.card, 20000); render(); },
+    S.liveId = 'B'; const d0 = mAdd(TODAY, -2); S.liveDay = dTxt(d0); A['live-do'](); clearTimers(); S.live.sinceD = d0; S.toast = null; const f0 = byId('B'), c0 = chatOf(f0); c0.length = 0;
+    c0.push({sys:true, t:'Вы живёте здесь с ' + dTxtY(d0) + '. Договор и акт приёма-передачи подписаны'}); S.butler = S.butler.filter(m => !/Поздравляю с новым домом/.test(m.t)); S.liveDay = null;
+    wAdd('Пополнение с карты ' + S.wallet.card, 20000); render(); },
   'm-pre'(){ if(S.mode === 'owner'){ toast('Напоминание за 3 дня получают жильцы'); return; } const f = liveF(), L = S.live, W = S.wallet;
     const t = L.pay === 'wallet' ? (W.bal >= f.rent ? 'На кошельке хватает, ничего делать не нужно' : 'На кошельке ' + rub(W.bal) + (W.auto ? ', недостающее пополним с карты сами' : '. Пополните или включите автопополнение'))
       : 'Оплата ' + PAYM[L.pay] + ' ' + datv(f) + '. Убедитесь, что деньги готовы';
@@ -3489,10 +3492,10 @@ V.moveout = () => { const f = byId(S.live.id), d = dos(f), M = moOf(), I = inspO
   const s1 = '<div class="box">' + stepHead(1, 'Дата выезда', M.notice ? 'done' : 'now') +
     (M.notice ? '<div class="small">Выезжаете ' + M.date + '. ' + f.owner + ' предупреждён' + ga(f, 'а') + '.</div>'
       : '<div class="small muted">' + d.early + '</div><div class="chips">' + dates.map(([k, l]) => '<button class="chip' + (M.date === l ? ' on' : '') + '" data-act="mo-date" data-v="' + l + '">' + l + '</button>').join('') + '</div>' +
-        '<button class="btn p" style="height:44px" data-act="mo-notice"' + (M.date ? '' : ' disabled') + '>' + (M.date ? 'Предупредить ' + datv(f) : 'Выберите дату') + '</button>') + '</div>';
+        '<button class="btn p" style="height:44px" data-act="mo-notice"' + (M.date ? '' : ' disabled') + '>' + (M.date ? 'Предупредить ' + accF(f) : 'Выберите дату') + '</button>') + '</div>';
   const nIn = Object.values(I.ph).flat().length, nOut = Object.values(M.ph).flat().length;
   const s2 = '<div class="box">' + stepHead(2, 'Акт при выезде', M.sent ? 'done' : M.notice ? 'now' : '') +
-    (!M.notice ? '<div class="small muted">После того как предупредите ' + datv(f) + ', сфотографируйте комнаты: сравним с фото при въезде</div>'
+    (!M.notice ? '<div class="small muted">После того как предупредите ' + accF(f) + ', сфотографируйте комнаты: сравним с фото при въезде</div>'
       : M.sent ? '<div class="small">Отправили акт: фото при выезде ' + nOut + ', при въезде было ' + nIn + '</div>'
       : '<div class="small muted">Сфотографируйте те же места, что при въезде. Рядом покажем, как было тогда</div>' +
         R.map(([k, l]) => { const a = I.ph[k] || [], b = M.ph[k] || []; return '<div class="morow"><b>' + l + '</b><div class="mopair"><div><span class="small muted">при въезде</span><div class="ithumbs">' + (a.length ? a.slice(0, 2).map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') : '<span class="small muted">нет фото</span>') + '</div></div>' +
@@ -3520,7 +3523,7 @@ V.moveout = () => { const f = byId(S.live.id), d = dos(f), M = moOf(), I = inspO
 Object.assign(A, {
   mo(){ moOf(); go('moveout'); },
   'mo-date'(v){ S.mo.date = v; render(); },
-  'mo-notice'(){ const f = byId(S.live.id), M = S.mo; M.notice = true; chatOf(f).push({me:true, t:'Здравствуйте! Мы съезжаем ' + M.date + '. Давайте договоримся, когда сверим квартиру и передадим ключи.'}); render(); toast('Предупредили ' + datv(f));
+  'mo-notice'(){ const f = byId(S.live.id), M = S.mo; M.notice = true; chatOf(f).push({me:true, t:'Здравствуйте! Мы съезжаем ' + M.date + '. Давайте договоримся, когда сверим квартиру и передадим ключи.'}); render(); toast('Предупредили ' + accF(f));
     later(1500, () => ownerSay(f, 'Спасибо, что предупредили заранее! ' + M.date + ' подойдёт, сверим квартиру по акту.')); },
   'mo-ok'(){ S.mo.ok = !S.mo.ok; render(); },
   'mo-send'(){ const f = byId(S.live.id), M = S.mo; M.sent = true; chatOf(f).push({sys:true, t:'Вы отправили акт выезда: ' + Object.values(M.ph).flat().length + ' фото'}); render(); toast('Акт отправлен ' + datv(f));
@@ -3754,7 +3757,7 @@ setupTask = t => { M.viewDay = false; if(S.vcIv) clearInterval(S.vcIv); if(!['t6
 BUT_Q.push('Как работает бронь?', 'Как вернуть залог?');
 const _butAns11 = butAns;
 butAns = t => { const q = findTxt(t), f = S.live && liveF(), D = S.deal && !S.deal.cancelled ? S.deal : null;
-  if(/залог|депозит/.test(q) && /верн|возвр|получ|выезд|съезж/.test(q)) return f ? (S.live.dep === 'dvor' ? 'Ваш залог ' + rub(f.dep) + ' лежит на залоговом счёте «Двора». При выезде откройте «Мой дом» → «Мы съезжаем»: предупредите ' + datv(f) + ', сфотографируйте квартиру, и после сверки залог вернётся на кошелёк.' : 'Залог ' + rub(f.dep) + ' у ' + gen(f) + ', вернёт он' + ga(f, 'а') + ' при выезде. Оформите выезд в «Мой дом» → «Мы съезжаем», с актом и фото спорить не придётся.') : 'Если платить въезд через кошелёк, залог хранится на залоговом счёте «Двора» и возвращается при выезде по акту. Если отдать его наличными, вернуть должен собственник.';
+  if(/залог|депозит/.test(q) && /верн|возвр|получ|выезд|съезж/.test(q)) return f ? (S.live.dep === 'dvor' ? 'Ваш залог ' + rub(f.dep) + ' лежит на залоговом счёте «Двора». При выезде откройте «Мой дом» → «Мы съезжаем»: предупредите ' + accF(f) + ', сфотографируйте квартиру, и после сверки залог вернётся на кошелёк.' : 'Залог ' + rub(f.dep) + ' у ' + gen(f) + ', вернёт он' + ga(f, 'а') + ' при выезде. Оформите выезд в «Мой дом» → «Мы съезжаем», с актом и фото спорить не придётся.') : 'Если платить въезд через кошелёк, залог хранится на залоговом счёте «Двора» и возвращается при выезде по акту. Если отдать его наличными, вернуть должен собственник.';
   if(/брон|аванс/.test(q)) return 'Бронь держит квартиру за вами до заезда. Аванс — 10% месячной аренды, он лежит на залоговом счёте «Двора» и при въезде становится частью залога. В первый час бронь можно отменить бесплатно. Позже сторона, которая отменяет, платит другой ещё 5% аренды. Меньше чем за неделю до заезда — только через поддержку.';
   if(/отмен/.test(q)) return 'Бронь: в первый час отмена бесплатная, потом отменяющая сторона платит другой 5% аренды сверху аванса. Меньше чем за неделю до заезда отменить можно только через поддержку, если случилось что-то не по вашей вине.';
   if(/безопасн|сделк|защищ/.test(q)) return 'Безопасная сделка: вы платите въезд через кошелёк, первый месяц лежит на защищённом счёте, пока вы не подпишете акт при заселении, а залог остаётся у «Двора» до выезда. Если что-то пойдёт не так, деньги не пропадут.';
@@ -3849,7 +3852,7 @@ function fixReply(i){ const f = liveF(), x = fixes()[i];
   if(MV12.fixNo && !x.nudged){ x.nudged = true; x.st = 'wait';
     later(2500, () => { fixLog(x, 'Прошли сутки без ответа. Дворецкий напомнил ' + datv(f)); butlerSay(f.owner + ' не ответил' + ga(f, 'а') + ' на заявку «' + (x.t || fixName(x)) + '» за сутки. Я напомнил' + '. Если ответа не будет ещё сутки, подключу поддержку.'); pushNote('Напомнили ' + datv(f), 'Заявка о поломке без ответа сутки', {to:'fixd'}); });
     later(6000, () => { x.st = 'sup'; fixLog(x, 'Двое суток без ответа. Подключили поддержку'); S.support.push({me:false, t:'Заявка о поломке без ответа 48 часов. Мы связываемся с собственником.'});
-      later(3500, () => { x.st = 'master'; x.ok = true; x.when = 'завтра, 10:00–12:00'; fixLog(x, 'Поддержка дозвонилась ' + datv(f) + ': мастер придёт ' + x.when); S.support.push({me:false, t:'Дозвонились до ' + gen(f) + '. Мастер придёт ' + x.when + '.'}); pushNote('Поддержка договорилась', 'Мастер придёт ' + x.when, {to:'fixd'}); }); });
+      later(3500, () => { x.st = 'master'; x.ok = true; x.when = 'завтра, 10:00–12:00'; fixLog(x, 'Поддержка дозвонилась до ' + gen(f) + ': мастер придёт ' + x.when); S.support.push({me:false, t:'Дозвонились до ' + gen(f) + '. Мастер придёт ' + x.when + '.'}); pushNote('Поддержка договорилась', 'Мастер придёт ' + x.when, {to:'fixd'}); }); });
     return; }
   if(MV12.fixBlame && !x.blamed){ x.blamed = true; ownerSay(f, 'Это вы сломали, раньше всё работало. Чините за свой счёт.', () => { x.st = 'blame'; fixLog(x, f.owner + ' считает поломку вашей виной'); pushNote(f.owner + ' ответил' + ga(f, 'а') + ' на заявку', 'Считает, что сломали вы', {to:'fixd'}); }); return; }
   if(MV12.fixSelf){ ownerSay(f, 'Спасибо, что сказали! Вызовите, пожалуйста, мастера сами, а я верну деньги. Пришлите чек.', () => { x.st = 'self'; fixLog(x, f.owner + ' просит вызвать мастера самим и вернёт деньги'); pushNote(f.owner + ' ответил' + ga(f, 'а') + ' на заявку', 'Просит починить самим и вернёт деньги', {to:'fixd'}); }); return; }
@@ -3935,7 +3938,7 @@ Object.assign(A, {
     later(1200, () => { if(R.ask >= mid || R.counter){ ownerSay(f, 'Хорошо, договорились: ' + R.term + ' мес. по ' + rub(R.ask) + '.', () => { R.to = R.ask; R.st = 'sign'; pushNote(f.owner + ' согласил' + (f.ownerG === 'f' ? 'ась' : 'ся'), 'Подпишите допсоглашение', {to:'home'}); }); }
       else ownerSay(f, 'Совсем без повышения не могу, цены выросли. Давайте ' + rub(mid) + '?', () => { R.to = mid; R.counter = true; R.st = 'offer'; pushNote(f.owner + ' предлагает ' + rub(mid), 'Ответьте в «Моём доме»', {to:'home'}); }); }); },
   'rn-sign'(){ const f = liveF(), R = S.live.rn; R.st = 'done'; R.till = dTxtY(mAdd(S.live.endD, R.term)); S.live.rentNext = R.to; chatOf(f).push({sys:true, t:'Допсоглашение подписано: договор продлён до ' + R.till + ', аренда ' + rub(R.to)}); render(); toast('Договор продлён до ' + R.till); },
-  'rn-no'(){ const f = liveF(), R = S.live.rn; R.st = 'no'; S.sheet = null; const M0 = moOf(); M0.date = S.live.end; chatOf(f).push({me:true, t:'Спасибо, но продлевать не будем. Съедем ' + S.live.end + '.'}); render(); toast('Предупредили ' + datv(f)); }
+  'rn-no'(){ const f = liveF(), R = S.live.rn; R.st = 'no'; S.sheet = null; const M0 = moOf(); M0.date = S.live.end; chatOf(f).push({me:true, t:'Спасибо, но продлевать не будем. Съедем ' + S.live.end + '.'}); render(); toast('Предупредили ' + accF(f)); }
 });
 /* owner side: renewal */
 function oRnBox(L, i){ const T = L.tenant, R = T.rn; if(!R) return ''; const rent = +L.form.price || 42000, pc = [[0, 'Те же условия'], [3, '+3%'], [5, '+5%'], [10, '+10%']];
@@ -4013,7 +4016,7 @@ const GOS = {
 };
 const gosOf = k => (S.gos = S.gos || {})[k] = S.gos[k] || {st:null, docs:{}, pick:{0:true}, when:'sep', consent:null};
 const sadList = f => [[f.sadName, f.sad], ['Сад № ' + (hashS(f.id + 's1') % 180 + 20), f.sad + 6], ['Сад № ' + (hashS(f.id + 's2') % 180 + 20), f.sad + 11]];
-const gosRes = (k, f) => ({reg:'Регистрация до ' + dTxtY(mAdd(MV1, 11)) + '. Свидетельство в личном кабинете Госуслуг', clinic:'Прикрепили к поликлинике «' + f.clinicName + '». Записаться к врачу можно на Госуслугах',
+const gosRes = (k, f) => ({reg:'Регистрация до ' + dTxtY(mAdd(S.live.sinceD || MV1, dos(f).term)) + '. Свидетельство в личном кабинете Госуслуг', clinic:'Прикрепили к поликлинике «' + f.clinicName + '». Записаться к врачу можно на Госуслугах',
   sad:'Вы в очереди: место № 14 в «' + f.sadName + '». Пришлём пуш, когда очередь сдвинется', school:'Школа «' + f.schoolName + '» приняла заявление. Отнесите личное дело в течение недели'})[k];
 const _nearTodo12 = nearTodo;
 nearTodo = f => { const kids = S.anketa.children.filter(Boolean), small = kids.some(k => k !== '7+ лет') || S.anketa.noKids === 'expecting', big = kids.some(k => k === '7+ лет' || k === '3–7 лет');
@@ -4043,7 +4046,7 @@ V.gos = () => { const f = liveF(), k = S.gosK, G = GOS[k], g = gosOf(k), reg = g
 Object.assign(A, {
   gos(v){ S.gosK = v; gosOf(v); go('gos'); },
   'gos-doc'(v){ const g = gosOf(S.gosK); g.docs[v] = !g.docs[v]; render(); },
-  'gos-pick'(v){ const g = gosOf(S.gosK); if(!g.pick[v] || Object.values(g.pick).filter(Boolean).length > 1) g.pick[v] = !g.pick[v]; render(); },
+  'gos-pick'(v){ const g = gosOf(S.gosK); if(!g.pick[v] || Object.values(g.pick).filter(Boolean).length > 1){ g.pick[v] = !g.pick[v]; render(); } else toast('Выберите хотя бы один сад'); },
   'gos-when'(v){ gosOf(S.gosK).when = v; render(); },
   'gos-copy'(v){ try { navigator.clipboard.writeText(v).catch(() => {}); } catch(e){} toast('Адрес скопирован'); },
   'gos-consent'(){ const f = liveF(), g = gosOf('reg'); g.consent = 'ask'; chatOf(f).push({me:true, t:'Здравствуйте! Мы оформляем временную регистрацию на Госуслугах. Подтвердите, пожалуйста, согласие, когда придёт уведомление.'}); render(); toast('Попросили ' + gen(f));
@@ -4072,11 +4075,11 @@ Object.assign(MA, {
   'm-fixno'(){ MV12.fixNo = !MV12.fixNo; if(MV12.fixNo){ MV12.fixBlame = false; MV12.fixSelf = false; } renderMod(); },
   'm-fixblame'(){ MV12.fixBlame = !MV12.fixBlame; if(MV12.fixBlame){ MV12.fixNo = false; MV12.fixSelf = false; } renderMod(); },
   'm-raise'(){ MV12.raise = !MV12.raise; renderMod(); },
-  'm-renew'(){ if(!S.live) MA['m-live'](); const f = liveF(), d = dos(f); S.push = null; S.live.endD = mAdd(MV1, d.term); S.live.end = dTxtY(S.live.endD); S.live.rn = {st:'offer', term:d.term, to:MV12.raise ? r500(f.rent * 1.05) : f.rent};
+  'm-renew'(){ if(!S.live) MA['m-live'](); const f = liveF(), d = dos(f); S.push = null; S.live.endD = mAdd(TODAY, 1); S.live.sinceD = mAdd(S.live.endD, -d.term); S.live.since = dTxtY(S.live.sinceD); S.live.end = dTxtY(S.live.endD); S.live.rn = {st:'offer', term:d.term, to:MV12.raise ? r500(f.rent * 1.05) : f.rent};
     chatOf(f).push({me:false, t:'Здравствуйте! Договор заканчивается ' + S.live.end + '. Предлагаю продлить на ' + d.term + ' мес.' + (MV12.raise ? ' Цены выросли, аренда будет ' + rub(S.live.rn.to) + '.' : ' Условия те же.')});
     S.tab = 'home'; S.stack = []; S.screen = 'home'; pushNote('До конца договора месяц', f.owner + ' предлагает продлить' + (MV12.raise ? ' с повышением' : ''), {to:'home'}); },
   'm-ofix'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.fix = {t:'течёт кран на кухне', ph:fShot('Кухня'), st:'new', d:'сегодня'}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; pushNote(L.tenant.who + ': поломка', 'Течёт кран на кухне', {to:'otenants'}); },
-  'm-orenew'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.tillD = mAdd(TODAY, 1); L.tenant.till = dTxtY(L.tenant.tillD); L.tenant.rn = {st:'ask'}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; pushNote('Договор с ' + L.tenant.who.replace('Семья ', 'семьёй ') + ' заканчивается', 'Решите, продлевать ли', {to:'otenants'}); },
+  'm-orenew'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.tillD = mAdd(TODAY, 1); L.tenant.till = dTxtY(L.tenant.tillD); L.tenant.since = dTxtY(mAdd(L.tenant.tillD, -11)); L.tenant.rn = {st:'ask'}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; pushNote('Договор с ' + L.tenant.who.replace('Семья ', 'семьёй ') + ' заканчивается', 'Решите, продлевать ли', {to:'otenants'}); },
   'm-orev'(){ if(!S.own) ownerDemo(); const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.out = {date:dTxt(TODAY), n:12, res:'✓ Акт выезда подписан. ' + (L.tenant.dep === 'dvor' ? 'Залог вернули семье с залогового счёта «Двора»' : 'Залог вернули семье')}; S.mode = 'owner'; S.tab = 'otenants'; S.stack = []; S.screen = 'otenants'; render(); }
 });
 const _mg12 = modGroups;
