@@ -907,6 +907,12 @@ a.link{color:inherit}
 .pairline.no{color:var(--mute)}
 .body > .btn,.body > .box,.body > .dlink{flex-shrink:0}
 .vcv{background:#5B606B!important}
+
+/* moderator panel groups */
+.mgrp{border:1px solid #D0D3D9;border-radius:12px;overflow:hidden;flex:none}
+.mgrp.open{border-color:#16181D}
+.mgh{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:11px 12px;text-align:left;background:#F6F7F9;color:#16181D}
+.mgb{display:flex;flex-direction:column;gap:8px;padding:10px 12px}
 </style>
 
 <div class="desk">
@@ -2859,7 +2865,7 @@ function payBox(f){ const L = S.live, d = dos(f), pm = L.pay || 'sbp', day = pay
         : L.late ? '<span style="font-weight:700">Не хватило ' + rub(f.rent - W.bal) + ', платёж ждёт</span><button class="link" data-act="wtop">Пополнить</button>'
         : '<span class="muted">Спишем ' + day + ' числа · на кошельке ' + rub(W.bal) + '</span><button class="link" data-act="go" data-v="wallet">Кошелёк</button>')
     : pm === 'cash'
-      ? (L.paid === 'wait' ? '<span class="muted">Ждём, когда ' + f.owner + ' подтвердит получение</span>' : L.paid ? '<span>✓ ' + f.owner + ' подтвердил' + ga(f, 'а') + ' оплату</span>' : '<span class="muted">Ждёт оплаты</span><button class="link" data-act="pay-cash">Отдали наличными</button>')
+      ? (L.paid === 'deny' ? '<span style="font-weight:700">' + f.owner + ' не подтверждает оплату</span><span style="display:flex;gap:12px"><label class="link" for="lreceipt">Расписка</label><input type="file" id="lreceipt" accept="image/*" hidden><button class="link" data-act="deny-sup" data-v="live">В поддержку</button></span>' : L.paid === 'wait' ? '<span class="muted">Ждём, когда ' + f.owner + ' подтвердит получение</span>' : L.paid ? '<span>✓ ' + f.owner + ' подтвердил' + ga(f, 'а') + ' оплату</span>' : '<span class="muted">Ждёт оплаты</span><button class="link" data-act="pay-cash">Отдали наличными</button>')
       : (L.paid ? (L.receipt ? '<span>✓ Оплачено, чек приложен</span>' : '<span>Оплачено · чек не приложен</span><label class="link" for="rcpt">Приложить чек</label><input type="file" id="rcpt" accept="image/*,application/pdf" hidden>')
         : '<span class="muted">Ждёт оплаты</span><span style="display:flex;gap:12px"><label class="link" for="rcpt">Оплатили, приложить чек</label><input type="file" id="rcpt" accept="image/*,application/pdf" hidden></span>');
   return '<div class="box"><div style="font-weight:800">Платежи</div>' +
@@ -3084,6 +3090,7 @@ V.deal = () => { const D = S.deal, f = byId(D.id), d = dos(f), st = dealStage(D)
       : payDone ? '<div class="small">' + (pm === 'wallet' ? '✓ ' + rub(due) + ' оплачено. Первый месяц на защищённом счёте, ' + f.owner + ' получит его после подписания акта. Залог ' + rub(dep) + ' на залоговом счёте «Двора» до выезда.'
           : '✓ ' + (pm === 'cash' ? f.owner + ' подтвердил' + ga(f, 'а') + ' ' + rub(D.cashSum) + ' наличными.' : 'Оплачено ' + rub(D.cashSum) + ' по СБП' + (D.receipt ? ', чек приложен.' : ', чек приложите в течение 3 дней.')) +
             (D.depAt === 'dvor' ? ' Залог ' + rub(dep) + ' на залоговом счёте «Двора», мы его защитим.' : (adv ? (D.advTo === 'back' ? ' Аванс ' + rub(adv) + ' вернули вам на кошелёк.' : ' Аванс ' + rub(adv) + ' «Двор» перевёл ' + datv(f) + '.') : '') + ' Залог у собственника, при выезде вернёт он.')) + '</div>'
+      : D.paid === 'deny' ? denyDeal(D, f)
       : D.paid === 'wait' ? '<div class="small muted">Ждём, когда ' + f.owner + ' подтвердит получение ' + rub(D.cashSum) + ' наличными</div>'
       : [['wallet', 'Безопасная сделка через кошелёк', 'Первый месяц уйдёт собственнику после акта, залог останется на залоговом счёте «Двора». Рекомендуем'], ['cash', 'Наличными ' + datv(f), f.owner + ' подтвердит получение в приложении'], ['sbp', 'По СБП ' + datv(f), 'Приложите чек о переводе']]
           .map(([k, l, sub]) => '<button class="list-row" data-act="dpay-m" data-v="' + k + '"><span>' + l + '<div class="small muted">' + sub + '</div></span><span>' + (pm === k ? ic('check', 18) : '') + '</span></button>').join('') +
@@ -3101,6 +3108,7 @@ V.deal = () => { const D = S.deal, f = byId(D.id), d = dos(f), st = dealStage(D)
   const mBox = S.anketa.move === 'нет' && !D.movers.ordered ? '' : moversBox(D, ++n);
   const aBox = '<div class="box">' + stepHead(++n, 'Акт приёма-передачи', D.actDone ? 'done' : payDone ? 'now' : '') +
     (!payDone ? '<div class="small muted">В день заезда сверите квартиру с ' + instr(f) + ', запишете счётчики и подпишете акт. Фото с осмотра подтянутся сами.</div>'
+      : D.actDisp ? actDispBox(D, f)
       : D.actSent ? '<div class="small muted">Вы подписали. Ждём подпись ' + gen(f) + '</div>'
       : '<div class="small muted">Объект ' + f.params.split(' · ').slice(0, 2).join(', ') + ' · дата передачи ' + D.moveIn + '</div>' +
         [['a-el', 'Электросчётчик, кВт·ч', '14 532'], ['a-cold', 'Холодная вода, м³', '00213'], ['a-hot', 'Горячая вода, м³', '00148']].map(([id, l, ph]) => '<label class="small" style="display:flex;flex-direction:column;gap:4px">' + l + '<input id="' + id + '" class="field" type="text" inputmode="numeric" placeholder="' + ph + '" autocomplete="off"></label>').join('') +
@@ -3599,6 +3607,114 @@ A['bd-fmt'] = v => { S.bookDraft.fmt = v; render(); };
 
 const nameIns = n => /а$/.test(n) ? n.slice(0, -1) + 'ой' : /я$/.test(n) ? n.slice(0, -1) + 'ей' : /й$/.test(n) ? n.slice(0, -1) + 'ем' : n + 'ом';
 const _mlive9 = MA['m-live']; MA['m-live'] = () => { _mlive9(); if(S.live){ S.live.dep = 'dvor'; render(); } };
+/* ===================== iteration 10: owners and flats differ by region, disputes, grouped moderator panel ===================== */
+const NM_RU = {m:['Олег','Иван','Максим','Роман','Денис','Антон','Артём','Борис','Глеб','Вадим'], f:['Ирина','Марина','Елена','Ольга','Светлана','Анна','Екатерина','Вера','Оксана','Алёна']};
+const NM_CAU = {m:['Магомед','Руслан','Тимур','Аслан','Ахмед','Мурат','Заур','Ислам'], f:['Мадина','Залина','Фатима','Амина','Лейла','Карина','Диана','Марьям']};
+const REG_TAT = ['Казань','Набережные Челны','Альметьевск','Нижнекамск','Зеленодольск','Иннополис','Уфа','Стерлитамак'];
+const REG_CAU = ['Махачкала','Грозный','Нальчик','Владикавказ','Черкесск','Магас','Майкоп'];
+const nGen = (n, g) => g === 'm' ? n + 'а' : /[гкхжшчщ]а$/.test(n) ? n.slice(0, -1) + 'и' : n.replace(/а$/, 'ы');
+const nDat = (n, g) => g === 'm' ? n + 'у' : n.replace(/а$/, 'е');
+const nIns = (n, g) => g === 'm' ? n + 'ом' : n.replace(/а$/, 'ой');
+let REVS_B = null;
+function geoPeople(){ const city = S.anketa.city || HAS.city, key = GEO.key, C = cityOf(city);
+  if(!REVS_B) REVS_B = JSON.parse(JSON.stringify(REVS));
+  FLATS.forEach(f => { if(!f._p) f._p = {owner:f.owner, m2:f.m2, floor:f.floor, floors:f.floors, lift:f.lift}; });
+  const home = city === HAS.city && S.district === HAS.district, tat = REG_TAT.includes(city);
+  const owners = []; FLATS.forEach(f => { if(!owners.some(o => o[0] === f._p.owner)) owners.push([f._p.owner, f.ownerG]); });
+  const map = {};
+  if(tat) owners.forEach(([n]) => { map[n] = n; });
+  else { const P = REG_CAU.includes(city) ? NM_CAU : NM_RU, seed = hashS(key || city), pick = {m:0, f:0};
+    const pools = {m:P.m.slice().sort((a, b) => hashS(a + seed) - hashS(b + seed)), f:P.f.slice().sort((a, b) => hashS(a + seed) - hashS(b + seed))};
+    owners.forEach(([n, g]) => { map[n] = pools[g][pick[g]++ % pools[g].length]; }); }
+  FLATS.forEach(f => { f.owner = map[f._p.owner];
+    if(home || tat && city === HAS.city){ Object.assign(f, {m2:f._p.m2, floor:f._p.floor, floors:f._p.floors, lift:f._p.lift}); }
+    else { const h = hashS(key + f.id), k = C ? C[4] : .7, big = k >= 1.3 || !!METRO[city], small = k < .62;
+      f.m2 = Math.round(f._p.m2 * (.94 + (h % 13) / 100));
+      f.floors = big ? [9, 12, 14, 17, 22, 25][h % 6] : small ? [5, 5, 9, 9, 10][h % 5] : [5, 9, 10, 12, 16][h % 5];
+      f.floor = Math.max(1, Math.min(f.floors, Math.round(f._p.floor * f.floors / f._p.floors) || 1)); f.lift = f.floors > 5; }
+    f.freight = f.lift && f.floors >= 12;
+    f.params = f.rooms + '-комн. · ' + f.m2 + ' м² · ' + f.floor + '/' + f.floors + ' эт.' + (f.lift ? ' · лифт' : ''); });
+  Object.keys(REVS_B).forEach(id => { REVS[id] = REVS_B[id].map(r => { let t = r[3]; owners.forEach(([n, g]) => { const m = map[n]; if(m === n) return;
+    t = t.replace(new RegExp(nGen(n, g) + '(?![а-яё])', 'g'), nGen(m, g)).replace(new RegExp(nDat(n, g) + '(?![а-яё])', 'g'), nDat(m, g)).replace(new RegExp(nIns(n, g) + '(?![а-яё])', 'g'), nIns(m, g)).replace(new RegExp(n + '(?![а-яё])', 'g'), m); }); return [r[0], r[1], r[2], t]; }); }); }
+const _geoApply9 = geoApply;
+geoApply = () => { const k = GEO.key; _geoApply9(); if(GEO.key !== k || !REVS_B) geoPeople(); };
+
+/* ---------- disputes ---------- */
+const MV10 = {cashDeny:false, actDispute:false};
+function denyOwnerOk(f, then){ later(1500, () => ownerSay(f, 'Да, вижу расписку, это я перепутал' + ga(f, 'а') + ' с другой оплатой. Подтверждаю, всё получил' + ga(f, 'а') + '.', then)); }
+const _dpay10 = A['dpay-do'];
+A['dpay-do'] = () => { const D = S.deal; if(!D || D.pay !== 'cash' || !MV10.cashDeny) return _dpay10(); const f = byId(D.id), adv = D.booked === true ? D.adv : 0; if(adv && !D.depW && !D.advTo) return;
+  dNonCashPrep(D, f); D.paid = 'wait'; render(); toast('Отправили ' + datv(f) + ' на подтверждение');
+  later(1500, () => ownerSay(f, 'Наличные пока не получал' + ga(f, 'а') + '. Вы точно передали мне? Может, кому-то другому?', () => { D.paid = 'deny'; pushNote(f.owner + ' не подтверждает оплату', 'Приложите расписку или напишите в поддержку', {to:'deal'}); })); };
+const _paycash10 = A['pay-cash'];
+A['pay-cash'] = () => { if(!MV10.cashDeny) return _paycash10(); const f = liveF(); S.live.paid = 'wait'; render(); toast('Отправили ' + datv(f) + ' на подтверждение');
+  later(1500, () => ownerSay(f, 'За этот месяц наличных пока не видел' + ga(f, 'а') + '. Когда вы передали?', () => { S.live.paid = 'deny'; pushNote(f.owner + ' не подтверждает оплату', 'Приложите расписку или напишите в поддержку', {to:'home'}); })); };
+const denyDeal = (D, f) => '<div class="err" style="padding:10px 12px"><b>' + f.owner + ' говорит, что не получал' + ga(f, 'а') + ' ' + rub(D.cashSum) + '</b><span>Наличные «Двор» не видит, поэтому подтвердить оплату можно только распиской. Через кошелёк такого не бывает: платёж виден обоим.</span></div>' +
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="btn p" style="height:44px;font-size:13px" for="dreceipt">Фото расписки</label><button class="btn s" style="height:44px;font-size:13px" data-act="deny-sup" data-v="deal">В поддержку</button></div><input type="file" id="dreceipt" accept="image/*,application/pdf" hidden>';
+function denySolve(where){ const f = where === 'deal' ? byId(S.deal.id) : liveF();
+  if(where === 'deal'){ S.deal.paid = true; dAdvSettle(S.deal, f); } else S.live.paid = true; render(); }
+Object.assign(A, {
+  'deny-sup'(v){ const f = v === 'deal' ? byId(S.deal.id) : liveF(), sum = v === 'deal' ? S.deal.cashSum : f.rent; go('support'); supSend('Отдал' + (S.user && /а$/.test(S.user.name) ? 'а' : '') + ' ' + datv(f) + ' ' + rub(sum) + ' наличными, а ' + (f.ownerG === 'f' ? 'она' : 'он') + ' говорит, что не получал' + ga(f, 'а') + '.');
+    later(5200, () => { S.support.push({me:false, t:'Связались с ' + instr(f) + '. ' + f.owner + ' пересчитал' + ga(f, 'а') + ' и нашл' + (f.ownerG === 'f' ? 'а' : 'ёл') + ' ваши деньги: перепутал' + ga(f, 'а') + ' с другой оплатой. Оплату подтвердили. Совет на будущее: берите расписку или платите через кошелёк, там платёж видят обе стороны.'}); S.chatBottom = true; denySolve(v);
+      pushNote('Поддержка разобралась', f.owner + ' подтвердил' + ga(f, 'а') + ' оплату', {to:v === 'deal' ? 'deal' : 'home'}); }); }
+});
+document.addEventListener('change', e => { const t = e.target; if(!t.files || !t.files.length) return;
+  if(t.id === 'dreceipt' && S.deal){ const f = byId(S.deal.id); chatOf(f).push({me:true, t:'Вот фото расписки о передаче ' + rub(S.deal.cashSum) + '.'}); render(); toast('Расписка отправлена ' + datv(f)); denyOwnerOk(f, () => denySolve('deal')); }
+  if(t.id === 'lreceipt' && S.live){ const f = liveF(); chatOf(f).push({me:true, t:'Вот фото расписки за аренду ' + rub(f.rent) + '.'}); render(); toast('Расписка отправлена ' + datv(f)); denyOwnerOk(f, () => denySolve('live')); }
+  if(t.id === 'dmeter' && S.deal && S.deal.actDisp){ const D = S.deal, f = byId(D.id); chatOf(f).push({me:true, t:'Фото электросчётчика: ' + D.act.el + '.'}); render(); toast('Фото счётчика отправлено');
+    later(1500, () => ownerSay(f, 'Да, на фото ' + D.act.el + ', я ошибся' + (f.ownerG === 'f' ? 'ась' : '') + ' при записи. Подписываю акт.', () => { D.actDisp = null; dealFinish(); })); } });
+/* the owner disputes the meter reading in the move-in act */
+const _actSign10 = A['act-sign'];
+A['act-sign'] = () => { const D = S.deal; if(!MV10.actDispute || D.actDisp !== undefined) return _actSign10(); const f = byId(D.id);
+  D.act.el = ($('#a-el') || {}).value || '14 532'; D.act.cold = ($('#a-cold') || {}).value || ''; D.act.hot = ($('#a-hot') || {}).value || ''; D.actSent = true; render(); toast('Подписали акт. Ждём ' + gen(f));
+  const n = parseInt(String(D.act.el).replace(/\D/g, ''), 10) || 14532, other = String(n + 30).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  later(1500, () => ownerSay(f, 'По свету у меня записано ' + other + ', а в акте ' + D.act.el + '. Давайте сверим, прежде чем подписывать.', () => { D.actDisp = {other}; D.actSent = false; pushNote(f.owner + ' не подписывает акт', 'Расхождение в показаниях счётчика', {to:'deal'}); })); };
+const actDispBox = (D, f) => '<div class="err" style="padding:10px 12px"><b>' + f.owner + ' не согласен' + ga(f, 'на') + ' с показаниями</b><span>Электросчётчик: у вас ' + D.act.el + ', у ' + gen(f) + ' ' + D.actDisp.other + '. От этого зависит, кто платит за 30 кВт·ч.</span></div>' +
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="btn p" style="height:44px;font-size:13px" for="dmeter">Фото счётчика</label><button class="btn s" style="height:44px;font-size:13px" data-act="act-agree">Согласиться</button></div><input type="file" id="dmeter" accept="image/*" capture="environment" hidden>';
+A['act-agree'] = () => { const D = S.deal, f = byId(D.id); D.act.el = D.actDisp.other; render(); toast('Исправили показания на ' + D.actDisp.other); later(1200, () => ownerSay(f, 'Спасибо, подписываю.', () => { D.actDisp = null; dealFinish(); })); };
+
+/* ---------- moderator panel grouped by test scenarios ---------- */
+M.grp = M.grp || {};
+function modGroups(opt){ const dis = ' disabled style="opacity:.5"', has = S.live || (S.own && S.own.list.some(L => L.tenant)), waiting = Object.values(S.booking).some(b => b.status === 'wait'), B = byId('B');
+  const btn = (act, label, on) => '<button class="s"' + (on === false ? dis : '') + ' data-act="' + act + '">' + label + '</button>';
+  const G = [
+    ['search', 'Поиск, районы, выбор вдвоём', [M.ai, M.slow, MV9.pairNo],
+      opt('m-ai', 'Ошибка ИИ в сравнении', M.ai, '4а · в Т3, не у всех участников') + opt('m-slow', 'Долгая загрузка «Что рядом»', M.slow, '3а · при следующем открытии карточки') +
+      opt('m-pairno', 'Второму родителю не нравятся квартиры', !!MV9.pairNo, 'голосует «не то» с причиной') +
+      btn('m-pairjoin', 'Второй родитель открывает приглашение', !!(S.partner && S.partner.st !== 'in')) + btn('m-dist', 'Сравнение районов Москвы')],
+    ['chat', 'Чат и просмотр', [M.offline, !M.autoConfirm, M.woz, M.viewDay],
+      opt('m-off', 'Нет интернета в чате', M.offline, '5а · сообщения ждут сеть') + opt('m-auto', 'Собственник подтверждает сам', M.autoConfirm, 'через 6 секунд после запроса') +
+      opt('m-woz', 'Отвечает модератор', M.woz, 'автоответы в чате собственника выключены, ответы пишете вы') +
+      (M.woz ? '<div style="display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid #D0D3D9;border-radius:10px">' +
+        (M.pend ? '<div class="small"><b>Участник · ' + byId(M.pend.id).owner + ', ' + byId(M.pend.id).short + ':</b> ' + esc(M.pend.t) + '</div>' : '<div class="small muted">Ждём сообщения участника в чате собственника. Ответить можно и без вопроса: в текущий чат.</div>') +
+        '<input id="wozt" type="text" autocomplete="off" placeholder="Ответ, Enter = от собственника" value="' + esc(M.wozDraft) + '" style="height:38px;border:1px solid #D0D3D9;border-radius:8px;padding:0 10px;font:inherit">' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" data-act="m-woz-owner">От собственника</button><button class="s" data-act="m-woz-bot">От Дворецкого</button>' + (M.pend ? '<button class="s" data-act="m-woz-sug">Подставить автоответ</button>' : '') + '</div></div>' : '') +
+      opt('m-viewday', 'Сегодня день просмотра', !!M.viewDay, 'в чате появится чек-лист осмотра') +
+      btn('m-chat', 'Добавить переписку с ' + instr(B) + ' (' + B.short + ')', !(S.chats.B || []).length) + btn('m-confirm', 'Подтвердить просмотр сейчас', waiting) + btn('m-video', 'Видеопросмотр сегодня (' + B.short + ')')],
+    ['deal', 'Бронь и заселение', [M.hourPassed, M.weekLeft, M.cashPay],
+      opt('m-hour', 'Прошло больше часа после брони', !!M.hourPassed, 'бесплатная отмена недоступна') + opt('m-week', 'До заезда меньше недели', !!M.weekLeft, 'отменить бронь можно только через поддержку') +
+      opt('m-cashpay', 'Семья платит наличными (собственник)', !!M.cashPay, 'иначе через безопасную сделку') +
+      btn('m-ocancel', 'Собственник отменяет бронь', !!(S.deal && S.deal.booked === true && !S.deal.cancelled)) + btn('m-obook', 'Семья бронирует квартиру (собственник)', !!S.own)],
+    ['live', 'Жизнь в квартире', [M.cardFail, M.dateCounter],
+      btn('m-live', 'Семья уже живёт (' + B.short + ')') + btn('m-pre', 'За 3 дня до оплаты аренды', !!has) + btn('m-payday', 'Наступил день оплаты', !!has) +
+      opt('m-cardfail', 'На карте не хватит денег', !!M.cardFail, 'автопополнение не пройдёт в день оплаты') + opt('m-datecounter', 'На смену даты — встречное предложение', !!M.dateCounter, 'иначе вторая сторона соглашается') +
+      btn('m-receipt', 'Прошло 3 дня, чек по СБП не приложен', !!(S.live && S.live.pay === 'sbp' && S.live.paid === true && !S.live.receipt))],
+    ['out', 'Выезд и залог', [MV9.claim], opt('m-moclaim', 'Собственник найдёт повреждение при выезде', !!MV9.claim, 'скол на кухне, просит удержать часть залога') + btn('m-oout', 'Жильцы съезжают (собственник)', !!S.own)],
+    ['dispute', 'Спорные ситуации', [MV10.cashDeny, MV10.actDispute],
+      '<div class="small muted">Включите перед заданием. Ещё споры: отмена брони — в «Бронь и заселение», повреждение при выезде — в «Выезд и залог»</div>' +
+      opt('m-cashdeny', 'Собственник говорит, что не получал наличные', !!MV10.cashDeny, 'при въезде и при ежемесячной оплате наличными') +
+      opt('m-actdispute', 'Собственник спорит с показаниями в акте', !!MV10.actDispute, 'при подписании акта приёма-передачи')],
+    ['owner', 'Собственник', [],
+      (S.own && S.own.list.some(L => L.status === 'review') ? btn('m-own', 'Одобрить объявление собственника') : '') + btn('m-owner-demo', 'Собственник с двумя квартирами и жильцами') + btn('m-rented', 'Пуш «квартиру сдали» · сценарий 3')]];
+  return G.map(([k, title, flags, body]) => { const on = flags.filter(Boolean).length, open = !!M.grp[k];
+    return '<div class="mgrp' + (open ? ' open' : '') + '"><button class="mgh" data-act="m-grp" data-v="' + k + '"><b>' + title + '</b><span class="small muted">' + (on ? 'вкл: ' + on + ' · ' : '') + (open ? 'свернуть' : 'открыть') + '</span></button>' + (open ? '<div class="mgb">' + body + '</div>' : '') + '</div>'; }).join(''); }
+Object.assign(MA, {
+  'm-grp'(v){ M.grp[v] = !M.grp[v]; renderMod(); },
+  'm-cashdeny'(){ MV10.cashDeny = !MV10.cashDeny; renderMod(); },
+  'm-actdispute'(){ MV10.actDispute = !MV10.actDispute; renderMod(); },
+  'm-dist'(){ S.anketa.city = 'Москва'; S.district = ''; S.stack = []; S.tab = 'search'; S.screen = 'results'; go('districts'); }
+});
+
 function renderMod(){
   const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
   m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор';
@@ -3609,22 +3725,7 @@ function renderMod(){
     '<div class="muted small">Участник видит только телефон. Перед каждым заданием нажмите его карточку: экран и данные встанут в начальное состояние. Когда задание выполнено, скажите участнику «Спасибо, задание выполнено» и переходите к следующему.</div>' +
     '<h3>Задания · план теста, слайд 06</h3>' +
     TASKS.map(([n,t,k,done]) => '<button class="task" data-act="m-task" data-v="' + k + '"><b class="n">' + n + '</b><span>' + t + '<br><span class="muted small">Готово, когда ' + done + '</span></span></button>').join('') +
-    '<h3>Состояния из wireframe</h3>' +
-    opt('m-ai','Ошибка ИИ в сравнении',M.ai,'4а · в Т3, не у всех участников') +
-    opt('m-slow','Долгая загрузка «Что рядом»',M.slow,'3а · при следующем открытии карточки') +
-    opt('m-off','Нет интернета в чате',M.offline,'5а · сообщения ждут сеть') +
-    opt('m-auto','Собственник подтверждает сам',M.autoConfirm,'через 6 секунд после запроса') +
-    opt('m-woz','Отвечает модератор',M.woz,'автоответы в чате собственника выключены, ответы пишете вы') +
-    (M.woz ? '<div style="display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid #D0D3D9;border-radius:10px">' +
-      (M.pend ? '<div class="small"><b>Участник · ' + byId(M.pend.id).owner + ', ' + byId(M.pend.id).short + ':</b> ' + esc(M.pend.t) + '</div>' : '<div class="small muted">Ждём сообщения участника в чате собственника. Ответить можно и без вопроса: в текущий чат.</div>') +
-      '<input id="wozt" type="text" autocomplete="off" placeholder="Ответ, Enter = от собственника" value="' + esc(M.wozDraft) + '" style="height:38px;border:1px solid #D0D3D9;border-radius:8px;padding:0 10px;font:inherit">' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" data-act="m-woz-owner">От собственника</button><button class="s" data-act="m-woz-bot">От Дворецкого</button>' + (M.pend ? '<button class="s" data-act="m-woz-sug">Подставить автоответ</button>' : '') + '</div></div>' : '') +
-    modExtra(opt) + modExtra2(opt) + modExtra3(opt) +
-    '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (Амирхана, 21)</button>' +
-    '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
-    (S.own && S.own.list.some(L => L.status === 'review') ? '<button class="s" data-act="m-own">Одобрить объявление собственника</button>' : '') +
-    '<button class="s" data-act="m-owner-demo">Собственник с двумя квартирами и жильцами</button>' +
-    '<button class="s" data-act="m-rented">Пуш «квартиру сдали» · сценарий 3</button>' +
+    '<h3>Состояния по сценариям теста</h3>' + modGroups(opt) +
     '<button class="s" data-act="m-reset">Начать заново</button>';
   if(wf){ const w = $('#wozt'); if(w){ w.focus(); w.setSelectionRange(w.value.length, w.value.length); } }
 }
