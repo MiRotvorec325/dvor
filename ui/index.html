@@ -1213,7 +1213,22 @@ const placeTxt = (f, b) => b.place === 'stop' ? 'у остановки «' + dos
 const workTxt = f => S.anketa.commute.map(c => COMMUTE[c](f)).join('<br>');
 const byId = id => FLATS.find(f => f.id === id);
 /* ---------- owner chat: dossier per flat, owner's manner, topics; no AI ---------- */
-const DOS0 = {pets:'small', pay:'both', payDay:5, split:true, free:'с 1 ноября', term:11, crib:false, dish:false, cond:'в спальне', net:'Дом.ру, 100 Мбит, роутер оставлю',
+/* ---------- dates are counted from today, so the prototype never shows days that have passed ---------- */
+const DMON = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const DMN = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const DMP = ['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'];
+const TODAY = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); })();
+const CM = TODAY.getMonth(), PM = (CM + 11) % 12, NM = (CM + 1) % 12;
+const dAdd = n => new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate() + n);
+const mAdd = (d, m) => new Date(d.getFullYear(), d.getMonth() + m, d.getDate());
+const dTxt = d => d.getDate() + ' ' + DMON[d.getMonth()] + (d.getFullYear() !== TODAY.getFullYear() ? ' ' + d.getFullYear() : '');
+const dTxtY = d => d.getDate() + ' ' + DMON[d.getMonth()] + ' ' + d.getFullYear();
+const dDay = d => ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'][d.getDay()] + ', ' + dTxt(d);
+const isoD = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const nextWd = (wd, k) => { for(let i = 2; i < 9; i++){ const d = dAdd(i); if(d.getDay() === wd) return dAdd(i + 7 * (k || 0)); } };
+const ndt = (wd, k) => { const d = nextWd(wd, k); return ['вс','пн','вт','ср','чт','пт','сб'][d.getDay()] + ', ' + dTxt(d); };
+const MV1 = dAdd(10), MV2 = dAdd(24);
+const DOS0 = {pets:'small', pay:'both', payDay:5, split:true, free:'с ' + dTxt(MV1), term:11, crib:false, dish:false, cond:'в спальне', net:'Дом.ру, 100 Мбит, роутер оставлю',
   furn:'диван, шкаф-купе, двуспальная кровать, обеденный стол со стульями', tech:'холодильник, стиральная машина, микроволновка, утюг и пылесос', tv:true,
   repair:'два года назад, светлый, аккуратный', win:'во двор, на восток, утром солнечно', bath:'раздельный, есть ванна', stove:'электрическая', kitchen:9, balcony:'застеклённый балкон', storage:'коляску можно держать в колясочной на первом этаже',
   heat:'центральное, зимой тепло, батареи греют хорошо', util:[9500, 6000], yard:'закрытый двор, детская площадка с горкой и качелями', shops:'продуктовый в соседнем доме, аптека через дорогу',
@@ -1226,7 +1241,7 @@ const DOS = {
   A:{stopName:'Серова', routes:'автобусы 10, 33 и трамвай 6', metro:'Козья слобода', metroMin:20, prev:'пожилая пара, жили пять лет', house:'кирпичная пятиэтажка 1972 года', style:'dry', cond:'нет', pets:'cats', pay:'cash', payDay:10, split:false, crib:false, net:'Ростелеком, 100 Мбит', repair:'косметический, три года назад', win:'на запад, во двор', bath:'совмещённый, с ванной', stove:'газовая', kitchen:7, balcony:'нет', storage:'колясочной нет, коляску ставят под лестницей',
      heat:'центральное, зимой тепло', yard:'площадка старая, но есть', shops:'«Пятёрочка» через дом', neighbors:'тихие пенсионеры', lives:'в соседнем доме', view:'вечером после 18:00 и в выходные', discount:'Цена окончательная.', clean:'Перед заездом уберусь.', childsafe:'специально ничего не ставил, заглушки можно купить', kidsLine:'С ребёнком можно.', security:'домофон', tv:false, furn:'диван, шкаф, кухонный гарнитур, стол и стулья', tech:'холодильник, стиральная машина'},
   B:{stopName:'Амирхана', routes:'автобусы 10, 46, 89 и трамвай 5', metro:'Яшьлек', metroMin:15, style:'warm', pets:'small', pay:'both', crib:true, dish:false, kidsLine:'С ребёнком можно, у самих двое детей. Детская кроватка осталась от младшего, могу оставить.', lives:'в соседнем доме, так что покажу в любой день'},
-  C:{pantry:'2 м²', stopName:'Ямашева', routes:'автобусы 46, 62, 89', metro:'Яшьлек', metroMin:8, prev:'молодая пара, жили два года, уехали в Москву', house:'монолитный, 2019 года', style:'formal', pets:'no', pay:'sbp', payDay:1, split:false, free:'с 15 ноября', term:12, dish:true, cond:'во всех комнатах', net:'МТС, 300 Мбит', repair:'дизайнерский, в прошлом году', win:'на юг, на проспект, но стеклопакеты тихие', heat:'центральное, плюс тёплый пол в ванной',
+  C:{pantry:'2 м²', stopName:'Ямашева', routes:'автобусы 46, 62, 89', metro:'Яшьлек', metroMin:8, prev:'молодая пара, жили два года, уехали в Москву', house:'монолитный, 2019 года', style:'formal', pets:'no', pay:'sbp', payDay:1, split:false, free:'с ' + dTxt(MV2), term:12, dish:true, cond:'во всех комнатах', net:'МТС, 300 Мбит', repair:'дизайнерский, в прошлом году', win:'на юг, на проспект, но стеклопакеты тихие', heat:'центральное, плюс тёплый пол в ванной',
      yard:'двор открытый, площадка новая', discount:'Торг не предполагается.', childsafe:'пока ничего нет, поставлю заглушки на розетки по просьбе', kidsLine:'С ребёнком можно, если он не будет рисовать на стенах.', lives:'в Москве, показывает квартиру моя сестра'},
   D:{stopName:'Мусина', routes:'автобусы 33, 60', metro:'Козья слобода', metroMin:18, prev:'студенты-аспиранты, аккуратные', house:'панельный, 2006 года', style:'dry', pets:'cats', pay:'cash', split:true, crib:false, net:'Ростелеком, 100 Мбит', repair:'пять лет назад, всё целое', bath:'совмещённый, душевая кабина', kitchen:7, balcony:'лоджия', kidsLine:'С ребёнком можно.', clean:'Квартиру отдам чистой.', lives:'в соседнем районе', discount:'Могу скинуть тысячу, если договор на год.'},
   E:{pantry:'2 м²', stopName:'Гаврилова', routes:'автобусы 10, 62 и трамвай 5', metro:'Яшьлек', metroMin:12, house:'панельный, 2010 года', style:'warm', pets:'all', pay:'both', crib:true, dish:true, cond:'в гостиной и спальне', net:'Дом.ру, 200 Мбит', repair:'год назад, всё новое', win:'на восток, во двор и на парк', storage:'колясочной нет, но коляска влезает в кладовку', kidsLine:'Конечно можно, сама мама двоих.', childsafe:'заглушки на розетках, замки на окнах, углы мебели закрыты'},
@@ -1543,10 +1558,10 @@ function mapMount(){
   if(D.sel && LF.lastSel !== D.sel.id){ LF.lastSel = D.sel.id; LF.map.panTo(LL(D.sel.x, D.sel.y)); }
   if(!D.sel) LF.lastSel = null;
 }
-const DAYS = ['Пт, 30 октября','Сб, 31 октября','Вс, 1 ноября'];
+const DAYS = [dDay(dAdd(1)), dDay(dAdd(2)), dDay(dAdd(3))];
 const WD = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'], WDA = {'Пн':'в понедельник','Вт':'во вторник','Ср':'в среду','Чт':'в четверг','Пт':'в пятницу','Сб':'в субботу','Вс':'в воскресенье'};
 const dayW = d => WDA[d.split(', ')[0]] + ', ' + d.split(', ')[1];
-const dayOf = v => { const [y,m,dd] = v.split('-').map(Number); return WD[new Date(y, m-1, dd).getDay()] + ', ' + dd + ' ' + MONTHS[m-1] + (y !== 2026 ? ' ' + y : ''); };
+const dayOf = v => { const [y,m,dd] = v.split('-').map(Number); return WD[new Date(y, m-1, dd).getDay()] + ', ' + dd + ' ' + MONTHS[m-1] + (y !== TODAY.getFullYear() ? ' ' + y : ''); };
 function gen(f){ const n = f.owner; if(f.ownerG === 'm') return n + 'а'; if(/[гкхжшчщ]а$/.test(n)) return n.slice(0,-1) + 'и'; return n.replace(/а$/,'ы'); }
 const TIMES = ['10:00','12:00','15:00','18:00'];
 const MONTHS = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
@@ -1813,11 +1828,11 @@ function citySearch(){
     (own ? '<div class="chips"><button class="chip' + (a.city === own ? ' on' : '') + '" data-act="pick" data-g="city" data-v="' + esc(own) + '">+ ' + esc(own) + '</button></div><div class="small muted">Города нет в списке? Выберите своё название, квартиры найдём и там</div>' : '');
 }
 const WHENS = ['через 2 недели','через месяц','через 2–3 месяца'];
-const dateTxt = v => { const [y,m,d] = v.split('-').map(Number); return d + ' ' + MONTHS[m-1] + (y !== 2026 ? ' ' + y : ''); };
+const dateTxt = v => { const [y,m,d] = v.split('-').map(Number); return d + ' ' + MONTHS[m-1] + (y !== TODAY.getFullYear() ? ' ' + y : ''); };
 function whenPick(){
   const a = S.anketa, own = !WHENS.includes(a.when);
   return choice('when', [...WHENS, 'Своя дата'], own ? 'Своя дата' : a.when) +
-    (own ? '<label class="small" style="display:flex;flex-direction:column;gap:6px">Въехать к дате<input class="field" id="whendate" type="date" min="2026-10-16" max="2027-12-31" value="' + S.whenDate + '"><span class="muted" id="whentxt">Переезд ' + esc(a.when) + '</span></label>' : '');
+    (own ? '<label class="small" style="display:flex;flex-direction:column;gap:6px">Въехать к дате<input class="field" id="whendate" type="date" min="' + isoD(TODAY) + '" max="2027-12-31" value="' + S.whenDate + '"><span class="muted" id="whentxt">Переезд ' + esc(a.when) + '</span></label>' : '');
 }
 V.anketa = () => {
   const a = S.anketa, n = S.step;
@@ -2126,14 +2141,15 @@ V.home = () => { const f = byId(S.live.id), d = dos(f), L = S.live;
       '<div class="row small"><button class="link" style="font-weight:700" data-act="owner" data-v="' + f.id + '">' + f.owner + ', собственник' + (f.verified ? ' ✓' : '') + '</button><button class="link" data-act="write" data-v="' + f.id + '">Написать</button></div></div>' +
     payBox(f) +
     '<div class="box"><div style="font-weight:800">Коммуналка и ЖКУ</div>' +
-      '<div class="row" style="align-items:flex-start;gap:12px"><span>За сентябрь<div class="small muted">коммуналка ' + rub(prevComm(f)) + ' + ЖКУ ' + rub(f.zhku) + ' · ✓ оплачено</div></span><b style="white-space:nowrap">' + rub(prevComm(f) + f.zhku) + '</b></div>' +
-      (L.bill ? '<div class="row" style="align-items:flex-start;gap:12px"><span>За октябрь<div class="small muted">коммуналка ' + rub(L.bill) + ' + ЖКУ ' + rub(f.zhku) + ' · ' + (L.billPaid ? '✓ оплачено' : 'оплатить до 10 ноября') + '</div></span><b style="white-space:nowrap">' + rub(L.bill + f.zhku) + '</b></div>' +
+      '<div class="row" style="align-items:flex-start;gap:12px"><span>За ' + DMN[PM] + '<div class="small muted">коммуналка ' + rub(prevComm(f)) + ' + ЖКУ ' + rub(f.zhku) + ' · ✓ оплачено</div></span><b style="white-space:nowrap">' + rub(prevComm(f) + f.zhku) + '</b></div>' +
+      (L.bill ? '<div class="row" style="align-items:flex-start;gap:12px"><span>За ' + DMN[CM] + '<div class="small muted">коммуналка ' + rub(L.bill) + ' + ЖКУ ' + rub(f.zhku) + ' · ' + (L.billPaid ? '✓ оплачено' : 'оплатить до 10 ' + DMON[NM]) + '</div></span><b style="white-space:nowrap">' + rub(L.bill + f.zhku) + '</b></div>' +
           '<div class="row small"><span class="muted">' + f.owner + ' прислал' + ga(f, 'а') + ' счёт по вашим показаниям</span><button class="link" data-act="live-bill-paid">' + (L.billPaid ? 'Отменить отметку' : 'Отметить оплату') + '</button></div>'
-        : '<div class="row" style="align-items:flex-start;gap:12px"><span>За октябрь<div class="small muted">' + (L.meters ? f.owner + ' считает по вашим показаниям' : 'сумма появится после показаний счётчиков') + '</div></span><b style="white-space:nowrap">придёт до 30 октября</b></div>') + '</div>' +
+        : '<div class="row" style="align-items:flex-start;gap:12px"><span>За ' + DMN[CM] + '<div class="small muted">' + (L.meters ? f.owner + ' считает по вашим показаниям' : 'сумма появится после показаний счётчиков') + '</div></span><b style="white-space:nowrap">придёт до ' + (new Date(TODAY.getFullYear(), CM + 1, 0).getDate() - 1) + ' ' + DMON[CM] + '</b></div>') + '</div>' +
     '<div class="box"><div style="font-weight:800">Счётчики</div><div class="small muted">' + (L.meters ? '✓ Показания за этот месяц отправлены ' + datv(f) : 'Передайте показания воды и света до 25 числа, ' + f.owner + ' посчитает коммуналку') + '</div>' +
       '<button class="btn s" style="height:40px" data-act="live-meters">' + (L.meters ? 'Изменить показания' : 'Передать показания') + '</button></div>' +
-    '<div class="box"><div style="font-weight:800">Договор и залог</div>' +
-      depRow(f) + '<div class="small muted">' + d.early + ' ' + d.fix + '</div></div>' +
+    '<div class="box"><div style="font-weight:800">Договор, акт и залог</div>' +
+      '<div class="row"><span>Договор</span><b>' + d.term + ' мес., с ' + L.since + '</b></div>' + depRow(f) + '<div class="small muted">' + d.early + ' ' + d.fix + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:42px;font-size:13px" data-act="contract-pdf">Договор</button><button class="btn s" style="height:42px;font-size:13px" data-act="actview">Акт приёма-передачи</button></div></div>' +
     (S.revHold && S.revHold[f.id] ? '<div class="box small"><b>Отзыв на проверке</b><span class="muted">В тексте есть нецензурные слова. Модератор проверит отзыв в течение дня. Пока его не видят другие семьи.</span><button class="link" style="align-self:flex-start;font-weight:700" data-act="live-rev">Исправить отзыв</button></div>'
       : '<button class="btn s" data-act="live-rev">' + (S.myRev[f.id] ? 'Изменить отзыв о квартире' : 'Оставить отзыв о квартире') + '</button>') +
     '<button class="link small" style="align-self:center;color:#E5484D;font-weight:700" data-act="live-end-ask">Мы съехали, вернуться к поиску</button></div>' + tabs(); };
@@ -2145,7 +2161,7 @@ V.ownreg = () => { const o = S.own, st = ownStep(), F = o.form, more = o.list.le
   const tg = (k, l) => '<button class="list-row" data-act="own-tg" data-v="' + k + '" aria-pressed="' + !!F[k] + '"><span>' + l + '</span><span class="tgl' + (F[k] ? ' on' : '') + '"></span></button>';
   return topBack(more ? 'Ещё одна квартира' : 'Сдать квартиру') + '<div class="body" style="gap:12px"><div class="small muted">' + (more ? 'Паспорт уже сверен. Для этой квартиры нужна своя выписка ЕГРН и объявление.' : 'Четыре шага.') + ' Паспорт и выписку видит только модератор «Двора», жильцам их не показываем.</div>' +
     step(1, 'Паспорт', o.passport && 'Загружен: разворот с фото', '<div class="small">Сфотографируйте разворот с фото. Имя должно совпасть с владельцем в выписке ЕГРН.</div>' + (o.busy === 'passport' ? '<div class="sk" style="height:40px"></div>' : '<button class="btn p" style="height:42px" data-act="own-up" data-v="passport">Сфотографировать паспорт</button><button class="btn s" style="height:42px" data-act="own-up" data-v="passport">Загрузить из галереи</button>')) +
-    step(2, 'Выписка из ЕГРН', o.egrn && 'Выписка от 24 октября 2026', '<div class="small">Выписка не старше 30 дней: в ней видно, что квартира принадлежит вам.</div>' + (o.busy === 'egrn' ? '<div class="sk" style="height:40px"></div>' : '<button class="btn p" style="height:42px" data-act="own-up" data-v="egrn">Получить через Госуслуги</button><button class="btn s" style="height:42px" data-act="own-up" data-v="egrn">Загрузить PDF</button>')) +
+    step(2, 'Выписка из ЕГРН', o.egrn && 'Выписка от ' + dTxtY(dAdd(-2)), '<div class="small">Выписка не старше 30 дней: в ней видно, что квартира принадлежит вам.</div>' + (o.busy === 'egrn' ? '<div class="sk" style="height:40px"></div>' : '<button class="btn p" style="height:42px" data-act="own-up" data-v="egrn">Получить через Госуслуги</button><button class="btn s" style="height:42px" data-act="own-up" data-v="egrn">Загрузить PDF</button>')) +
     step(3, 'Объявление и фото', o.status !== 'draft' && F.addr + ', ' + F.rooms + '-комн., ' + F.m2 + ' м², ' + rub(+F.price) + '/мес, коммуналка ≈ ' + rub(+F.comm),
       fld('own-addr', 'Адрес', F.addr, 'Например, ул. Амирхана, 30') +
       '<div style="display:flex;flex-direction:column;gap:6px"><div class="lbl">Комнат</div><div class="chips">' + ROOMS.map(x => '<button class="chip' + (F.rooms === x ? ' on' : '') + '" data-act="own-set" data-v="rooms:' + x + '">' + x + '</button>').join('') + '</div></div>' +
@@ -2171,7 +2187,7 @@ const titleOf = L => (L.form.addr || 'Без адреса') + ', ' + L.form.room
 const ownTitle = () => titleOf(S.own.list[S.own.cur]);
 const fiTitle = i => S.own.list.length > 1 ? '<div class="small muted">' + esc(titleOf(S.own.list[i])) + '</div>' : '';
 function obutSay(t){ if(S.own) S.own.but.push({me:false, t}); }
-const OREQS = i => [{fi:i, who:'Семья Петровых', kids:'ребёнок 3–7 лет', day:'Сб, 31 октября', time:'12:00', status:'wait'}, {fi:i, who:'Алия Сафина', kids:'двое детей, 1–3 и 7+ лет', day:'Вс, 1 ноября', time:'15:00', status:'wait'}];
+const OREQS = i => [{fi:i, who:'Семья Петровых', kids:'ребёнок 3–7 лет', day:dDay(dAdd(2)), time:'12:00', status:'wait'}, {fi:i, who:'Алия Сафина', kids:'двое детей, 1–3 и 7+ лет', day:dDay(dAdd(3)), time:'15:00', status:'wait'}];
 const OTHREADS = i => [{fi:i, who:'Семья Петровых', msgs:[{me:false, t:'Здравствуйте! Есть ли в доме лифт? У нас коляска.'}, {bot:true, t:cfgAns(i, 'lift')}]},
   {fi:i, who:'Алия Сафина', msgs:[{me:false, t:'Добрый день! А кто жил в квартире до нас?'}, {sys:true, t:'В объявлении этого нет, Дворецкий передал вопрос вам'}]}];
 
@@ -2290,12 +2306,12 @@ V.otenants = () => { const o = S.own, l = o.list.map((L, i) => [L, i]).filter(([
         '<div class="row"><span>Показания счётчиков</span><b>' + (T.meters ? '✓ переданы' : 'ещё нет') + '</b></div>' +
         '<div class="row small"><button class="link" style="font-weight:700" data-act="oten-chat" data-v="' + i + '">Написать</button><button class="link" data-act="oten-info" data-v="' + i + '">Подробнее о жильцах</button>' + (T.meters ? '' : '<button class="link" data-act="oten-remind" data-v="' + i + '">Напомнить</button>') + '</div></div>'; }).join('')
       : '<div class="h1">Пока никто не заехал</div><div class="muted" style="font-size:14px;line-height:20px">Когда договоритесь с семьёй после просмотра, нажмите «Сдал этой семье» во вкладке «Просмотры». Здесь появятся жильцы: оплата, счётчики, договор и чат.</div><button class="btn s" data-act="tab" data-v="oreq">К просмотрам</button>') + '</div>' + tabs(); };
-const tenantOf = x => ({who:x.who, kids:x.kids, since:'1 ноября 2026', till:'1 октября 2027', phone:'+7 (917) 2' + (x.who.length * 7 % 90 + 10) + '-4' + (x.who.length % 9) + '-1' + (x.who.length % 7) , pets:'нет', paid:false, meters:false, pay:'wallet', payDay:5});
+const tenantOf = x => ({who:x.who, kids:x.kids, since:dTxtY(MV1), till:dTxtY(mAdd(MV1, 11)), phone:'+7 (917) 2' + (x.who.length * 7 % 90 + 10) + '-4' + (x.who.length % 9) + '-1' + (x.who.length % 7) , pets:'нет', paid:false, meters:false, pay:'wallet', payDay:5});
 function ownerDemo(){ clearTimers(); const th = S.theme; S = fresh(); S.theme = th; S.user = {...DEMO_USER, role:'both'}; const o = S.own = mkOwn(); o.passport = true;
   o.list[0].egrn = true; o.list[0].status = 'ok'; o.list[0].views = 37; Object.assign(o.list[0].form, {addr:'ул. Амирхана, 30', rooms:'2', m2:'54', floor:'5/9', price:'42000', comm:'5900', pets:'small', kids:true, lift:true, pantry:true, parking:false, photos:8});
   const L1 = mkL(); L1.egrn = true; L1.status = 'ok'; L1.views = 52; Object.assign(L1.form, {addr:'ул. Сибгата Хакима, 5', rooms:'3', m2:'71', floor:'7/12', price:'51000', comm:'7800', pets:'cats', kids:true, lift:true, pantry:false, parking:true, photos:10});
-  L1.tenant = {who:'Семья Галиевых', kids:'двое детей, 3–7 и 7+ лет', since:'1 сентября 2026', till:'1 августа 2027', phone:'+7 (917) 284-41-15', pets:'кошка', paid:true, meters:false, pay:'sbp', payDay:5};
-  o.list.push(L1); o.reqs = OREQS(0); o.threads = OTHREADS(0).concat([{fi:1, tenant:true, who:'Семья Галиевых', msgs:[{sys:true, t:'Семья заехала 1 сентября 2026'}, {me:false, t:'Добрый день! Оплатили октябрь по СБП.'}, {me:true, t:'Спасибо, получил.'}, {me:false, t:'В ванной подтекает смеситель, посмотрите, пожалуйста?'}]}]);
+  L1.tenant = {who:'Семья Галиевых', kids:'двое детей, 3–7 и 7+ лет', since:dTxtY(mAdd(MV1, -2)), till:dTxtY(mAdd(MV1, 9)), phone:'+7 (917) 284-41-15', pets:'кошка', paid:true, meters:false, pay:'sbp', payDay:5};
+  o.list.push(L1); o.reqs = OREQS(0); o.threads = OTHREADS(0).concat([{fi:1, tenant:true, who:'Семья Галиевых', msgs:[{sys:true, t:'Семья заехала ' + dTxtY(mAdd(MV1, -2))}, {me:false, t:'Добрый день! Оплатили ' + DMN[PM] + ' по СБП.'}, {me:true, t:'Спасибо, получил.'}, {me:false, t:'В ванной подтекает смеситель, посмотрите, пожалуйста?'}]}]);
   o.but.push({me:false, t:'Напоминаю: сегодня до 25 числа Семья Галиевых передаёт показания счётчиков по Сибгата Хакима, 5. Пока их нет.'});
   S.mode = 'owner'; S.tab = 'cabinet'; S.screen = 'cabinet'; render(true); toast('Демо: две квартиры, во второй живут Галиевы'); }
 
@@ -2497,7 +2513,6 @@ SH.me = () => sheet('<div class="h1" style="font-size:17px">Имя, фамили
   '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="mesurname">Фамилия</label><input id="mesurname" class="field" type="text" value="' + esc(S.user.surname) + '"></div>' +
   '<div style="display:flex;flex-direction:column;gap:8px"><label class="lbl" for="mephone">Телефон</label><input id="mephone" class="field" type="tel" inputmode="tel" maxlength="18" value="' + esc(S.user.phone) + '"><span class="small" id="mephoneerr" style="color:#E5484D"></span></div>' +
   '<button class="btn p" data-act="me-save">Сохранить</button>');
-SH.ocity = () => sheet('<div class="h1" style="font-size:17px">Город, где сдаю</div>' + ['Казань','Москва','Санкт-Петербург','Екатеринбург','Новосибирск','Нижний Новгород'].map(c => '<button class="list-row" data-act="ocity-set" data-v="' + c + '"><span>' + c + '</span><span>' + (S.own.city === c ? ic('check', 18) : ic('chev', 18)) + '</span></button>').join(''));
 SH.otenant = () => { const L = S.own.list[S.otenI], T = L.tenant;
   return sheet('<div class="h1" style="font-size:17px">' + T.who + '</div><div class="small muted">' + esc(titleOf(L)) + '</div>' +
     [['Семья', T.kids], ['Питомцы', T.pets], ['Телефон', T.phone], ['Заехали', T.since], ['Договор до', T.till], ['Залог', rub(depF(L.form)) + (L.tenant.dep === 'dvor' ? ', у «Двора»' : ', вернуть при выезде')], ['Аренда', rub(+L.form.price) + ' до 5 числа'], ['Коммуналка', '≈ ' + rub(+L.form.comm || 0) + ', по показаниям до 25 числа']].map(([a, b]) => '<div class="row" style="gap:12px"><span class="muted">' + a + '</span><span style="text-align:right">' + b + '</span></div>').join('') +
@@ -2638,10 +2653,11 @@ function confirmBooking(id){
 }
 
 function applyAnketa(){ const a = S.anketa; S.anketaDone = true;
+  if(!a.children.filter(Boolean).length && a.noKids){ a.near = a.near.filter(k => !['sad', 'school'].includes(k) && (a.noKids === 'expecting' || (k !== 'clinic' && k !== 'liftc'))); if(a.noKids === 'none') a.kids = false; if(S.sort === 'sad' || S.sort === 'school') S.sort = a.noKids === 'none' ? 'price' : 'clinic'; }
   S.filters = {sad: a.near.includes('sad') ? a.sadMax : 0, school: a.near.includes('school') ? a.schoolMax : 0, clinic: a.near.includes('clinic') ? a.clinicMax : 0, lift: a.near.includes('liftc'), kids: a.kids, verified: a.verified, beds2: S.filters.beds2, parking: a.near.includes('parking'), pets: a.pet !== 'нет' ? a.pet : false, budget: S.filters.budget || 0}; }
 function ownApprove(i){ if(!S.own) return; if(i === undefined) i = S.own.list.findIndex(L => L.status === 'review'); const L = S.own.list[i]; if(!L || L.status !== 'review') return;
   const first = !S.own.list.some(x => x.status === 'ok'); L.status = 'ok';
-  if(first){ S.own.reqs.push(...OREQS(i)); S.own.threads.push(...OTHREADS(i)); } else S.own.reqs.push({fi:i, who:'Семья Хасановых', kids:'ребёнок до 1 года', day:'Вс, 1 ноября', time:'12:00', status:'wait'});
+  if(first){ S.own.reqs.push(...OREQS(i)); S.own.threads.push(...OTHREADS(i)); } else S.own.reqs.push({fi:i, who:'Семья Хасановых', kids:'ребёнок до 1 года', day:dDay(dAdd(3)), time:'12:00', status:'wait'});
   obutSay('Объявление ' + titleOf(L) + ' опубликовано. ' + (first ? 'Пришли две заявки на просмотр, они во вкладке «Просмотры».' : 'Пришла заявка на просмотр от Семьи Хасановых.') + ' На вопросы семей по объявлению отвечаю сам, личные передаю вам.');
   S.push = {title:'Документы сверены', text:'Объявление ' + titleOf(L) + ' опубликовано', id:null, own:true}; render(); later(4500, () => { S.push = null; render(); }); }
 function supSend(t){ S.support.push({me:true, t}); S.chatBottom = true; render();
@@ -2654,7 +2670,7 @@ const A = {
   start(){ if(!S.kidsAsked){ S.anketa.children = []; S.kidsAsked = true; } if(S.user){ S.step = 1; go('anketa'); } else { S.regNext = 'anketa'; go('reg'); } },
   'kid-age'(v){ const i = v.indexOf(':'); S.anketa.children[+v.slice(0,i)] = v.slice(i+1); render(); },
   'kid-add'(){ S.anketa.children.push(''); S.anketa.noKids = ''; render(); },
-  nokids(v){ S.anketa.noKids = S.anketa.noKids === v ? '' : v; S.kidErr = false; render(); },
+  nokids(v){ const a = S.anketa; a.noKids = a.noKids === v ? '' : v; S.kidErr = false; if(a.noKids){ a.near = a.near.filter(k => !['sad', 'school'].includes(k) && (a.noKids === 'expecting' || (k !== 'clinic' && k !== 'liftc'))); if(a.noKids === 'none') a.kids = false; } render(); },
   'kid-del'(v){ S.anketa.children.splice(+v, 1); render(); },
   'sign-in'(){ S.regNext = 'back'; S.reg = {name:'', surname:'', phone:'', code:'', sent:false, role:'', now:'', roleDone:false}; go('reg'); },
   'reg-send'(){ const r = S.reg; if(!regOk().send) return; r.sent = true; r.code = ''; render(); toast('Код отправлен на ' + r.phone); },
@@ -2686,8 +2702,8 @@ const A = {
   skip(){ S.filters = {sad:0, lift:false, kids:false, verified:false, beds2:false, parking:false}; S.anketaDone = false; S.tab='search'; S.stack=[]; S.screen='results'; S.scroll.results = 0; render(); toast('Показываем все квартиры. Анкету можно заполнить в профиле'); },
   pick(v, el){
     const g = el.dataset.g;
-    if(g === 'when' && v === 'Своя дата'){ if(!S.whenDate) S.whenDate = '2026-11-15'; v = 'к ' + dateTxt(S.whenDate); }
-    if(g === 'city'){ S.district = v === HAS.city ? HAS.district : ''; S.cityQ = ''; if(['ул. Баумана, 1', 'ул. Ленина, 1'].includes(S.anketa.work)) S.anketa.work = v === HAS.city ? 'ул. Баумана, 1' : 'ул. Ленина, 1'; }
+    if(g === 'when' && v === 'Своя дата'){ if(!S.whenDate) S.whenDate = isoD(dAdd(20)); v = 'к ' + dateTxt(S.whenDate); }
+    if(g === 'city'){ placeChange(v, v === HAS.city ? HAS.district : ''); return; }
     S.anketa[g] = v; render();
   },
   commute(v){ const c = S.anketa.commute, i = c.indexOf(v); if(i < 0) c.push(v); else if(c.length > 1) c.splice(i,1); render(); },
@@ -2715,8 +2731,8 @@ const A = {
   'map-zoom'(v){ if(LF.map && document.querySelector('#phone .lmap-host')){ +v > 0 ? LF.map.zoomIn() : LF.map.zoomOut(); return; } const z0 = S.mapZoom || 1, z1 = Math.max(1, Math.min(3, z0 + (+v))); if(z1 === z0){ toast(+v > 0 ? 'Ближе уже некуда' : 'Это вся схема района'); return; } S.mapZoom = z1; render(); },
   'set-sort'(v){ S.sort = v; S.sheet = null; S.scroll.results = 0; render(); },
   district(){ S.sheet = 'district'; S.placeQ = ''; render(); },
-  'place-d'(v){ S.district = v; S.placeQ = ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
-  'place-c'(v){ S.anketa.city = v; S.district = v === HAS.city ? HAS.district : ''; S.placeQ = ''; if(['ул. Баумана, 1', 'ул. Ленина, 1'].includes(S.anketa.work)) S.anketa.work = v === HAS.city ? 'ул. Баумана, 1' : 'ул. Ленина, 1'; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
+  'place-d'(v){ placeChange(S.anketa.city, v); },
+  'place-c'(v){ placeChange(v, v === HAS.city ? HAS.district : ''); },
   'to-has'(){ S.anketa.city = HAS.city; S.district = HAS.district; S.mapSel = null; render(); },
   'relax-dist'(v){ const [k, m] = v.split(':'); S.filters[k] = +m; render(); },
   'relax-lift'(){ S.filters.lift = false; render(); },
@@ -2799,14 +2815,14 @@ const A = {
   'live-paid'(){ S.live.paid = !S.live.paid; render(); if(S.live.paid) toast('Отметили оплату за этот месяц'); },
   'live-meters'(){ S.sheet = 'meters'; render(); },
   'live-meters-send'(){ S.live.meters = true; S.sheet = null; const f = byId(S.live.id), L0 = S.live; chatOf(f).push({me:true, t:'Передаю показания счётчиков за этот месяц.'}); render(); toast('Показания отправлены ' + datv(f));
-    if(!L0.bill) later(4000, () => { if(S.live !== L0) return; L0.bill = Math.round(f.comm * 1.04 / 10) * 10; chatOf(f).push({me:false, t:'Посчитал' + ga(f, 'а') + ' коммуналку за октябрь по вашим показаниям: ' + rub(L0.bill) + ', плюс ЖКУ ' + rub(f.zhku) + '. Оплатить до 10 ноября.'});
+    if(!L0.bill) later(4000, () => { if(S.live !== L0) return; L0.bill = Math.round(f.comm * 1.04 / 10) * 10; chatOf(f).push({me:false, t:'Посчитал' + ga(f, 'а') + ' коммуналку за ' + DMN[CM] + ' по вашим показаниям: ' + rub(L0.bill) + ', плюс ЖКУ ' + rub(f.zhku) + '. Оплатить до 10 ' + DMON[NM] + '.'});
       S.push = {title:'Пришёл счёт за коммуналку', text:'Октябрь: ' + rub(L0.bill + f.zhku) + ' · ' + f.short, id:f.id}; render(); later(4500, () => { S.push = null; render(); }); }); },
-  'live-bill-paid'(){ S.live.billPaid = !S.live.billPaid; render(); if(S.live.billPaid) toast('Отметили оплату коммуналки за октябрь'); },
+  'live-bill-paid'(){ S.live.billPaid = !S.live.billPaid; render(); if(S.live.billPaid) toast('Отметили оплату коммуналки за ' + DMN[CM]); },
   'live-rev'(){ const m = S.myRev[S.live.id], h = S.revHold && S.revHold[S.live.id]; S.revStars = m ? m[2] : 5; S.revDraft = h || (m ? m[3] : ''); S.sheet = 'liverev'; render(); },
   'rev-star'(v){ S.revStars = +v; render(); },
   'rev-send'(){ const t = (S.revDraft || '').trim(); if(!t){ toast('Напишите пару слов о квартире'); return; }
     if(MAT.test(findTxt(t)) || INSULT.test(findTxt(t))){ (S.revHold = S.revHold || {})[S.live.id] = t; S.sheet = null; render(); toast('Отзыв на проверке: в нём есть грубые слова'); return; }
-    if(S.revHold) delete S.revHold[S.live.id]; S.myRev[S.live.id] = [S.user ? S.user.name : 'Вы', 'октябрь 2026', S.revStars || 5, t]; S.sheet = null; render(); toast('Спасибо! Отзыв появился в карточке квартиры'); },
+    if(S.revHold) delete S.revHold[S.live.id]; S.myRev[S.live.id] = [S.user ? S.user.name : 'Вы', DMN[CM] + ' ' + TODAY.getFullYear(), S.revStars || 5, t]; S.sheet = null; render(); toast('Спасибо! Отзыв появился в карточке квартиры'); },
   'live-end-ask'(){ S.sheet = 'liveend'; render(); },
   'live-end'(){ S.live = null; S.sheet = null; tab('search'); toast('Вернули поиск квартир'); },
   'own-add'(){ S.own.list.push(mkL()); S.own.cur = S.own.list.length - 1; go('ownreg'); },
@@ -2835,7 +2851,7 @@ const A = {
   'oten-remind'(v){ const L = S.own.list[+v], t = S.own.threads.find(x => x.tenant && x.fi === +v); if(t) t.msgs.push({bot:true, t:'Напоминание от Дворецкого: передайте, пожалуйста, показания счётчиков до 25 числа.'}); render(); toast('Дворецкий напомнил: ' + L.tenant.who); },
   ocfg(){ S.chatBottom = true; if(S.screen !== 'butler') go('butler'); if(!S.own.cfg) obutSend('Настройка ответов', 'Настройка ответов'); },
   'oset-toggle'(v){ S.own.set[v] = !S.own.set[v]; render(); },
-  ocity(){ S.sheet = 'ocity'; render(); },
+  ocity(){ S.ocQ = ''; S.sheet = 'ocity'; render(); },
   'ocity-set'(v){ S.own.city = v; S.sheet = null; render(); toast('Город: ' + v); },
   'oreq-no'(v){ S.own.reqs[+v].status = 'no'; render(); },
   'oreq-move'(v){ S.oreqI = +v; S.sheet = 'omove'; render(); },
@@ -2863,7 +2879,7 @@ document.addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === '
 const clampMin = v => { v = Math.round(+v); return v >= 5 ? Math.min(v, 999) : 0; };
 const minToT = m => String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
 const tToMin = t => +t.slice(0,2)*60 + +t.slice(3,5);
-const OWN_DAYS = Array.from({length:153}, (_, i) => { const t = new Date(2026, 9, 30 + i); return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0'); });
+const OWN_DAYS = Array.from({length:153}, (_, i) => { const t = dAdd(1 + i); return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0') + '-' + String(t.getDate()).padStart(2,'0'); });
 const HOURS = Array.from({length:14}, (_, i) => String(8 + i).padStart(2,'0'));
 const MINS = Array.from({length:12}, (_, i) => String(i*5).padStart(2,'0'));
 const WH = 36;
@@ -3016,9 +3032,9 @@ function inspFiles(input){ const k = input.id.slice(6), id = S.cur, I = inspOf(i
 
 /* ---------- wallet ---------- */
 const walletRow = () => '<button class="list-row" data-act="go" data-v="wallet"><span>Кошелёк<div class="small muted">' + rub(S.wallet.bal) + (S.wallet.auto ? ' · автопополнение включено' : '') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>';
-function commBars(f){ const L = S.live, p = prevComm(f), v = [['июль', Math.round(p * .88 / 10) * 10], ['август', Math.round(p * .9 / 10) * 10], ['сентябрь', p], ['октябрь', L.bill || 0]], mx = Math.max(...v.map(x => x[1]));
+function commBars(f){ const L = S.live, p = prevComm(f), v = [[DMN[(CM + 9) % 12], Math.round(p * .88 / 10) * 10], [DMN[(CM + 10) % 12], Math.round(p * .9 / 10) * 10], [DMN[PM], p], [DMN[CM], L.bill || 0]], mx = Math.max(...v.map(x => x[1]));
   return '<div class="box"><div style="font-weight:800">Коммуналка по месяцам</div><div class="bars">' + v.map(([m, s], i) => '<div class="' + (i === 3 ? 'cur' : '') + '"><span>' + (s ? tys(s) : '—') + '</span><i style="height:' + (s ? Math.max(8, Math.round(s / mx * 56)) : 4) + 'px"></i><span>' + m.slice(0, 3) + '</span></div>').join('') + '</div>' +
-    '<div class="small muted">' + (L.bill ? 'В октябре на ' + rub(Math.abs(L.bill - p)) + (L.bill > p ? ' больше' : ' меньше') + ', чем в сентябре.' : 'Октябрь появится, когда ' + f.owner + ' пришлёт счёт по вашим показаниям.') + ' Коммуналку платите ' + datv(f) + ' напрямую, здесь только её динамика.</div></div>'; }
+    '<div class="small muted">' + (L.bill ? 'В ' + DMP[CM] + ' на ' + rub(Math.abs(L.bill - p)) + (L.bill > p ? ' больше' : ' меньше') + ', чем в ' + DMP[PM] + '.' : cap(DMN[CM]) + ' появится, когда ' + f.owner + ' пришлёт счёт по вашим показаниям.') + ' Коммуналку платите ' + datv(f) + ' напрямую, здесь только её динамика.</div></div>'; }
 V.wallet = () => { const W = S.wallet, own = S.mode === 'owner', f = liveF(), L = S.live;
   const rentBox = own ? (S.own.list.filter(L => L.tenant).length ? '<div class="box"><div style="font-weight:800">Аренда от жильцов</div>' + S.own.list.filter(L => L.tenant).map(L => { const T = L.tenant;
         return '<div class="row" style="align-items:flex-start"><span>' + T.who + '<div class="small muted">' + ((T.pay || 'wallet') === 'wallet' ? 'через кошелёк, ' + (T.payDayNext || T.payDay || 5) + ' числа' : PAYM[T.pay] + ', мимо кошелька') + '</div></span><b>' + rub(+L.form.price) + '</b></div>'; }).join('') +
@@ -3304,7 +3320,7 @@ V.moved = () => { const f = byId(S.deal.id), D = S.deal;
     '<div class="muted" style="font-size:14px;line-height:20px;max-width:300px">' + (D.depAt === 'dvor' ? 'Первый месяц ушёл ' + datv(f) + ', залог ' + rub(f.dep) + ' хранится на залоговом счёте «Двора» и вернётся при выезде.' : 'Акт подписан, копия в чате с ' + instr(f) + '.') + ' Аренда, коммуналка и счётчики теперь в «Моём доме».</div></div>' +
     '<div class="foot one" style="gap:8px"><button class="btn p" data-act="moved-home">Перейти в «Мой дом»</button><button class="btn s" data-act="moved-near">Что интересного рядом</button></div>'; };
 function dealFinish(){ const D = S.deal, f = byId(D.id), d = dos(f); D.actDone = true;
-  S.live = {id:f.id, since:D.moveIn, paid:true, meters:false, pay:D.pay === 'wallet' ? 'wallet' : D.pay, payDay:d.payDay, dep:D.depAt || (D.pay === 'wallet' ? 'dvor' : 'owner'), receipt:D.receipt}; noteFlat(f.id);
+  S.live = {id:f.id, since:D.moveIn, paid:true, meters:false, pay:D.pay === 'wallet' ? 'wallet' : D.pay, payDay:d.payDay, dep:D.depAt || (D.pay === 'wallet' ? 'dvor' : 'owner'), receipt:D.receipt, act:D.act}; noteFlat(f.id);
   chatOf(f).push({sys:true, t:'Акт подписан обеими сторонами. Добро пожаловать домой!'});
   butlerSay('Поздравляю с новым домом! В «Моём доме» аренда, коммуналка и счётчики. Напомню о платеже за 3 дня до ' + d.payDay + ' числа.');
   S.sheet = null; S.stack = []; S.screen = 'moved'; render(true); }
@@ -3342,7 +3358,7 @@ const mkODeal = x => { const L = S.own.list[x.fi], r = +L.form.price; return {re
 V.odeal = () => { const x = S.own.reqs[S.odr], X = x.deal, L = S.own.list[x.fi], fam = x.who;
   if(X.cancelled) return topBack('Заселение · ' + fam) + '<div class="body"><div class="h1">Бронь отменена</div><div class="muted" style="font-size:14px;line-height:20px">' + X.cancelTxt + '</div></div>';
   const due = X.rent + X.dep - (X.booked === true ? X.adv : 0);
-  return topBack('Заселение · ' + fam) + '<div class="body" style="gap:12px"><div class="small muted">' + esc(titleOf(L)) + ' · заезд 1 ноября</div>' +
+  return topBack('Заселение · ' + fam) + '<div class="body" style="gap:12px"><div class="small muted">' + esc(titleOf(L)) + ' · заезд ' + dTxt(MV1) + '</div>' +
     '<div class="box">' + stepHead('', 'Бронь', X.booked === true ? 'done' : '') + (X.booked === true ? '<div class="small">Семья внесла аванс ' + rub(X.adv) + ', он на залоговом счёте «Двора». При въезде станет частью залога.</div>' + (X.paid ? '' : '<button class="link small" style="align-self:flex-start;color:#E5484D" data-act="ocancel">Отменить бронь</button>') : '<div class="small muted">Семья не бронировала</div>') + '</div>' +
     '<div class="box">' + stepHead(1, 'Договор', X.signed ? 'done' : 'now') +
       (X.signed ? '<div class="small">' + (X.contract === 'paper' ? 'Бумажный договор загружен' : 'Подписан онлайн вами и семьёй') + '</div>'
@@ -3403,7 +3419,7 @@ Object.assign(A, {
   'mv-no'(){ S.deal.movers.declined = true; render(); },
   'mv-undo'(){ S.deal.movers = {}; render(); },
   'act-ok'(){ S.deal.act.ok = !S.deal.act.ok; render(); },
-  'act-sign'(){ const D = S.deal, f = byId(D.id); D.actSent = true; render(); toast('Подписали акт. Ждём ' + gen(f)); later(2500, () => { if(!D.actDone) dealFinish(); }); },
+  'act-sign'(){ const D = S.deal, f = byId(D.id); D.actSent = true; D.act.el = ($('#a-el') || {}).value || ''; D.act.cold = ($('#a-cold') || {}).value || ''; D.act.hot = ($('#a-hot') || {}).value || ''; render(); toast('Подписали акт. Ждём ' + gen(f)); later(2500, () => { if(!D.actDone) dealFinish(); }); },
   'moved-home'(){ S.tab = 'home'; S.stack = []; S.screen = 'home'; render(true); },
   odeal(v){ const x = S.own.reqs[+v]; x.deal = x.deal || mkODeal(x); S.odr = +v; go('odeal'); },
   ocontract(){ const X = S.own.reqs[S.odr].deal; X.contract = 'online'; render(); toast('Подписали. Ждём семью');
@@ -3434,7 +3450,7 @@ Object.assign(MA, {
     S.support.push({me:false, t:'Видим, что ' + f.owner + ' отменил' + ga(f, 'а') + ' бронь на ' + f.short + '. Вернули вам аванс ' + rub(D.adv) + ' и ' + rub(D.pen) + ' компенсации на кошелёк. Мне очень жаль, помогу найти замену.'}, {kind:'flats', ids:sim.length ? sim : FLATS.filter(x => x.id !== f.id).slice(0, 3).map(x => x.id), t:'Похожие по цене, площади и садам рядом, свободны к ' + D.moveIn});
     pushNote(f.owner + ' отменил' + ga(f, 'а') + ' бронь', 'Вернули ' + rub(D.adv + D.pen) + ' на кошелёк. Поддержка подобрала похожие квартиры', {to:'support'}); },
   'm-obook'(){ if(!S.own){ toast('Сначала включите сценарий собственника'); return; } const i = S.own.reqs.findIndex(x => x.status !== 'no' && x.status !== 'rented'); if(i < 0) return; const x = S.own.reqs[i];
-    if(x.status === 'wait') x.status = 'ok'; x.deal = x.deal || mkODeal(x); x.deal.booked = true; pushNote(x.who + ' забронировали квартиру', 'Аванс ' + rub(x.deal.adv) + ' у «Двора», заезд 1 ноября', {to:'oreq'}); }
+    if(x.status === 'wait') x.status = 'ok'; x.deal = x.deal || mkODeal(x); x.deal.booked = true; pushNote(x.who + ' забронировали квартиру', 'Аванс ' + rub(x.deal.adv) + ' у «Двора», заезд ' + dTxt(MV1), {to:'oreq'}); }
 });
 const modExtra2 = opt => '<h3>Итерация 8 · бронь и заселение</h3>' +
   opt('m-hour', 'Прошло больше часа после брони', !!M.hourPassed, 'бесплатная отмена «нажали случайно» недоступна') +
@@ -3496,17 +3512,17 @@ function nearItems(f){ const d = dos(f), city = S.anketa.city;
     {id:'foot', cat:'kids', t:'Футбол для детей 5–7 лет', p:f.schoolName + ', спортзал', w:f.school + ' мин пешком', when:'вт, чт · 17:30', price:'от 2 500 ₽ в месяц', age:'5+', act:'signup'},
     {id:'pool', cat:'kids', t:'Бассейн: группа «Мама и малыш»', p:'бассейн в спорткомплексе рядом', w:'12 мин пешком', when:'сб, вс · 10:00', price:'от 600 ₽ за занятие', age:'0+', act:'signup'},
     {id:'art', cat:'kids', t:'Рисование и лепка', p:'Дом детского творчества', w:'11 мин пешком', when:'пн, ср · 16:00', price:'бесплатно, бюджетная группа', age:'4+', act:'signup'},
-    {id:'clay', cat:'master', t:'Мастер-класс: лепим из глины', p:'детская библиотека', w:'9 мин пешком', when:'сб, 7 ноября · 12:00', price:'500 ₽', age:'4+', act:'signup'},
+    {id:'clay', cat:'master', t:'Мастер-класс: лепим из глины', p:'детская библиотека', w:'9 мин пешком', when:ndt(6, 0) + ' · 12:00', price:'500 ₽', age:'4+', act:'signup'},
     {id:'mall', cat:'cinema', t:'Мультфильмы в кинотеатре рядом', p:'кинотеатр в торговом центре', w:'14 мин пешком', when:'каждый день', price:'от 350 ₽', age:'0+', act:'buy', a:'cinema'}],
   city:[
     {id:'cpark', cat:'park', t:P[0] || 'Городской парк культуры и отдыха', p:real ? 'прогулки и детские площадки' : 'центральный парк города', w:'≈ 25 мин на транспорте', when:'ежедневно', price:'вход бесплатный', age:'0+', act:'route'},
-    {id:'puppet', cat:'theatre', t:'Спектакль «Три поросёнка»', p:P[2] || 'Дом культуры', w:'≈ 25 мин на транспорте', when:'вс, 8 ноября · 11:00', price:'от 400 ₽', age:'3+', act:'buy', a:'theatre'},
-    {id:'phil', cat:'concert', t:'Концерт «Музыкальные сказки»', p:P[4] || 'Дом культуры', w:'≈ 30 мин на транспорте', when:'сб, 14 ноября · 12:00', price:'от 600 ₽', age:'6+', act:'buy', a:'concert'},
+    {id:'puppet', cat:'theatre', t:'Спектакль «Три поросёнка»', p:P[2] || 'Дом культуры', w:'≈ 25 мин на транспорте', when:ndt(0, 0) + ' · 11:00', price:'от 400 ₽', age:'3+', act:'buy', a:'theatre'},
+    {id:'phil', cat:'concert', t:'Концерт «Музыкальные сказки»', p:P[4] || 'Дом культуры', w:'≈ 30 мин на транспорте', when:ndt(6, 1) + ' · 12:00', price:'от 600 ₽', age:'6+', act:'buy', a:'concert'},
     P[6] ? {id:'zoo', cat:'kids', l:'прогулка', t:'День с детьми: ' + P[6], p:P[6], w:'≈ 30 мин на транспорте', when:'ежедневно', price:'от 500 ₽', age:'0+', act:'buy', a:'kids'} : {id:'museum', cat:'kids', l:'выставка', t:'Интерактивная выставка для детей', p:'Краеведческий музей', w:'≈ 25 мин на транспорте', when:'вт–вс · 10:00–18:00', price:'от 300 ₽', age:'4+', act:'buy', a:'kids'},
-    {id:'cook', cat:'master', t:'Мастер-класс по выпечке для детей и родителей', p:'кулинарная студия в центре', w:'≈ 25 мин на транспорте', when:'сб, 7 ноября · 14:00', price:'1 500 ₽ за двоих', age:'5+', act:'buy', a:'kids'},
-    P[5] ? {id:'circus', cat:'kids', l:'цирк', t:'Цирковое представление', p:P[5], w:'≈ 30 мин на транспорте', when:'сб, 21 ноября · 15:00', price:'от 800 ₽', age:'0+', act:'buy', a:'kids'} : null,
-    {id:'tour', cat:'kids', l:'экскурсия', t:'Экскурсия «' + city + ' для новичков»', p:'старт: ' + (P[7] || 'исторический центр'), w:'≈ 25 мин на транспорте', when:'вс, 8 ноября · 12:00', price:'900 ₽', age:'6+', act:'buy', a:'kids'},
-    {id:'drama', cat:'theatre', t:'Вечер для родителей: спектакль', p:P[3] || 'Городской театр', w:'≈ 25 мин на транспорте', when:'пт, 6 ноября · 19:00', price:'от 700 ₽', age:'16+', act:'buy', a:'theatre'},
+    {id:'cook', cat:'master', t:'Мастер-класс по выпечке для детей и родителей', p:'кулинарная студия в центре', w:'≈ 25 мин на транспорте', when:ndt(6, 0) + ' · 14:00', price:'1 500 ₽ за двоих', age:'5+', act:'buy', a:'kids'},
+    P[5] ? {id:'circus', cat:'kids', l:'цирк', t:'Цирковое представление', p:P[5], w:'≈ 30 мин на транспорте', when:ndt(6, 2) + ' · 15:00', price:'от 800 ₽', age:'0+', act:'buy', a:'kids'} : null,
+    {id:'tour', cat:'kids', l:'экскурсия', t:'Экскурсия «' + city + ' для новичков»', p:'старт: ' + (P[7] || 'исторический центр'), w:'≈ 25 мин на транспорте', when:ndt(0, 0) + ' · 12:00', price:'900 ₽', age:'6+', act:'buy', a:'kids'},
+    {id:'drama', cat:'theatre', t:'Вечер для родителей: спектакль', p:P[3] || 'Городской театр', w:'≈ 25 мин на транспорте', when:ndt(5, 0) + ' · 19:00', price:'от 700 ₽', age:'16+', act:'buy', a:'theatre'},
     {id:'cine', cat:'cinema', t:'Премьеры недели', p:'кинотеатры в центре', w:'≈ 20 мин на транспорте', when:'каждый день', price:'от 350 ₽', age:'0+', act:'buy', a:'cinema'}].filter(Boolean)}; }
 function nearTodo(f){ const d = dos(f), kids = S.anketa.children.filter(Boolean), school = kids.some(k => k === '7+ лет') || kids.some(k => k === '3–7 лет');
   return [['reg', 'Оформить временную регистрацию', 'Нужна для сада и поликлиники. Через Госуслуги или МФЦ, ' + f.owner + ' подтвердит согласие', 'https://www.gosuslugi.ru/'],
@@ -3538,6 +3554,42 @@ Object.assign(A, {
   'near-route'(v){ const x = nearItems(byId(S.live.id)).dist.concat(nearItems(byId(S.live.id)).city).find(i => i.id === v); toast(x.t + ': ' + x.w + ' от дома'); },
   'moved-near'(){ S.stack = []; S.tab = 'near'; S.screen = 'near'; render(true); }
 });
+
+/* ---------- fixes: changing city, owner city, act view ---------- */
+function placeApply(city, dist){ const a = S.anketa, was = a.city;
+  a.city = city; S.district = dist; S.placeQ = ''; S.cityQ = ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0;
+  if(['ул. Баумана, 1', 'ул. Ленина, 1'].includes(a.work)) a.work = city === HAS.city ? 'ул. Баумана, 1' : 'ул. Ленина, 1';
+  if(S.placeReset){ clearTimers(); S.typing = false; S.push = null; S.fav = []; S.chats = {}; S.cf = {}; S.booking = {}; S.insp = {}; S.deal = null; S.rented = {}; S.placeReset = false; toast('Ищем ' + (dist ? 'в районе ' + dist : 'в ' + inCity(city)) + '. Поиск начат заново'); }
+  render(); }
+const placeHasData = () => S.fav.length || Object.keys(S.chats).some(k => S.chats[k].length) || Object.keys(S.booking).length || (S.deal && !S.deal.cancelled);
+function placeChange(city, dist){ if(city === S.anketa.city && dist === S.district){ S.sheet = null; S.placeQ = ''; render(); return; }
+  if(S.live){ S.sheet = null; render(); toast('Вы уже живёте в квартире. Чтобы искать в другом месте, нажмите «Мы съехали» в «Моём доме»'); return; }
+  if(S.deal && !S.deal.cancelled && !S.deal.actDone && (S.deal.booked || S.deal.signed)){ S.sheet = null; render(); toast('Сначала завершите или отмените заселение на ' + byId(S.deal.id).short); return; }
+  if(placeHasData()){ S.placePend = [city, dist]; S.sheet = 'placeask'; render(); return; }
+  placeApply(city, dist); }
+SH.placeask = () => { const [city, dist] = S.placePend, cur = S.anketa.city, same = city === cur, n = S.fav.length, c = Object.keys(S.chats).filter(k => S.chats[k].length).length;
+  return sheet('<div class="h1" style="font-size:17px">' + (same ? 'Сменить район?' : 'Искать в ' + inCity(city) + '?') + '</div><div style="font-size:14px;line-height:20px">В ' + (same ? 'другом районе другие квартиры и собственники' : inCity(city) + ' другие квартиры и собственники') + ', поэтому поиск начнётся заново: ' +
+    [n ? 'избранное (' + kv(n) + ')' : '', c ? 'переписки с собственниками (' + c + ')' : '', Object.keys(S.booking).length ? 'записи на просмотры' : ''].filter(Boolean).join(', ') + ' по ' + (same ? 'району ' + (S.district || cur) : 'городу ' + cur) + ' удалятся. Анкета семьи сохранится.</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" data-act="close-sheet">Остаться</button><button class="btn p" data-act="place-ok">Искать заново</button></div>'); };
+SH.ocity = () => { const q = findTxt(S.ocQ || ''), list = CITY_NAMES.filter(c => !q || findTxt(c).includes(q)).slice(0, q ? 10 : 8), own = q.length > 1 && !CITY_NAMES.some(c => findTxt(c).startsWith(q)) ? capCity(S.ocQ) : '';
+  return sheet('<div class="h1" style="font-size:17px">Город, где сдаю</div><input class="field" id="ocsearch" type="search" autocomplete="off" placeholder="Найти город" value="' + esc(S.ocQ || '') + '">' +
+    list.map(c => '<button class="list-row" data-act="ocity-set" data-v="' + c + '"><span>' + c + '</span><span>' + (S.own.city === c ? ic('check', 18) : ic('chev', 18)) + '</span></button>').join('') +
+    (own ? '<button class="list-row" data-act="ocity-set" data-v="' + esc(own) + '"><span>Мой город: ' + esc(own) + '<div class="small muted">Нет в списке? Объявление всё равно увидят семьи</div></span><span>' + ic('chev', 18) + '</span></button>' : '')); };
+SH.actview = () => { const f = byId(S.live.id), L = S.live, A = L.act, ph = Object.values(inspOf(f.id).ph).flat();
+  return sheet('<div class="h1" style="font-size:17px">Акт приёма-передачи</div><div class="small muted">' + f.short + ' · ' + f.params.split(' · ').slice(0, 2).join(', ') + ' · передана ' + L.since + '</div>' +
+    (A ? '<div class="box"><div class="row"><span>Электросчётчик</span><b>' + (A.el || '—') + '</b></div><div class="row"><span>Холодная вода</span><b>' + (A.cold || '—') + '</b></div><div class="row"><span>Горячая вода</span><b>' + (A.hot || '—') + '</b></div></div>' +
+        '<div class="small">' + (A.ok ? '✓ Претензий к состоянию нет' : 'Замечания: ' + esc(A.note || 'есть')) + '</div>' +
+        '<div class="lbl">Фото состояния · ' + ph.length + '</div>' + (ph.length ? '<div class="ithumbs">' + ph.slice(0, 8).map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') + '</div>' : '<div class="small muted">Фото не добавляли</div>') +
+        '<div class="small muted">Подписан вами и ' + instr(f) + ' в «Дворе». При выезде сверим квартиру с этим актом, и залог вернётся без споров.</div>'
+      : '<div class="box small"><b>Акт подписан на бумаге</b><span class="muted">' + (L.actPhoto ? '✓ Фото акта загружено. При выезде сверим квартиру с ним.' : 'Сфотографируйте акт, чтобы он был под рукой при выезде: по нему вернут залог.') + '</span></div>' +
+        (L.actPhoto ? '' : '<label class="btn p" for="actphoto">Загрузить фото акта</label><input type="file" id="actphoto" accept="image/*,application/pdf" hidden>')) +
+    '<button class="btn s" data-act="close-sheet">Закрыть</button>'); };
+Object.assign(A, {
+  'place-ok'(){ S.placeReset = true; placeApply(...S.placePend); },
+  actview(){ S.sheet = 'actview'; render(); }
+});
+document.addEventListener('input', e => { if(e.target.id === 'ocsearch'){ S.ocQ = e.target.value; render(); const el = document.getElementById('ocsearch'); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } } });
+document.addEventListener('change', e => { if(e.target.id === 'actphoto' && e.target.files.length && S.live){ S.live.actPhoto = true; render(); toast('Фото акта сохранено'); } });
 
 function renderMod(){
   const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
