@@ -875,6 +875,38 @@ a.btn{display:flex}
 .ckline{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .ckline .link{white-space:nowrap;padding-top:6px}
 a.link{color:inherit}
+
+/* iteration 9 */
+.dlink{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;border-radius:12px;background:var(--soft);text-align:left;flex:none}
+.dcardx{gap:10px}
+.dcardx.cur{outline:2px solid var(--ink)}
+.dgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.dm{display:flex;flex-direction:column;gap:2px;padding:8px;border-radius:10px;background:var(--soft);font-size:13px;line-height:17px}
+.dm.good b{text-decoration:underline;text-underline-offset:3px}
+.fit{display:flex;flex-direction:column;align-items:flex-end;font-size:20px;font-weight:800;line-height:22px}
+.pick2{display:inline-block;margin-top:4px;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;background:var(--ink);color:var(--paper)}
+.vc{flex:1;display:flex;flex-direction:column;min-height:0;background:#111}
+.vcv{position:relative;height:330px!important;width:100%;border-radius:0!important;flex:none;overflow:hidden}
+.vcv .glbl{display:none}
+.vctop{position:absolute;left:14px;right:14px;top:14px;display:flex;justify-content:space-between;color:#fff;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6);z-index:2}
+.vcroom{position:absolute;left:14px;bottom:52px;color:#fff;font-size:22px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.6);z-index:2}
+.vcsay{position:absolute;left:14px;right:90px;bottom:12px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;line-height:16px;padding:6px 9px;border-radius:10px;z-index:2}
+.vcself{position:absolute;right:12px;bottom:12px;width:66px;height:88px;border-radius:12px;background:linear-gradient(160deg,#6b5b4e,#3a3029);color:#fff;font-size:11px;display:grid;place-items:end center;padding-bottom:6px;z-index:2;border:2px solid rgba(255,255,255,.6)}
+.vcflash{position:absolute;inset:0;background:#fff;opacity:.7;z-index:3}
+.vcbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:10px 14px;background:#111;flex:none}
+.vcbar button{height:40px;border-radius:20px;background:#2a2a2a;color:#fff;font-size:12px;font-weight:700;text-align:center}
+.vcbar .shot{background:#fff;color:#111}
+.vcbar .end{background:#E5484D}
+.vc .body{background:var(--paper)}
+.vcbtn{padding:6px 12px;border-radius:14px;background:var(--ink);color:var(--paper);font-size:12px;font-weight:800}
+.morow{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+.mopair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mopair .ithumb,.mopair .iadd{width:52px;height:52px}
+.pairline{margin:-6px 0 4px;padding:8px 12px;border-radius:0 0 12px 12px;background:var(--soft);font-size:12px;font-weight:700;flex:none}
+.pairline.both{background:var(--ink);color:var(--paper)}
+.pairline.no{color:var(--mute)}
+.body > .btn,.body > .box,.body > .dlink{flex-shrink:0}
+.vcv{background:#5B606B!important}
 </style>
 
 <div class="desk">
@@ -985,7 +1017,7 @@ const revRows = (l, flat) => l.map(([w, d, st, t, fl]) => '<div style="display:f
 const revBox = (f, n) => revRows(revsOf(f.id).slice(0, n));
 const nowMsk = () => { const n = new Date(); return ((n.getUTCHours() + 3) % 24) * 60 + n.getUTCMinutes(); };
 const nowSlot = () => { let m = Math.ceil(nowMsk() / 5) * 5; if(m < 480) m = 480; if(m > 1260) m = 600; return String(Math.floor(m/60)).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); };
-const placeTxt = (f, b) => b.place === 'stop' ? 'у остановки «' + dos(f).stopName + '»' : b.place === 'own' && b.placeTxt ? b.placeTxt : 'у подъезда';
+const placeTxt = (f, b) => b.fmt === 'video' ? 'по видеосвязи' : b.place === 'stop' ? 'у остановки «' + dos(f).stopName + '»' : b.place === 'own' && b.placeTxt ? b.placeTxt : 'у подъезда';
 const workTxt = f => S.anketa.commute.map(c => COMMUTE[c](f)).join('<br>');
 const byId = id => FLATS.find(f => f.id === id);
 /* ---------- owner chat: dossier per flat, owner's manner, topics; no AI ---------- */
@@ -1606,7 +1638,7 @@ V.anketa = () => {
   const a = S.anketa, n = S.step;
   if(n === 1) return stepTop(1) +
     '<div class="h1">Куда и когда переезжаете?</div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Город</div>' + citySearch() + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Город</div>' + citySearch() + distLink() + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Когда нужна квартира?</div>' + whenPick() + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Нужна помощь с переездом?</div>' + choice('move', ['да', 'нет', 'решу позже'], a.move) + '<div class="small muted">Грузчики и машина. Сколько нужно, посчитаем перед переездом по количеству вещей</div></div>' +
     '<div class="box small muted">Ищем в любом городе России. Нет вашего города в списке? Впишите название.</div>' + stepFoot(1);
@@ -1708,7 +1740,7 @@ V.results = () => {
       '</div>' + tabs();
   }
   return searchTop() + '<div class="body" style="gap:12px">' + filterChips() +
-    '<div class="row small"><span>' + kv(r.length) + (S.anketaDone ? ' под вашу анкету' : ' в районе') + '</span><button class="muted" data-act="sort">' + SORTS[S.sort] + ' ▾</button></div>' +
+    (S.district ? '' : distLink()) + '<div class="row small"><span>' + kv(r.length) + (S.anketaDone ? ' под вашу анкету' : ' в районе') + '</span><button class="muted" data-act="sort">' + SORTS[S.sort] + ' ▾</button></div>' +
     r.map((f,i) => flatCard(f, i===0)).join('') + '</div>' + cmpBar() + tabs();
 };
 
@@ -1758,7 +1790,7 @@ V.card = () => {
       '<div class="small muted" style="margin-top:2px">Отложите ещё на первый месяц, счета придут в конце месяца:</div>' +
       '<div class="row small" style="align-items:flex-start;gap:12px"><span>Коммуналка<div class="muted">свет, вода, отопление</div></span><b style="white-space:nowrap">≈ ' + rub(f.comm) + '</b></div>' +
       '<div class="row small" style="align-items:flex-start;gap:12px"><span>ЖКУ<div class="muted">' + f.zhkuWhat + '</div></span><b style="white-space:nowrap">≈ ' + rub(f.zhku) + '</b></div></div>' +
-    dealBox(f) + affBox(f) + houseBox(f) + insideBox(f) +
+    dealBox(f) + pairBox(f) + budgetBox(f) + affBox(f) + houseBox(f) + insideBox(f) +
     near +
     '<div class="box small"><span>' + ownerLine(f) + '</span></div>' +
     '<div class="box"><div class="row"><b>Отзывы о квартире</b><span class="small" style="font-weight:700">' + rateTxt(f) + '</span></div>' + revBox(f, 2) + '<button class="link small" style="align-self:flex-start;font-weight:700" data-act="reviews" data-v="flat:' + f.id + '">Все отзывы о квартире ›</button></div>' +
@@ -1806,6 +1838,8 @@ V.compare = () => {
   if(list.length < 2) return head + '<div class="body"><div class="h1">Для сравнения нужны две квартиры</div><div class="muted" style="font-size:14px;line-height:20px">Добавьте в избранное ещё ' + (2-list.length) + ', нажав ♡ в списке или в карточке.</div><div style="flex:1"></div><button class="btn p" data-act="tab" data-v="search">Искать квартиры</button></div>';
   const rows = [
     ['Въезд', f=>f.entry, f=>tys(f.entry), 'min'],
+    ['Бюджет переезда', f=>moveBudget(f).total, f=>tys(moveBudget(f).total), 'min'],
+    ...(PR() ? [['Голоса семьи', f=>0, f=>S.partner.likes[f.id] === 'yes' ? 'обоим' : S.partner.likes[f.id] === 'no' ? 'только вам' : 'вам', null]] : []),
     ['Сад пешком', f=>f.sad, f=>f.sad+' мин', 'min'],
     ['Школа пешком', f=>f.school, f=>f.school+' мин', 'min'],
     ['Поликлиника', f=>f.clinic, f=>f.clinic+' мин', 'min'],
@@ -1848,7 +1882,7 @@ function bookStrip(f){
   const st = x => x.status === 'ok' ? '✓' : '⏳';
   return '<div class="bstrip" style="flex:none;display:flex;align-items:center;gap:8px;padding:6px 18px;border-bottom:1px solid var(--line);background:var(--paper);font-size:12px;min-height:34px">' +
     (bs.length ? '<button data-act="bookings" data-v="' + f.id + '" style="flex:1;display:flex;align-items:center;gap:6px;min-width:0;text-align:left" aria-label="Все записи к собственнику"><span aria-hidden="true">👁</span><b style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' +
-        (bs.length > 1 ? bs.length + ' ' + plural(bs.length,'просмотр','просмотра','просмотров') + ' · ' + bs.filter(([, x]) => x.status === 'ok').length + ' ✓' : 'Просмотр ' + bs[0][1].day.split(', ')[1] + ', ' + bs[0][1].time + ' ' + st(bs[0][1])) + '</b><span class="muted">›</span></button>' +
+        (bs.length > 1 ? bs.length + ' ' + plural(bs.length,'просмотр','просмотра','просмотров') + ' · ' + bs.filter(([, x]) => x.status === 'ok').length + ' ✓' : (bs[0][1].fmt === 'video' ? 'Видео ' : 'Просмотр ') + bs[0][1].day.split(', ')[1] + ', ' + bs[0][1].time + ' ' + st(bs[0][1])) + '</b><span class="muted">›</span></button>' +
         (live ? '<button class="link" data-act="book" data-v="' + f.id + '">Перенести</button>' : '<button class="link" data-act="book" data-v="' + f.id + '">Записаться</button>')
       : '<span class="muted" style="flex:1">Просмотр не назначен</span><button class="link" style="font-weight:700" data-act="book" data-v="' + f.id + '">Записаться</button>') + '</div>';
 }
@@ -1919,7 +1953,7 @@ V.home = () => { const f = byId(S.live.id), d = dos(f), L = S.live;
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:42px;font-size:13px" data-act="contract-pdf">Договор</button><button class="btn s" style="height:42px;font-size:13px" data-act="actview">Акт приёма-передачи</button></div></div>' +
     (S.revHold && S.revHold[f.id] ? '<div class="box small"><b>Отзыв на проверке</b><span class="muted">В тексте есть нецензурные слова. Модератор проверит отзыв в течение дня. Пока его не видят другие семьи.</span><button class="link" style="align-self:flex-start;font-weight:700" data-act="live-rev">Исправить отзыв</button></div>'
       : '<button class="btn s" data-act="live-rev">' + (S.myRev[f.id] ? 'Изменить отзыв о квартире' : 'Оставить отзыв о квартире') + '</button>') +
-    '<button class="link small" style="align-self:center;color:#E5484D;font-weight:700" data-act="live-end-ask">Мы съехали, вернуться к поиску</button></div>' + tabs(); };
+    '<button class="btn s" data-act="mo">' + (S.mo ? 'Выезд: продолжить' : 'Мы съезжаем: выезд и возврат залога') + '</button></div>' + tabs(); };
 const ownStep = () => { const o = S.own; return !o.passport ? 1 : !o.egrn ? 2 : o.status === 'draft' ? 3 : 4; };
 const ROOMS = ['1','2','3','4+'], OPETS = [['no','нельзя'],['small','только маленьких'],['cats','кошек'],['all','всех']];
 V.ownreg = () => { const o = S.own, st = ownStep(), F = o.form, more = o.list.length > 1;
@@ -2069,7 +2103,7 @@ V.otenants = () => { const o = S.own, l = o.list.map((L, i) => [L, i]).filter(([
     (l.length ? l.map(([L, i]) => { const T = L.tenant, F = L.form;
       return '<div class="box"><div class="row"><b style="font-size:15px">' + T.who + '</b><span class="chip on" style="font-size:11px">живут</span></div><div class="small muted">' + esc(titleOf(L)) + '</div>' +
         '<div class="row muted"><span>Заехали</span><span>' + T.since + '</span></div><div class="row muted"><span>Договор</span><span>до ' + T.till + '</span></div><div class="row muted"><span>Семья</span><span>' + T.kids + '</span></div>' +
-        oPayRows(L, i) + oDepRow(T) +
+        oPayRows(L, i) + oDepRow(T) + oOutBox(L, i) +
         '<div class="row"><span>Показания счётчиков</span><b>' + (T.meters ? '✓ переданы' : 'ещё нет') + '</b></div>' +
         '<div class="row small"><button class="link" style="font-weight:700" data-act="oten-chat" data-v="' + i + '">Написать</button><button class="link" data-act="oten-info" data-v="' + i + '">Подробнее о жильцах</button>' + (T.meters ? '' : '<button class="link" data-act="oten-remind" data-v="' + i + '">Напомнить</button>') + '</div></div>'; }).join('')
       : '<div class="h1">Пока никто не заехал</div><div class="muted" style="font-size:14px;line-height:20px">Когда договоритесь с семьёй после просмотра, нажмите «Сдал этой семье» во вкладке «Просмотры». Здесь появятся жильцы: оплата, счётчики, договор и чат.</div><button class="btn s" data-act="tab" data-v="oreq">К просмотрам</button>') + '</div>' + tabs(); };
@@ -2085,7 +2119,7 @@ function ownerDemo(){ clearTimers(); const th = S.theme; S = fresh(); S.theme = 
 V.fav = () => {
   const list = S.fav.map(byId);
   return '<div class="top"><span class="t">Избранное</span></div><div class="body" style="gap:12px">' +
-    (list.length ? list.map(f => flatCard(f, false)).join('') + '<div class="small muted">Сохранённые квартиры можно сравнить по саду, сумме въезда и лифту.</div>'
+    favHead() + (list.length ? favList(list).map(f => flatCard(f, false) + pairLine(f)).join('') + '<div class="small muted">Сохранённые квартиры можно сравнить по саду, сумме въезда и лифту.</div>'
       : '<div class="h1">Пока ничего не сохранено</div><div class="muted" style="font-size:14px;line-height:20px">Нажмите ♡ на квартире в списке, и она появится здесь.</div><button class="btn s" data-act="tab" data-v="search">Искать квартиры</button>') +
     '</div>' + (list.length >= 2 ? '<div class="foot one" style="border-top:1px solid var(--line)"><button class="btn p" data-act="compare">Сравнить ' + kv(list.length) + '</button></div>' : '') + tabs();
 };
@@ -2164,7 +2198,7 @@ V.profile = () => S.mode === 'owner' && S.own && S.user ? ownerProfile() : '<div
   '<div style="display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)">' + ava() + '<input type="file" id="avafile" accept="image/*" hidden>' + (S.user
       ? '<div><b>Семья ' + esc(famGen(S.user.surname)) + '</b><div class="small muted">' + esc(S.user.name) + ' · ' + esc(S.user.phone) + '</div><div class="small muted">' + kidsTxt() + '</div><div class="small muted">Переезд в ' + inCity(S.anketa.city) + ' ' + S.anketa.when + '</div></div></div>'
       : '<div style="flex:1"><b>Вы не вошли</b><div class="small muted">Войдите, чтобы писать собственникам и записываться на просмотры</div></div></div><button class="btn p" style="margin-top:14px" data-act="sign-in">Войти или зарегистрироваться</button>') +
-  '<button class="list-row" data-act="go" data-v="family"><span>Анкета семьи<div class="small muted">' + kidsTxt() + ' · ' + S.anketa.city + '</div></span><span class="muted">›</span></button>' +
+  (S.user ? pairRow() : '') + '<button class="list-row" data-act="go" data-v="family"><span>Анкета семьи<div class="small muted">' + kidsTxt() + ' · ' + S.anketa.city + '</div></span><span class="muted">›</span></button>' +
   (S.user ? '<button class="list-row" data-act="me-edit"><span>Имя, фамилия и телефон</span><span class="muted">›</span></button>' : '') +
   ((S.live ? '<button class="list-row" data-act="tab" data-v="home"><span>Мой дом<div class="small muted">' + byId(S.live.id).short + ' · живёте с ' + S.live.since + '</div></span><span class="muted">›</span></button>'
       : dealRow()) +
@@ -2313,12 +2347,12 @@ SH.district = () => {
   if(cities.length) out += '<div class="lbl">' + (q ? 'Города' : 'Другой город') + '</div>' + cities.map(c => row('place-c', c, c, (cityDists(c) ? cityDists(c).length + ' районов · ' : '') + (METRO[c] || c === HAS.city ? 'есть метро' : 'квартиры по всему городу'), c === cur)).join('');
   if(q && q.length > 1 && !CITY_NAMES.some(c => findTxt(c).startsWith(q)) && !dl.length) out += row('place-c', capCity(S.placeQ), 'Искать в городе «' + esc(capCity(S.placeQ)) + '»', 'Нет в списке? Ищем квартиры и в небольших городах', false);
   if(!out) out = '<div class="small muted">Ничего не нашли. Попробуйте название города или района.</div>';
-  return sheet('<div class="h1" style="font-size:17px">Где ищем</div><div class="small muted">Любой город России. Если вашего нет в списке, впишите название</div><input class="field" id="placesearch" type="search" autocomplete="off" placeholder="Город или район" value="' + esc(S.placeQ) + '">' + out);
+  return sheet('<div class="h1" style="font-size:17px">Где ищем</div><div class="small muted">Любой город России. Если вашего нет в списке, впишите название</div>' + distLink() + '<input class="field" id="placesearch" type="search" autocomplete="off" placeholder="Город или район" value="' + esc(S.placeQ) + '">' + out);
 };
 SH.why = () => { const v = verdict(S.fav.map(byId)); return sheet('<div class="h1" style="font-size:17px">Почему такой вывод</div><div style="font-size:14px;line-height:20px">Помощник взял приоритеты из вашей анкеты: ' + (needSchool() ? 'сад и школу пешком (у вас ' + (onlySchool() ? 'школьник' : 'есть ребёнок 7+ или выбрана школа') + ')' : 'сад пешком до ' + S.anketa.sadMax + ' минут') + ', сумму въезда и лифт. Лучше всех по этим минутам квартира на ' + v.best.short + ', поэтому она первая. Если важнее деньги, смотрите строку «Въезд»: там серым выделен самый дешёвый въезд.</div><div class="small muted">Помощник не знает того, чего нет в анкете и объявлениях. Решение за вами.</div><button class="btn p" data-act="close-sheet">Понятно</button>'); };
 SH.book = () => {
   const f = byId(S.cur), d = S.bookDraft;
-  return sheet('<div class="h1" style="font-size:17px">Просмотр · ' + f.short + '</div><div class="small muted">' + f.owner + ' получит запрос и подтвердит время в чате</div>' +
+  return sheet('<div class="h1" style="font-size:17px">Просмотр · ' + f.short + '</div><div class="small muted">' + f.owner + ' получит запрос и подтвердит время в чате</div>' + fmtBlock(d) +
     (ownerFlats(f).length > 1 ? '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Какую квартиру смотрим · у ' + gen(f) + ' ' + ownerFlats(f).length + '</div><div class="chips">' + ownerFlats(f).map(x => '<button class="chip' + (x.id === f.id ? ' on' : '') + '" data-act="bd-flat" data-v="' + x.id + '">' + x.short + (S.booking[x.id] && S.booking[x.id].status !== 'cancel' ? ' · ' + (S.booking[x.id].status === 'ok' ? '✓' : '⏳') : '') + '</button>').join('') + '</div></div>' : '') +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">День</div><div class="chips">' + DAYS.map(x => '<button class="chip' + (!d.ownDay&&d.day===x?' on':'') + '" data-act="bd-day" data-v="' + x + '">' + x + '</button>').join('') +
       '<button class="chip' + (d.ownDay?' on':'') + '" data-act="bd-own-day">Другой день</button></div>' +
@@ -2326,8 +2360,8 @@ SH.book = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Время</div><div class="chips">' + TIMES.map(x => '<button class="chip' + (!d.ownTime&&d.time===x?' on':'') + '" data-act="bd-time" data-v="' + x + '">' + x + '</button>').join('') +
       '<button class="chip' + (d.ownTime?' on':'') + '" data-act="bd-own-time">Другое время</button></div>' +
       (d.ownTime ? '<div class="wheels">' + wheel('wh-h', HOURS.map(h => [h, h]), (d.time || nowSlot()).slice(0,2)) + '<div class="wsep">:</div>' + wheel('wh-m', MINS.map(m => [m, m]), (d.time || nowSlot()).slice(3,5)) + '</div><span class="small muted">С 8:00 до 21:00 · сейчас ' + String(Math.floor(nowMsk()/60)).padStart(2,'0') + ':' + String(nowMsk()%60).padStart(2,'0') + ' по Москве</span>' : '') + '</div>' +
-    '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Где встретиться</div><div class="chips">' + [['door','у подъезда'],['stop','у остановки «' + dos(f).stopName + '»'],['own','другое место']].map(([k,l]) => '<button class="chip' + ((d.place||'door')===k?' on':'') + '" data-act="bd-place" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
-      (d.place === 'own' ? '<input class="field" id="bdplace" type="text" placeholder="Например, у магазина «Пятёрочка»" value="' + esc(d.placeTxt || '') + '" autocomplete="off">' : '') + '</div>' +
+    (d.fmt === 'video' ? '' : '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Где встретиться</div><div class="chips">' + [['door','у подъезда'],['stop','у остановки «' + dos(f).stopName + '»'],['own','другое место']].map(([k,l]) => '<button class="chip' + ((d.place||'door')===k?' on':'') + '" data-act="bd-place" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
+      (d.place === 'own' ? '<input class="field" id="bdplace" type="text" placeholder="Например, у магазина «Пятёрочка»" value="' + esc(d.placeTxt || '') + '" autocomplete="off">' : '') + '</div>') +
     '<button class="btn p" id="bdsend" data-act="bd-send"' + (d.day&&d.time?'':' disabled') + '>' + (d.day&&d.time ? 'Отправить запрос на ' + d.day.split(', ')[1] + ', ' + d.time : 'Выберите день и время') + '</button>');
 };
 SH.pickbook = () => { const list = S.fav.map(byId).sort((a,b)=>a.id.localeCompare(b.id)), best = verdict(list).best;
@@ -2408,7 +2442,7 @@ function confirmBooking(id){
   const b = S.booking[id]; if(!b || b.status !== 'wait') return;
   const f = byId(id);
   b.status = 'ok';
-  chatOf(f).push({me:false, t:'Подтверждаю просмотр ' + (ownerFlats(f).length > 1 ? 'на ' + f.short + ' ' : '') + dayW(b.day) + ' в ' + b.time + '. ' + (b.place === 'stop' ? 'Встречу вас у остановки «' + dos(f).stopName + '», оттуда до дома ' + mins(f.stop) + ' пешком. Напишите, когда выйдете.' : b.place === 'own' && b.placeTxt ? 'Встретимся: ' + b.placeTxt + '. Напишите, когда подойдёте.' : 'Буду ждать у подъезда.')});
+  chatOf(f).push({me:false, t:'Подтверждаю ' + (b.fmt === 'video' ? 'видеопросмотр ' : 'просмотр ') + (ownerFlats(f).length > 1 ? 'на ' + f.short + ' ' : '') + dayW(b.day) + ' в ' + b.time + '. ' + (b.fmt === 'video' ? 'Позвоню вам по видеосвязи в приложении и покажу всё, что попросите.' : b.place === 'stop' ? 'Встречу вас у остановки «' + dos(f).stopName + '», оттуда до дома ' + mins(f.stop) + ' пешком. Напишите, когда выйдете.' : b.place === 'own' && b.placeTxt ? 'Встретимся: ' + b.placeTxt + '. Напишите, когда подойдёте.' : 'Буду ждать у подъезда.')});
   butlerSay('Просмотр подтверждён: ' + b.day + ', ' + b.time + ', ' + f.short + ', встреча ' + placeTxt(f, b) + '. Напомню утром в день просмотра и за 2 часа, пришлю чек-лист.');
   S.push = {title: f.owner + ' подтвердил' + (f.ownerG==='f'?'а':'') + ' просмотр', text: b.day + ', ' + b.time + ' · ' + f.short, id};
   S.chatBottom = true; render();
@@ -2506,7 +2540,7 @@ const A = {
   open(v){ S.cur = v; S.photo = 1; go('card'); },
   fav(v){
     const i = S.fav.indexOf(v);
-    if(i < 0){ S.fav.push(v); S.fav.sort(); render(); if(S.fav.length >= 2) toast('Квартира в избранном. Можно сравнить ' + kv(S.fav.length), {act:'compare', label:'Сравнить'}); else toast('Квартира в избранном'); }
+    if(i < 0){ S.fav.push(v); S.fav.sort(); render(); pairReact(v); if(S.fav.length >= 2) toast('Квартира в избранном. Можно сравнить ' + kv(S.fav.length), {act:'compare', label:'Сравнить'}); else toast('Квартира в избранном'); }
     else { S.fav.splice(i,1); toast('Убрали из избранного', {act:'unfav-undo', v, label:'Вернуть'}); }
   },
   'unfav-undo'(v){ if(!S.fav.includes(v)){ S.fav.push(v); S.fav.sort(); } S.toast = null; render(); },
@@ -2529,9 +2563,9 @@ const A = {
   'bd-send'(){
     const f = byId(S.cur), d = S.bookDraft; if(!d.day || !d.time) return;
     const moved = S.booking[f.id] && S.booking[f.id].status !== 'cancel';
-    S.booking[f.id] = {day:d.day, time:d.time, status:'wait', place:d.place || 'door', placeTxt:(d.placeTxt || '').trim()};
-    const pl = S.booking[f.id].place === 'door' ? '' : ' Можно встретиться ' + placeTxt(f, S.booking[f.id]) + '?';
-    noteFlat(f.id); chatOf(f).push({me:true, t:(moved?'Можно перенести просмотр? Удобно ':'Хочу посмотреть квартиру ') + (ownerFlats(f).length > 1 ? 'на ' + f.short + ' ' : '') + dayW(d.day) + ' в ' + d.time + '.' + pl});
+    S.booking[f.id] = {day:d.day, time:d.time, status:'wait', place:d.place || 'door', placeTxt:(d.placeTxt || '').trim(), fmt:d.fmt || 'live'};
+    const pl = d.fmt === 'video' || S.booking[f.id].place === 'door' ? '' : ' Можно встретиться ' + placeTxt(f, S.booking[f.id]) + '?';
+    noteFlat(f.id); chatOf(f).push({me:true, t:(moved?'Можно перенести просмотр? Удобно ':d.fmt === 'video' ? 'Хочу посмотреть квартиру по видеосвязи ' : 'Хочу посмотреть квартиру ') + (ownerFlats(f).length > 1 ? 'на ' + f.short + ' ' : '') + dayW(d.day) + ' в ' + d.time + '.' + pl});
     butlerSay('Записал запрос: ' + d.day + ', ' + d.time + ', ' + f.short + '. Жду ответа ' + gen(f) + '.');
     S.sheet = null; S.chatBottom = true; render();
     toast('Запрос отправлен. Ждём ответа ' + gen(f));
@@ -3076,7 +3110,7 @@ V.deal = () => { const D = S.deal, f = byId(D.id), d = dos(f), st = dealStage(D)
         (D.act.ok ? '' : '<input id="actnote" class="field" type="text" placeholder="Что не так: например, скол на столешнице" value="' + esc(D.act.note) + '" autocomplete="off">') +
         '<button class="btn p" data-act="act-sign">Подписать акт</button>') + '</div>';
   return topBack('Заселение · ' + f.short) + '<div class="body" style="gap:12px">' +
-    '<div class="small muted">Заезд ' + D.moveIn + ' · ' + f.owner + ', собственник' + (f.verified ? ' ✓' : '') + '</div>' + bookBox + cBox + pBox + mBox + aBox + '</div>'; };
+    '<div class="small muted">Заезд ' + D.moveIn + ' · ' + f.owner + ', собственник' + (f.verified ? ' ✓' : '') + '</div>' + dealBudget(D, f) + bookBox + cBox + pBox + mBox + aBox + '</div>'; };
 V.moved = () => { const f = byId(S.deal.id), D = S.deal;
   return '<div class="body" style="justify-content:center;align-items:center;text-align:center;gap:14px"><div class="okring">' + ic('check', 40) + '</div><div class="h1">Вы заселились!</div>' +
     '<div class="muted" style="font-size:14px;line-height:20px;max-width:300px">' + (D.depAt === 'dvor' ? 'Первый месяц ушёл ' + datv(f) + ', залог ' + rub(f.dep) + ' хранится на залоговом счёте «Двора» и вернётся при выезде.' : 'Акт подписан, копия в чате с ' + instr(f) + '.') + ' Аренда, коммуналка и счётчики теперь в «Моём доме».</div></div>' +
@@ -3353,6 +3387,218 @@ Object.assign(A, {
 document.addEventListener('input', e => { if(e.target.id === 'ocsearch'){ S.ocQ = e.target.value; render(); const el = document.getElementById('ocsearch'); if(el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } } });
 document.addEventListener('change', e => { if(e.target.id === 'actphoto' && e.target.files.length && S.live){ S.live.actPhoto = true; render(); toast('Фото акта сохранено'); } });
 
+/* ===================== iteration 9: districts, video viewing, move-out, moving budget, searching together ===================== */
+const isUI = typeof prow === 'function';
+const listRow = (act, title, sub) => isUI ? prow(act[0], act[1], title, sub) : '<button class="list-row" ' + act[1] + '><span>' + title + (sub ? '<div class="small muted">' + sub + '</div>' : '') + '</span><span class="muted">' + ic('chev', 18) + '</span></button>';
+
+/* ---------- 1. choosing a district in an unfamiliar city ---------- */
+const baseRent = () => Math.round(FLATS.reduce((s, f) => s + (f._b ? f._b.rent : f.rent), 0) / FLATS.length);
+function distStats(city, d){ const C = cityOf(city), h = hashS(city + '|' + d + '|st'), r = k => ((h >>> k) % 997) / 997;
+  const home = city === HAS.city && d === HAS.district, coef = home ? 1 : (C ? C[4] : .7) * (1 + ((hashS(city + '|' + d) % 13) - 6) / 100);
+  const s = {rent:Math.round(baseRent() * .92 * coef / 500) * 500, sad:4 + Math.round(r(1) * 10), school:5 + Math.round(r(3) * 12), park:3 + Math.round(r(5) * 13), work:12 + Math.round(r(7) * 40), noise:Math.floor(r(9) * 3), kg:3 + Math.round(r(11) * 8)};
+  if(home) Object.assign(s, {sad:5, school:8, park:4, work:25, noise:1, kg:9});
+  return s; }
+const NOISE = ['тихо', 'спокойно', 'шумно'];
+function distScore(s){ const a = S.anketa, kids = a.children.filter(Boolean).length, inc = a.income;
+  let v = 100 - s.work * .7 - s.park * .8 - s.noise * 6;
+  if(kids || a.noKids === 'expecting') v -= s.sad * 2.2;
+  if(needSchool()) v -= s.school * 1.4;
+  v -= Math.max(0, s.rent - (inc ? inc / 3 : baseRent() * (cityOf(S.anketa.city) || [0,0,0,0,1])[4])) / 1500;
+  return Math.max(35, Math.min(98, Math.round(v + 18))); }
+function distWhy(s, all){ const best = (k, low) => all.every(x => low ? s[k] <= x[k] : s[k] >= x[k]);
+  const p = []; if(best('sad', 1)) p.push('ближе всех сады'); if(best('rent', 1)) p.push('дешевле всего'); if(best('work', 1)) p.push('быстрее до работы'); if(best('park', 1)) p.push('парк в паре минут');
+  if(s.noise === 0) p.push('тихие дворы'); if(s.noise === 2) p.push('оживлённые улицы, шумнее');
+  return p.length ? cap(p.slice(0, 3).join(', ')) : 'Средний по всем пунктам'; }
+V.districts = () => { const city = S.anketa.city, ds = cityDists(city) || [], sort = S.dSort || 'fit';
+  const rows = ds.map(d => { const st = distStats(city, d); return {d, st, sc:distScore(st)}; });
+  const all = rows.map(x => x.st), top = [...rows].sort((a, b) => b.sc - a.sc)[0];
+  rows.sort((a, b) => sort === 'fit' ? b.sc - a.sc : sort === 'rent' ? a.st.rent - b.st.rent : a.st.work - b.st.work);
+  const m = (l, v, good) => '<div class="dm' + (good ? ' good' : '') + '"><span class="small muted">' + l + '</span><b>' + v + '</b></div>';
+  return topBack('Районы · ' + city) + '<div class="body" style="gap:12px">' +
+    '<div class="small muted">Сравнили районы по тому, что важно вашей семье из анкеты: ' + (S.anketa.children.filter(Boolean).length ? 'сады и школы рядом, ' : '') + 'дорога до работы (' + esc(S.anketa.work) + '), парки, шум и цена.</div>' +
+    '<div class="chips">' + [['fit', 'Подходят вам'], ['rent', 'Дешевле'], ['work', 'Ближе к работе']].map(([k, l]) => '<button class="chip' + (sort === k ? ' on' : '') + '" data-act="d-sort" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
+    rows.map(({d, st, sc}) => '<div class="box dcardx' + (S.district === d ? ' cur' : '') + '"><div class="row" style="align-items:flex-start"><span><b style="font-size:16px">' + cap(dname(d)) + '</b>' + (d === top.d ? '<div><span class="pick2">советует Дворецкий</span></div>' : '') + '</span><span class="fit">' + sc + '%<span class="small muted">подходит</span></span></div>' +
+      '<div class="dgrid">' + m('Двушка', '≈ ' + tys(st.rent) + '/мес', st.rent === Math.min(...all.map(x => x.rent))) + m('Сад пешком', st.sad + ' мин', st.sad === Math.min(...all.map(x => x.sad))) + m('Школа', st.school + ' мин', st.school === Math.min(...all.map(x => x.school))) +
+        m('До работы', st.work + ' мин', st.work === Math.min(...all.map(x => x.work))) + m('Парк', st.park + ' мин', st.park === Math.min(...all.map(x => x.park))) + m('Шум', NOISE[st.noise], st.noise === 0) + '</div>' +
+      '<div class="small">' + distWhy(st, all) + '. Садов в 15 минутах: ' + st.kg + '.</div>' +
+      '<button class="btn ' + (S.district === d ? 's' : 'p') + '" style="height:42px" data-act="d-pick" data-v="' + esc(d) + '">' + (S.district === d ? 'Вы ищете здесь' : 'Смотреть квартиры здесь') + '</button></div>').join('') +
+    '<div class="small muted">Минуты и цены — средние по району. Спросите Дворецкого, если хотите сравнить по другому признаку.</div></div>'; };
+Object.assign(A, {
+  'd-sort'(v){ S.dSort = v; render(); },
+  'd-pick'(v){ if(S.district === v){ back(); return; } placeChange(S.anketa.city, v); if(S.district === v){ S.stack = []; S.tab = 'search'; S.screen = 'results'; render(true); } },
+  'place-ok'(){ S.placeReset = true; placeApply(...S.placePend); if(S.screen === 'districts' && S.district === S.placePend[1]){ S.stack = []; S.tab = 'search'; S.screen = 'results'; render(true); } },
+  districts(){ S.sheet = null; go('districts'); }
+});
+const distLink = () => cityDists(S.anketa.city) ? '<button class="dlink" data-act="districts"><span><b>Не знаете ' + (S.anketa.city === 'Москва' ? 'Москву' : 'город') + '? Сравните районы</b><div class="small muted">Сады, школы, дорога до работы, парки, шум и цены</div></span><span>' + ic('chev', 18) + '</span></button>' : '';
+
+/* ---------- 2. viewing by video ---------- */
+function vShot(f, room){ const c = document.createElement('canvas'); c.width = 320; c.height = 240; const g = c.getContext('2d'), hue = (hashS(room) % 360);
+  const gr = g.createLinearGradient(0, 0, 320, 240); gr.addColorStop(0, 'hsl(' + hue + ',22%,48%)'); gr.addColorStop(1, 'hsl(' + ((hue + 40) % 360) + ',18%,28%)'); g.fillStyle = gr; g.fillRect(0, 0, 320, 240);
+  g.fillStyle = 'rgba(255,255,255,.85)'; g.fillRect(40, 40, 110, 90); g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(170, 130, 120, 70);
+  g.fillStyle = '#fff'; g.font = 'bold 18px sans-serif'; g.fillText(room, 14, 222); g.font = '12px sans-serif'; g.fillText('видеопросмотр · ' + f.short, 14, 22); return c.toDataURL('image/jpeg', .8); }
+V.vcall = () => { const f = byId(S.cur), C = S.vc, R = inspRooms(f), I = inspOf(f.id), cur = R[C.room], pp = I.ph[cur[0]] || [], n = Object.values(I.ph).flat().length;
+  return '<div class="vc"><div class="vcv img room gal p' + (C.room % 6) + '">' + (C.flash ? '<div class="vcflash"></div>' : '') +
+      '<div class="vctop"><b>' + f.owner + '</b><span id="vct">' + vTime() + '</span></div><div class="vcroom">' + cur[1] + '</div>' + (C.say ? '<div class="vcsay">' + esc(C.say) + '</div>' : '') + '<div class="vcself">Вы</div></div>' +
+    '<div class="vcbar"><button data-act="vc-mute" aria-pressed="' + !!C.mute + '">' + (C.mute ? 'Микрофон выкл.' : 'Микрофон') + '</button><button class="shot" data-act="vc-shot">Снимок · ' + n + '</button><button class="end" data-act="vc-end">Завершить</button></div>' +
+    '<div class="body" style="gap:10px"><div class="small muted">Попросите показать комнату — снимки сразу попадут в чек-лист осмотра</div>' +
+      '<div class="chips" style="flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none">' + R.map(([k, l], i) => '<button class="chip' + (i === C.room ? ' on' : '') + '" data-act="vc-room" data-v="' + i + '">' + l + ((I.ph[k] || []).length ? ' · ' + (I.ph[k] || []).length : '') + '</button>').join('') + '</div>' +
+      cur[2].map((t, j) => { const on = !!I.ck[cur[0] + ':' + j]; return '<button class="ckrow" data-act="insp-ck" data-v="' + cur[0] + ':' + j + '" aria-pressed="' + on + '"><span class="ck' + (on ? ' on' : '') + '">✓</span><span>' + t + '</span></button>'; }).join('') +
+      (pp.length ? '<div class="ithumbs">' + pp.map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') + '</div>' : '') + '</div></div>'; };
+const vTime = () => { const s = Math.floor((Date.now() - S.vc.t0) / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+const VSAY = {kitchen:'Вот кухня: холодильник новый, плита работает, сейчас включу.', bed:'Это спальня, шкаф большой, кровать остаётся.', room:'Это комната, диван раскладывается.', living:'Гостиная, тут светло после обеда.', kids:'Здесь можно сделать детскую, окна во двор.', bath:'Ванная: машинка стиральная, напор хороший, смотрите.', hall:'Прихожая, замки поменяли в прошлом году.', balcony:'Балкон застеклён, можно сушить бельё.'};
+Object.assign(A, {
+  vcall(v){ S.cur = v; inspOf(v); S.vc = {room:0, t0:Date.now(), say:byId(v).owner + ': Здравствуйте! Видно меня? Начнём с кухни.'}; go('vcall'); clearInterval(S.vcIv); S.vcIv = setInterval(() => { const el = document.getElementById('vct'); if(!el || S.screen !== 'vcall'){ clearInterval(S.vcIv); return; } el.textContent = vTime(); }, 1000); },
+  'vc-room'(v){ const f = byId(S.cur), R = inspRooms(f), r = R[+v]; S.vc.room = +v; S.vc.say = 'Вы: Покажите, пожалуйста, ' + r[1].toLowerCase(); render(); later(1400, () => { if(S.screen !== 'vcall') return; S.vc.say = f.owner + ': ' + (VSAY[r[0]] || 'Смотрите, всё как на фото.'); render(); }); },
+  'vc-shot'(){ const f = byId(S.cur), I = inspOf(f.id), r = inspRooms(f)[S.vc.room]; (I.ph[r[0]] = I.ph[r[0]] || []).push(vShot(f, r[1])); S.vc.flash = true; render(); later(250, () => { if(S.vc){ S.vc.flash = false; if(S.screen === 'vcall') render(); } }); },
+  'vc-mute'(){ S.vc.mute = !S.vc.mute; render(); },
+  'vc-end'(){ clearInterval(S.vcIv); const f = byId(S.cur), I = inspOf(f.id), n = Object.values(I.ph).flat().length, min = Math.max(1, Math.round((Date.now() - S.vc.t0) / 60000)), b = S.booking[f.id]; if(n) I.saved = true; if(b) b.done = true;
+    chatOf(f).push({sys:true, t:'Видеопросмотр ' + min + ' мин' + (n ? ' · снимков: ' + n + '. Они в чек-листе осмотра и попадут в акт при въезде' : '')}); S.vc = null; S.chatBottom = true; back(); toast(n ? 'Снимки сохранены в чек-лист' : 'Звонок завершён'); }
+});
+
+/* ---------- 3. moving out and getting the deposit back ---------- */
+const moOf = () => S.mo = S.mo || {date:null, notice:false, ph:{}, ok:true, sent:false, resp:null, dec:null, res:null, back:false};
+function moDed(){ const M = S.mo; if(!M.resp || M.resp === 'ok') return 0; if(M.dec === 'accept') return M.claim.amt; return M.res ? M.res.amt : M.claim.amt; }
+V.moveout = () => { const f = byId(S.live.id), d = dos(f), M = moOf(), I = inspOf(f.id), R = inspRooms(f), dep = f.dep, atDvor = S.live.dep === 'dvor', ded = moDed();
+  const dates = [['2w', dTxt(dAdd(14))], ['1m', dTxt(mAdd(TODAY, 1))], ['eom', dTxt(new Date(TODAY.getFullYear(), TODAY.getMonth() + 2, 0))]];
+  const s1 = '<div class="box">' + stepHead(1, 'Дата выезда', M.notice ? 'done' : 'now') +
+    (M.notice ? '<div class="small">Выезжаете ' + M.date + '. ' + f.owner + ' предупреждён' + ga(f, 'а') + '.</div>'
+      : '<div class="small muted">' + d.early + '</div><div class="chips">' + dates.map(([k, l]) => '<button class="chip' + (M.date === l ? ' on' : '') + '" data-act="mo-date" data-v="' + l + '">' + l + '</button>').join('') + '</div>' +
+        '<button class="btn p" style="height:44px" data-act="mo-notice"' + (M.date ? '' : ' disabled') + '>' + (M.date ? 'Предупредить ' + datv(f) : 'Выберите дату') + '</button>') + '</div>';
+  const nIn = Object.values(I.ph).flat().length, nOut = Object.values(M.ph).flat().length;
+  const s2 = '<div class="box">' + stepHead(2, 'Акт при выезде', M.sent ? 'done' : M.notice ? 'now' : '') +
+    (!M.notice ? '<div class="small muted">После того как предупредите ' + datv(f) + ', сфотографируйте комнаты: сравним с фото при въезде</div>'
+      : M.sent ? '<div class="small">Отправили акт: фото при выезде ' + nOut + ', при въезде было ' + nIn + '</div>'
+      : '<div class="small muted">Сфотографируйте те же места, что при въезде. Рядом покажем, как было тогда</div>' +
+        R.map(([k, l]) => { const a = I.ph[k] || [], b = M.ph[k] || []; return '<div class="morow"><b>' + l + '</b><div class="mopair"><div><span class="small muted">при въезде</span><div class="ithumbs">' + (a.length ? a.slice(0, 2).map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') : '<span class="small muted">нет фото</span>') + '</div></div>' +
+          '<div><span class="small muted">сейчас</span><div class="ithumbs">' + b.map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') + '<label class="iadd" for="mof-' + k + '">+ фото</label><input type="file" id="mof-' + k + '" accept="image/*" capture="environment" multiple hidden></div></div></div></div>'; }).join('') +
+        '<button class="ckrow" data-act="mo-ok" aria-pressed="' + M.ok + '"><span class="ck' + (M.ok ? ' on' : '') + '">✓</span><span>Всё в том же состоянии, что при въезде</span></button>' +
+        '<button class="btn p" style="height:44px" data-act="mo-send">Отправить акт ' + datv(f) + '</button>') + '</div>';
+  const s3 = '<div class="box">' + stepHead(3, 'Сверка с ' + instr(f), M.resp === 'ok' || M.res || M.dec === 'accept' ? 'done' : M.sent ? 'now' : '') +
+    (!M.sent ? '<div class="small muted">' + f.owner + ' сверит квартиру с актом при въезде и подпишет акт выезда</div>'
+      : !M.resp ? '<div class="small muted">Ждём, когда ' + f.owner + ' сверит квартиру…</div>'
+      : M.resp === 'ok' ? '<div class="small">✓ ' + f.owner + ' подписал' + ga(f, 'а') + ' акт: претензий нет</div>'
+      : '<div class="err" style="padding:10px 12px"><b>' + f.owner + ': ' + M.claim.txt + '</b><span>Просит удержать ' + rub(M.claim.amt) + ' из залога</span></div>' +
+        '<div class="small muted">Как было при въезде (' + M.claim.room + '):</div><div class="ithumbs">' + ((I.ph[M.claim.key] || []).length ? I.ph[M.claim.key].slice(0, 3).map(u => '<span class="ithumb" style="background-image:url(' + u + ')"></span>').join('') : '<span class="small muted">фото при въезде нет</span>') + '</div>' +
+        (M.dec === 'accept' ? '<div class="small">Вы согласились: удержим ' + rub(M.claim.amt) + '</div>'
+          : M.dec === 'dispute' ? (M.res ? '<div class="small" style="font-weight:700">' + M.res.txt + '</div>' : '<div class="small muted">Поддержка сравнивает фото при въезде и выезде…</div>')
+          : '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:44px;font-size:13px" data-act="mo-accept">Согласиться</button><button class="btn p" style="height:44px;font-size:13px" data-act="mo-dispute">Оспорить</button></div>')) + '</div>';
+  const done3 = M.resp === 'ok' || M.dec === 'accept' || !!M.res;
+  const s4 = '<div class="box">' + stepHead(4, 'Возврат залога', M.back ? 'done' : done3 ? 'now' : '') +
+    '<div class="row small"><span>Залог</span><span>' + rub(dep) + '</span></div>' + (ded ? '<div class="row small"><span>Удержание по акту</span><span>− ' + rub(ded) + '</span></div>' : '') + '<div class="row" style="font-weight:800"><span>Вернётся вам</span><span>' + rub(dep - ded) + '</span></div>' +
+    (!done3 ? '<div class="small muted">Залог вернётся после сверки квартиры</div>'
+      : M.back ? '<div class="small">✓ ' + (atDvor ? rub(dep - ded) + ' на кошельке. Вывести на карту можно в любой момент' : 'Вы отметили, что ' + f.owner + ' вернул' + ga(f, 'а') + ' залог') + '</div>'
+      : atDvor ? '<div class="small muted">Залог лежит на залоговом счёте «Двора», вернём его сразу</div><button class="btn p" style="height:44px" data-act="mo-back">Вернуть ' + rub(dep - ded) + ' на кошелёк</button>'
+      : '<div class="small muted">Залог у ' + gen(f) + ', вернуть его должен' + ga(f, 'а') + ' он' + ga(f, 'а') + '</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:44px;font-size:13px" data-act="mo-noback">Не вернул' + ga(f, 'а') + '</button><button class="btn p" style="height:44px;font-size:13px" data-act="mo-back">Залог получен</button></div>') + '</div>';
+  return topBack('Выезд · ' + f.short) + '<div class="body" style="gap:12px">' + s1 + s2 + s3 + s4 +
+    (M.back ? '<div class="box"><b>Вы съехали</b><div class="small muted">Спасибо, что жили через «Двор». Отзыв поможет следующей семье</div><button class="btn s" style="height:44px" data-act="live-rev">Оставить отзыв о квартире</button><button class="btn p" style="height:44px" data-act="mo-finish">Вернуться к поиску</button></div>' : '') + '</div>'; };
+Object.assign(A, {
+  mo(){ moOf(); go('moveout'); },
+  'mo-date'(v){ S.mo.date = v; render(); },
+  'mo-notice'(){ const f = byId(S.live.id), M = S.mo; M.notice = true; chatOf(f).push({me:true, t:'Здравствуйте! Мы съезжаем ' + M.date + '. Давайте договоримся, когда сверим квартиру и передадим ключи.'}); render(); toast('Предупредили ' + datv(f));
+    later(1500, () => ownerSay(f, 'Спасибо, что предупредили заранее! ' + M.date + ' подойдёт, сверим квартиру по акту.')); },
+  'mo-ok'(){ S.mo.ok = !S.mo.ok; render(); },
+  'mo-send'(){ const f = byId(S.live.id), M = S.mo; M.sent = true; chatOf(f).push({sys:true, t:'Вы отправили акт выезда: ' + Object.values(M.ph).flat().length + ' фото'}); render(); toast('Акт отправлен ' + datv(f));
+    later(3200, () => { if(M.resp) return; if(M.ok && !MV9.claim){ M.resp = 'ok'; ownerSay(f, 'Всё проверил' + ga(f, 'а') + ', квартира в порядке. Подписал' + ga(f, 'а') + ' акт, спасибо!'); pushNote(f.owner + ' подписал' + ga(f, 'а') + ' акт выезда', 'Претензий нет, залог вернётся полностью', {to:'moveout'}); }
+      else { M.resp = 'claim'; M.claim = {key:'kitchen', room:'кухня', txt:'на кухне скол на столешнице', amt:Math.round(f.dep * .08 / 500) * 500 || 3000}; ownerSay(f, 'На кухне скол на столешнице, раньше его не было. Предлагаю удержать ' + rub(M.claim.amt) + ' из залога.'); pushNote(f.owner + ' нашл' + (f.ownerG === 'f' ? 'а' : 'ёл') + ' повреждение', 'Скол на столешнице, просит удержать ' + rub(M.claim.amt), {to:'moveout'}); } }); },
+  'mo-accept'(){ S.mo.dec = 'accept'; render(); toast('Удержим ' + rub(S.mo.claim.amt) + ' из залога'); },
+  'mo-dispute'(){ const f = byId(S.live.id), M = S.mo, had = (inspOf(f.id).ph.kitchen || []).length; M.dec = 'dispute'; S.support.push({me:true, t:'Не согласен с удержанием из залога: ' + M.claim.txt + '. Прошу сравнить с фото при въезде.'}); render(); toast('Передали в поддержку');
+    later(4500, () => { M.res = had ? {amt:0, txt:'Поддержка сравнила фото: скол виден на снимке кухни при въезде. Удержание отменено, залог вернётся полностью'} : {amt:Math.round(M.claim.amt / 2 / 100) * 100, txt:'Фото кухни при въезде нет, доказать нельзя ни вам, ни ' + datv(f) + '. Поддержка предложила разделить: удержим ' + rub(Math.round(M.claim.amt / 2 / 100) * 100)};
+      S.support.push({me:false, t:M.res.txt + '. ' + f.owner + ' согласил' + (f.ownerG === 'f' ? 'ась' : 'ся') + '.'}); pushNote('Поддержка разобралась', had ? 'Скол был при въезде, удержание отменено' : 'Удержание разделили пополам', {to:'moveout'}); }); },
+  'mo-back'(){ const f = byId(S.live.id), M = S.mo, sum = f.dep - moDed(); M.back = true; if(S.live.dep === 'dvor') wAdd('Возврат залога · ' + f.short, sum); render(); toast(S.live.dep === 'dvor' ? 'Залог вернули на кошелёк' : 'Отметили: залог получен'); },
+  'mo-noback'(){ const f = byId(S.live.id); go('support'); supSend(f.owner + ' не возвращает залог ' + rub(f.dep - moDed()) + ' после выезда, акт подписан.'); },
+  'mo-finish'(){ S.live = null; S.mo = null; S.deal = null; S.sheet = null; tab('search'); toast('Вернули поиск квартир'); }
+});
+document.addEventListener('change', e => { const t = e.target; if(!t.id || !t.id.startsWith('mof-') || !t.files.length || !S.mo) return; const k = t.id.slice(4);
+  [...t.files].forEach(file => { const r = new FileReader(); r.onload = () => { const img = new Image(); img.onload = () => { const s = Math.min(1, 320 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); (S.mo.ph[k] = S.mo.ph[k] || []).push(c.toDataURL('image/jpeg', .8)); render(); }; img.src = r.result; }; r.readAsDataURL(file); }); });
+/* owner side: tenants moving out */
+function oOutBox(L, i){ const T = L.tenant, O = T.out; if(!O) return '';
+  return '<div class="box" style="background:var(--soft)"><b>Выезд ' + O.date + '</b><div class="small muted">Семья прислала акт выезда: ' + O.n + ' фото. Сравните с актом при въезде</div>' +
+    (O.res ? '<div class="small">' + O.res + '</div>'
+      : O.claim ? '<div class="small muted">Вы попросили удержать ' + rub(O.claim) + '. Ждём ответа семьи…</div>'
+      : '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn s" style="height:42px;font-size:13px" data-act="oout-claim" data-v="' + i + '">Есть повреждения</button><button class="btn p" style="height:42px;font-size:13px" data-act="oout-ok" data-v="' + i + '">Всё в порядке</button></div>') + '</div>'; }
+Object.assign(A, {
+  'oout-ok'(v){ const T = S.own.list[+v].tenant; T.out.res = '✓ Вы подписали акт выезда. ' + (T.dep === 'dvor' ? 'Залог ' + rub(T.depSum) + ' вернули семье с залогового счёта «Двора»' : 'Верните семье залог, который у вас'); render(); toast('Акт выезда подписан'); },
+  'oout-claim'(v){ const L = S.own.list[+v], T = L.tenant, amt = Math.round(depF(L.form) * .08 / 500) * 500 || 3000; T.out.claim = amt; render(); toast('Попросили удержать ' + rub(amt));
+    later(3500, () => { T.out.res = 'Семья оспорила удержание. Поддержка сравнила фото при въезде: скол уже был. Удержание отменено, залог вернулся семье полностью'; pushNote('Поддержка разобралась', 'Скол был на фото при въезде, удержание отменено', {to:'otenants'}); }); }
+});
+
+/* ---------- 4. moving budget ---------- */
+function moveBudget(f){ const a = S.anketa, k = f._b ? f.rent / f._b.rent : 1, D = dealOf(f.id), p = D && D.movers && D.movers.ordered ? moversPlan(D.movers) : null;
+  const mv = a.move === 'нет' || (D && D.movers && D.movers.declined) ? 0 : p ? (p.movers * 700 * p.hours + 2500) : Math.round((f.rooms >= 3 ? 9000 : 6500) * Math.max(.7, k) / 100) * 100;
+  const setup = Math.round(10000 * Math.max(.7, k) / 500) * 500;
+  return {entry:f.entry, mv, util:f.util, setup, total:f.entry + mv + f.util + setup}; }
+function budgetBox(f){ const B = moveBudget(f), a = S.anketa;
+  return '<div class="box"><div class="row"><b>Бюджет переезда</b><b style="font-size:17px">≈ ' + rub(B.total) + '</b></div>' +
+    '<div class="row small"><span>Въезд: аренда и залог</span><span>' + rub(B.entry) + '</span></div>' +
+    '<div class="row small"><span>Грузчики и машина</span><span>' + (B.mv ? '≈ ' + rub(B.mv) : a.move === 'нет' ? 'справитесь сами' : '—') + '</span></div>' +
+    '<div class="row small"><span>Коммуналка и ЖКУ за первый месяц</span><span>≈ ' + rub(B.util) + '</span></div>' +
+    '<div class="row small"><span>Обустройство: шторы, лампы, мелочи</span><span>≈ ' + rub(B.setup) + '</span></div>' +
+    (a.income ? '<div class="small muted">Это ' + Math.round(B.total / a.income * 100) + '% месячного дохода семьи' + (B.total > a.income ? '. Можно внести залог частями, если собственник согласен' : '') + '</div>' : '<div class="small muted">Дорогу семьи до нового города не считаем: её вы знаете лучше</div>') + '</div>'; }
+function dealBudget(D, f){ const B = moveBudget(f), paid = (D.booked === true ? D.adv : 0) + (D.paid === true ? f.rent + f.dep - (D.booked === true ? D.adv : 0) : 0);
+  return '<div class="box small"><div class="row"><b>Бюджет переезда</b><b>≈ ' + rub(B.total) + '</b></div><div class="prog"><div style="width:' + Math.min(100, Math.round(paid / B.total * 100)) + '%"></div></div><span class="muted">Оплачено ' + rub(paid) + ' · осталось ≈ ' + rub(Math.max(0, B.total - paid)) + (B.mv ? ', из них грузчики и машина ≈ ' + rub(B.mv) + ' в день переезда' : '') + '</span></div>'; }
+
+/* ---------- 5. searching together ---------- */
+const PR = () => S.partner && S.partner.st === 'in' ? S.partner : null;
+function pairRow(){ const P = S.partner;
+  return listRow(['users', 'data-act="pair"'], P ? (P.st === 'in' ? 'Ищете вдвоём с ' + esc(nameIns(P.name)) : 'Приглашение для ' + esc(P.name)) : 'Искать вдвоём', P ? (P.st === 'in' ? 'Общее избранное и голоса' : 'Ждём, когда откроет ссылку') : 'Пригласите второго родителя: общее избранное и голоса'); }
+SH.pair = () => { const P = S.partner;
+  if(P && P.st === 'in') return sheet('<div class="h1" style="font-size:17px">Ищете вдвоём</div><div style="font-size:14px;line-height:20px">' + esc(P.name) + ' видит ваше избранное, ставит «нравится» или «не то» и может добавлять квартиры. Вы видите то же самое.</div><button class="btn s" data-act="pair-off">Отключить совместный поиск</button><button class="btn p" data-act="close-sheet">Хорошо</button>');
+  return sheet('<div class="h1" style="font-size:17px">Искать вдвоём</div><div style="font-size:14px;line-height:20px">Пригласите второго родителя. У вас будет общее избранное: каждый отмечает, нравится ли квартира, и сразу видно, какие нравятся обоим.</div>' +
+    '<label class="lbl" for="pairname">Как зовут</label><input id="pairname" class="field" type="text" placeholder="Например, Алина" value="' + esc(S.pairDraft || '') + '" autocomplete="off">' +
+    '<div class="small muted">Отправим ссылку в мессенджер. Анкету семьи заполнять второй раз не нужно</div><button class="btn p" data-act="pair-send">' + (P ? 'Отправить ещё раз' : 'Отправить приглашение') + '</button>'); };
+const pairOpinion = f => { const sad = f.sad > 10, pricey = f.rent > baseRent() * (f._b ? f.rent / f._b.rent : 1) * 1.08, noLift = !f.lift;
+  if(MV9.pairNo || sad || pricey || noLift) return {v:'no', t:sad ? 'далеко от сада' : pricey ? 'дороговато для нас' : noLift ? 'без лифта тяжело с коляской' : 'не нравится район'};
+  return {v:'yes', t:['тоже нравится!', 'отличная, давай смотреть', 'кухня большая, мне нравится'][hashS(f.id) % 3]}; };
+function pairReact(id, delay){ const P = PR(); if(!P || P.likes[id]) return; later(delay || 3000, () => { const Q = PR(); if(!Q || Q.likes[id] || !S.fav.includes(id)) return; const f = byId(id), o = pairOpinion(f); Q.likes[id] = o.v; Q.notes[id] = o.t;
+  pushNote(Q.name + (o.v === 'yes' ? ': нравится ' : ': не то · ') + f.short, cap(o.t), {to:'fav'}); }); }
+function pairJoin(){ const P = S.partner; if(!P || P.st === 'in') return; P.st = 'in'; pushNote(P.name + ' присоединяется к поиску', 'Теперь избранное общее', {to:'fav'});
+  S.fav.forEach((id, i) => pairReact(id, 2500 + i * 1800));
+  later(2500 + S.fav.length * 1800 + 2000, () => { const Q = PR(); if(!Q) return; const pick = results().find(f => !S.fav.includes(f.id) && pairOpinion(f).v === 'yes'); if(!pick) return; S.fav.push(pick.id); S.fav.sort(); Q.likes[pick.id] = 'yes'; Q.notes[pick.id] = 'нашла вот эту, посмотри'; Q.adds.push(pick.id); pushNote(Q.name + ' добавляет квартиру', pick.short + ' · ' + rub(pick.rent) + '/мес', {to:'fav'}); }); }
+function pairLine(f){ const P = PR(); if(!P) return ''; const me = S.fav.includes(f.id), v = P.likes[f.id], n = P.notes[f.id], add = P.adds.includes(f.id);
+  return '<div class="pairline' + (v === 'yes' && me ? ' both' : v === 'no' ? ' no' : '') + '">' + (v === 'yes' ? (add ? 'Добавил' + (/а$/.test(P.name) ? 'а ' : ' ') + esc(P.name) + ': «' + n + '»' : (me ? 'Нравится вам обоим' : esc(P.name) + ': нравится')) : v === 'no' ? esc(P.name) + ': «' + n + '»' : esc(P.name) + ' ещё не смотрел' + (/а$/.test(P.name) ? 'а' : '')) + '</div>'; }
+const pairBox = f => PR() && S.fav.includes(f.id) ? pairLine(f) : '';
+function favHead(){ const P = S.partner;
+  if(!P) return S.user ? '<button class="dlink" data-act="pair"><span><b>Выбираете квартиру вдвоём?</b><div class="small muted">Пригласите второго родителя: общее избранное и голоса</div></span><span>' + ic('chev', 18) + '</span></button>' : '';
+  if(P.st !== 'in') return '<div class="small muted">Ждём, когда ' + esc(P.name) + ' откроет приглашение</div>';
+  const both = S.fav.filter(id => P.likes[id] === 'yes').length;
+  return '<div class="small muted">Общее избранное с ' + esc(nameIns(P.name)) + ' · нравится обоим: ' + both + '</div><div class="chips">' + [['all', 'Все'], ['both', 'Нравится обоим']].map(([k, l]) => '<button class="chip' + ((S.favF || 'all') === k ? ' on' : '') + '" data-act="fav-f" data-v="' + k + '">' + l + '</button>').join('') + '</div>'; }
+const favList = list => PR() && S.favF === 'both' ? list.filter(f => S.partner.likes[f.id] === 'yes') : list;
+Object.assign(A, {
+  pair(){ S.pairDraft = S.partner ? S.partner.name : ''; S.sheet = 'pair'; render(); },
+  'pair-send'(){ const n = capCity(S.pairDraft || '') || 'Второй родитель'; S.partner = {name:n, st:'inv', likes:{}, notes:{}, adds:[]}; S.sheet = null; render(); toast('Приглашение для ' + n + ' отправлено'); if(MV9.pairAuto !== false) later(4500, pairJoin); },
+  'pair-off'(){ S.partner = null; S.favF = 'all'; S.sheet = null; render(); toast('Совместный поиск выключен'); },
+  'fav-f'(v){ S.favF = v; render(); }
+});
+document.addEventListener('input', e => { if(e.target.id === 'pairname') S.pairDraft = e.target.value; });
+
+/* ---------- moderator ---------- */
+const MV9 = {claim:false, pairNo:false};
+const modExtra3 = opt => '<h3>Итерация 9 · районы, видео, выезд, вдвоём</h3>' +
+  opt('m-moclaim', 'Собственник найдёт повреждение при выезде', !!MV9.claim, 'скол на кухне, просит удержать часть залога') +
+  opt('m-pairno', 'Второму родителю не нравятся квартиры', !!MV9.pairNo, 'голосует «не то» с причиной') +
+  '<button class="s"' + (S.partner && S.partner.st !== 'in' ? '' : ' disabled style="opacity:.5"') + ' data-act="m-pairjoin">Второй родитель открывает приглашение</button>' +
+  '<button class="s" data-act="m-video">Видеопросмотр сегодня (Амирхана, 21)</button>' +
+  '<button class="s"' + (S.own ? '' : ' disabled style="opacity:.5"') + ' data-act="m-oout">Жильцы съезжают (собственник)</button>';
+Object.assign(MA, {
+  'm-moclaim'(){ MV9.claim = !MV9.claim; renderMod(); },
+  'm-pairno'(){ MV9.pairNo = !MV9.pairNo; renderMod(); },
+  'm-pairjoin'(){ pairJoin(); },
+  'm-video'(){ clearTimers(); const th = S.theme; S = fresh(); S.theme = th; S.user = {...DEMO_USER}; S.anketa.city = HAS.city; S.district = HAS.district; S.cur = 'B';
+    S.booking.B = {day:dDay(TODAY), time:'12:00', status:'ok', place:'door', placeTxt:'', fmt:'video'}; chatOf(byId('B')).push({me:true, t:'Хочу посмотреть квартиру по видеосвязи сегодня в 12:00.'}, {me:false, t:'Подтверждаю видеопросмотр. Позвоню вам в приложении и покажу всё, что попросите.'});
+    M.viewDay = true; S.tab = 'chats'; S.stack = []; S.screen = 'chat'; render(true); },
+  'm-oout'(){ const L = S.own.list.find(x => x.tenant); if(!L) return; L.tenant.out = {date:dTxt(dAdd(14)), n:12}; pushNote(L.tenant.who + ' съезжают ' + dTxt(dAdd(14)), 'Прислали акт выезда, сверьте квартиру', {to:'otenants'}); }
+});
+
+const _inspStrip0 = inspStrip;
+inspStrip = f => { const b = S.booking[f.id];
+  if(b && b.status === 'ok' && M.viewDay && !S.live && b.fmt === 'video' && !b.done) return '<button class="istrip vcgo" data-act="vcall" data-v="' + f.id + '"><span style="flex:1">Сегодня видеопросмотр в ' + b.time + '<div class="small muted" style="font-weight:500">' + f.owner + ' покажет квартиру, а вы сделаете снимки для чек-листа</div></span><span class="vcbtn">Начать</span></button>';
+  return _inspStrip0(f); };
+const fmtBlock = d => '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Как смотрим</div><div class="chips">' + [['live', 'Вживую'], ['video', 'По видеосвязи']].map(([k, l]) => '<button class="chip' + ((d.fmt || 'live') === k ? ' on' : '') + '" data-act="bd-fmt" data-v="' + k + '">' + l + '</button>').join('') + '</div>' +
+  (d.fmt === 'video' ? '<div class="small muted">Собственник покажет квартиру по видеозвонку в приложении. Во время звонка можно делать снимки, они сразу попадут в чек-лист осмотра</div>' : '<div class="small muted">Переезжаете издалека? Выберите видеосвязь: посмотрите квартиру, не приезжая</div>') + '</div>';
+A['bd-fmt'] = v => { S.bookDraft.fmt = v; render(); };
+
+const nameIns = n => /а$/.test(n) ? n.slice(0, -1) + 'ой' : /я$/.test(n) ? n.slice(0, -1) + 'ей' : /й$/.test(n) ? n.slice(0, -1) + 'ем' : n + 'ом';
+const _mlive9 = MA['m-live']; MA['m-live'] = () => { _mlive9(); if(S.live){ S.live.dep = 'dvor'; render(); } };
 function renderMod(){
   const m = $('#mod'), btn = $('#modbtn'), wf = document.activeElement && document.activeElement.id === 'wozt';
   m.hidden = !M.open; btn.textContent = M.open ? 'Скрыть панель' : 'Модератор';
@@ -3373,7 +3619,7 @@ function renderMod(){
       (M.pend ? '<div class="small"><b>Участник · ' + byId(M.pend.id).owner + ', ' + byId(M.pend.id).short + ':</b> ' + esc(M.pend.t) + '</div>' : '<div class="small muted">Ждём сообщения участника в чате собственника. Ответить можно и без вопроса: в текущий чат.</div>') +
       '<input id="wozt" type="text" autocomplete="off" placeholder="Ответ, Enter = от собственника" value="' + esc(M.wozDraft) + '" style="height:38px;border:1px solid #D0D3D9;border-radius:8px;padding:0 10px;font:inherit">' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="s" data-act="m-woz-owner">От собственника</button><button class="s" data-act="m-woz-bot">От Дворецкого</button>' + (M.pend ? '<button class="s" data-act="m-woz-sug">Подставить автоответ</button>' : '') + '</div></div>' : '') +
-    modExtra(opt) + modExtra2(opt) +
+    modExtra(opt) + modExtra2(opt) + modExtra3(opt) +
     '<button class="s"' + ((S.chats.B||[]).length?' disabled style="opacity:.5"':'') + ' data-act="m-chat">Добавить переписку с Ириной (Амирхана, 21)</button>' +
     '<button class="s"' + (waiting?'':' disabled style="opacity:.5"') + ' data-act="m-confirm">Подтвердить просмотр сейчас</button>' +
     (S.own && S.own.list.some(L => L.status === 'review') ? '<button class="s" data-act="m-own">Одобрить объявление собственника</button>' : '') +
