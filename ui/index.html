@@ -1006,6 +1006,45 @@ body{--desk:#E9E2D8}
 @keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 @keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-3px);opacity:1}}
 @media (prefers-reduced-motion:reduce){.typing b,.typing i{animation:none}}
+
+/* profile: grouped rows with icons */
+.ph .pbody{gap:18px}
+.ph .phead{display:flex;gap:14px;align-items:center;padding:4px 2px}
+.ph .phead .img{width:60px!important;height:60px!important}
+.ph .pname{font-size:18px;line-height:24px;font-weight:800}
+.ph .pgrp{display:flex;flex-direction:column;gap:8px}
+.ph .pgt{font-size:12px;font-weight:700;color:var(--mute);padding-left:4px}
+.ph .pbox{background:var(--soft);border-radius:20px;overflow:hidden}
+.ph .prow{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;text-align:left;font-size:15px;line-height:20px;position:relative}
+.ph .prow + .prow::before{content:"";position:absolute;left:58px;right:0;top:0;border-top:1px solid var(--line)}
+.ph .pic{width:32px;height:32px;flex:none;border-radius:10px;background:var(--fill);display:grid;place-items:center;color:var(--ink)}
+.ph .ptx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ph .ptx .small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .prow.danger{background:none;color:#E5484D;font-weight:700;padding-left:4px}
+.ph .prow.danger .pic{background:rgba(229,72,77,.12);color:#E5484D}
+.ph .phead .bdg .ic{margin-right:2px}
+/* welcome: centred hero, routes from the house to what is nearby */
+.ph .wel{gap:24px}
+.hero{position:relative;width:300px;height:230px;margin:0 auto;flex:none}
+.hero > svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.hero .hp{fill:none;stroke:var(--mint);stroke-width:2;stroke-linecap:round;stroke-dasharray:2 7;opacity:.6;animation:hdash 1.2s linear infinite}
+.hero .hdot{fill:var(--mint)}
+.hero .ring{fill:none;stroke:var(--cta);stroke-width:1.5;transform-box:fill-box;transform-origin:center;animation:hring 3.2s ease-out infinite}
+.hero .ring.r2{animation-delay:1.6s}
+.hlogo{position:absolute;left:50%;top:112px;translate:-50% -50%;width:92px;height:92px;border-radius:26px;background:linear-gradient(160deg,#2E2924 0%,#171512 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 14px 34px rgba(0,0,0,.35);display:grid;place-items:center}
+.hchip{position:absolute;translate:-50% -50%;opacity:0;animation:hpop .55s cubic-bezier(.2,.9,.3,1.25) forwards}
+.hin{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:999px;background:var(--soft);color:var(--ink);font-size:12px;font-weight:700;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.28);animation:hfloat 4.5s ease-in-out infinite}
+.hin b{color:var(--mint);font-weight:800}
+.hin .ic{color:var(--mint)}
+.weltx{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:0 6px}
+.wmark{font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--cta)}
+@keyframes hdash{to{stroke-dashoffset:-18}}
+@keyframes hring{from{transform:scale(.7);opacity:.7}to{transform:scale(1.7);opacity:0}}
+@keyframes hpop{from{opacity:0;transform:scale(.6) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes hfloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.ph[data-theme=light] .hin{box-shadow:0 8px 20px rgba(60,40,20,.12)}
+.ph[data-theme=light] .hlogo{box-shadow:0 14px 34px rgba(60,40,20,.25)}
+@media (prefers-reduced-motion:reduce){.hero .hp,.hero .ring,.hin{animation:none}.hchip{animation:none;opacity:1}.hero .hdot,.hero .ring{display:none}}
 </style>
 
 <div class="desk">
@@ -1046,7 +1085,15 @@ const ICP = {
   info:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/>',
   kid:'<circle cx="12" cy="12" r="8.5"/><path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2M9.3 9.8v.2M14.7 9.8v.2"/>',
   book:'<path d="M3.5 6.2c2.8-1.1 5.6-.9 8.5 1 2.9-1.9 5.7-2.1 8.5-1v12c-2.8-1.1-5.6-.9-8.5 1-2.9-1.9-5.7-2.1-8.5-1z"/><path d="M12 7.2v12"/>',
-  cross:'<path d="M12 5v14M5 12h14"/>'
+  cross:'<path d="M12 5v14M5 12h14"/>',
+  wallet:'<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 7.5z"/><circle cx="16" cy="13.5" r="1.2"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2.2M12 18.3v2.2M20.5 12h-2.2M5.7 12H3.5M18 6l-1.6 1.6M7.6 16.4 6 18M18 18l-1.6-1.6M7.6 7.6 6 6"/>',
+  help:'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 16.8v.2"/>',
+  out:'<path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14"/><path d="M10 8l-4 4 4 4M6 12h9"/>',
+  doc:'<path d="M7 3.5h7l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19V5a1.5 1.5 0 0 1 1-1.5z"/><path d="M14 3.5V8h4M9 12.5h6M9 16h4"/>',
+  phone:'<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 17.5h2"/>',
+  key:'<circle cx="8" cy="15" r="3.5"/><path d="M10.5 12.5 19 4M16 7l2 2M14 9l1.5 1.5"/>',
+  bot:'<rect x="5" y="8" width="14" height="10" rx="3"/><path d="M12 4.5V8M9.5 13v.2M14.5 13v.2M3 13h2M19 13h2"/>'
 };
 const ic = (n, sz) => '<svg class="ic' + (n === 'heartf' ? ' f' : '') + '" width="' + (sz || 20) + '" height="' + (sz || 20) + '" viewBox="0 0 24 24" fill="' + (n === 'heartf' ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICP[n === 'heartf' ? 'heart' : n] + '</svg>';
 const rub = n => n.toLocaleString('ru-RU').replace(/ /g,' ') + ' ₽';
@@ -1639,11 +1686,18 @@ const WEL_ILL = '<svg viewBox="0 0 320 200" width="100%" height="200" fill="none
   '<circle cx="184" cy="128" r="7"/><path d="M184 135 v20 M184 155 l-7 15 M184 155 l7 15 M184 142 l12 8"/><circle cx="202" cy="146" r="5"/><path d="M202 151 v10 M202 161 l-4 9 M202 161 l4 9"/>' +
   '<path d="M118 176 C170 186 222 186 262 174" stroke-dasharray="5 6"/><rect x="238" y="110" width="62" height="60"/><path d="M232 112 L269 86 L306 112"/><rect x="258" y="142" width="22" height="28"/>' +
   '<text x="269" y="132" font-size="13" text-anchor="middle" fill="#8A9099" stroke="none" font-weight="700">сад</text><text x="190" y="196" font-size="13" text-anchor="middle" fill="#8A9099" stroke="none" font-weight="700">6 мин пешком</text></svg>';
-V.welcome = () => '<div class="body" style="justify-content:center;gap:18px">' +
-  '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:14px"><div style="width:96px;height:96px;border-radius:22px;background:linear-gradient(160deg,#2E2924 0%,#171512 70%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center"><svg width="62" height="62" viewBox="0 0 40 40" fill="none" stroke="#F59A8E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 L20 6 L33 17"/><path d="M11 15 V30"/><path d="M29 15 V30"/><path d="M5 30 H35"/><path d="M5 30 V35"/><path d="M35 30 V35"/></svg></div><div style="font-size:34px;line-height:1;font-weight:800;letter-spacing:-.01em">Двор</div></div>' +
-  '<div class="h1" style="font-size:24px;line-height:30px">Квартира и всё, что рядом с ребёнком</div>' +
-  '<div class="muted" style="font-size:14px;line-height:20px">Сад, школа и поликлиника в минутах пешком прямо в карточке. Сумма въезда видна до звонка. Собственники проверены, для арендатора без комиссии.</div>' +
-  '<div style="flex:1"></div><button class="btn p" data-act="start">Начать</button></div>';
+const HPATHS = [['M150 112 Q 92 104 64 60', 'kid', 'Сад', '4 мин', 20, 20, '.35s'], ['M150 112 Q 212 102 236 64', 'book', 'Школа', '8 мин', 80, 22, '.75s'], ['M150 112 Q 128 178 84 186', 'cross', 'Поликлиника', '11 мин', 27, 89, '1.15s']];
+V.welcome = () => '<div class="body wel">' +
+  '<div style="flex:1"></div><div class="hero" aria-hidden="true"><svg viewBox="0 0 300 230">' +
+    '<circle class="ring" cx="150" cy="112" r="46"/><circle class="ring r2" cx="150" cy="112" r="46"/>' +
+    HPATHS.map(([d], i) => '<path class="hp" d="' + d + '" style="animation-delay:' + (i * .4) + 's"/>').join('') +
+    HPATHS.map(([d], i) => '<circle class="hdot" r="3.5"><animateMotion dur="2.6s" begin="' + (-i * .9) + 's" repeatCount="indefinite" path="' + d + '"/></circle>').join('') +
+  '</svg><div class="hlogo"><svg width="56" height="56" viewBox="0 0 40 40" fill="none" stroke="#F59A8E" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 L20 6 L33 17"/><path d="M11 15 V30"/><path d="M29 15 V30"/><path d="M5 30 H35"/><path d="M5 30 V35"/><path d="M35 30 V35"/></svg></div>' +
+    HPATHS.map(([, icn, l, m, x, y, dl]) => '<span class="hchip" style="left:' + x + '%;top:' + y + '%;animation-delay:' + dl + '"><span class="hin" style="animation-delay:' + dl + '">' + ic(icn, 14) + l + ' <b>' + m + '</b></span></span>').join('') +
+  '</div>' +
+  '<div class="weltx"><div class="wmark">Двор</div><div class="h1" style="font-size:24px;line-height:30px">Квартира и всё, что рядом с ребёнком</div>' +
+  '<div class="muted" style="font-size:14px;line-height:20px">Сад, школа и поликлиника в минутах пешком прямо в карточке. Сумма въезда видна до звонка. Собственники проверены, для арендатора без комиссии.</div></div>' +
+  '<div style="flex:1.3"></div><button class="btn p" data-act="start">Начать</button></div>';
 
 function stepTop(n){
   if(S.editOne) return '<div class="top"><button data-act="edit-cancel" aria-label="Назад">' + ic('back', 22) + '</button><span class="t">' + EDIT_T[n] + '</span></div><div class="body">';
@@ -2222,33 +2276,37 @@ V.map = () => {
 };
 const ava = () => S.user && S.user.photo ? '<label for="avafile" class="img up" style="width:52px;height:52px;border-radius:50%;background:center/cover url(' + S.user.photo + ');cursor:pointer" aria-label="Сменить фото"></label>'
   : S.user ? '<label for="avafile" class="img" style="width:52px;height:52px;border-radius:50%;cursor:pointer;text-align:center;font-size:10px;line-height:12px" aria-label="Добавить фото">+ фото</label>' : '<div class="img ava" style="width:52px;height:52px;border-radius:50%"></div>';
+const prow = (icon, attrs, title, sub, cls) => '<button class="prow' + (cls ? ' ' + cls : '') + '" ' + attrs + '><span class="pic">' + ic(icon, 19) + '</span><span class="ptx">' + title + (sub ? '<span class="small muted">' + sub + '</span>' : '') + '</span>' + (cls === 'danger' ? '' : '<span class="muted chev">' + ic('chev', 18) + '</span>') + '</button>';
+const pgrp = (title, rows) => { rows = rows.filter(Boolean); return rows.length ? '<div class="pgrp">' + (title ? '<div class="pgt">' + title + '</div>' : '') + '<div class="pbox">' + rows.join('') + '</div></div>' : ''; };
+const supSub = () => S.support.length > 1 ? esc(S.support[S.support.length-1].t).slice(0, 40) + '…' : 'Ответим за 15 минут';
+const pfoot = () => S.user ? '<button class="prow danger" data-act="sign-out-ask"><span class="pic">' + ic('out', 19) + '</span><span class="ptx">Выйти из аккаунта</span></button>' : '';
+const phead = (name, lines, tags) => '<div class="phead">' + ava() + '<input type="file" id="avafile" accept="image/*" hidden><div style="min-width:0"><div class="pname">' + name + '</div>' + lines.map(l => '<div class="small muted">' + l + '</div>').join('') +
+  (tags && tags.length ? '<div class="bdgs" style="margin-top:8px">' + tags.join('') + '</div>' : '') + '</div></div>';
 const ownerProfile = () => { const o = S.own, n = o.list.filter(L => L.status === 'ok').length, t = o.list.filter(L => L.tenant).length;
-  return '<div class="top"><span class="t">Профиль</span></div><div class="body" style="gap:0">' +
-  '<div style="display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)">' + ava() + '<input type="file" id="avafile" accept="image/*" hidden>' +
-    '<div><b>' + esc(S.user.name + ' ' + S.user.surname) + '</b><div class="small muted">Собственник · ' + esc(S.user.phone) + '</div><div class="small muted">' + kv(n) + ' на «Дворе»' + (t ? ' · сдано: ' + t : '') + '</div><div class="small muted">' + (o.passport ? 'Паспорт сверен ✓' : 'Паспорт ещё не загружен') + ' · город: ' + o.city + '</div></div></div>' +
-  '<button class="list-row" data-act="tab" data-v="cabinet"><span>Мои объявления<div class="small muted">' + o.list.map(titleOf).join('; ') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="tab" data-v="otenants"><span>Жильцы<div class="small muted">' + (t ? o.list.filter(L => L.tenant).map(L => L.tenant.who).join(', ') : 'пока никто не заехал') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="ocfg"><span>Ответы Дворецкого<div class="small muted">Что он отвечает семьям за вас</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="me-edit"><span>Имя, фамилия и телефон</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="mode-tenant"><span>Перейти в режим «Снимаю»<div class="small muted">Поиск квартиры для своей семьи, анкета семьи, избранное</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  walletRow() + '<button class="list-row" data-act="go" data-v="settings"><span>Настройки<div class="small muted">Город, уведомления, Дворецкий</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="support"><span>Чат с поддержкой' + (S.support.length > 1 ? '<div class="small muted">' + esc(S.support[S.support.length-1].t).slice(0, 40) + '…</div>' : '') + '</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="go" data-v="help"><span>Помощь</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="sign-out-ask" style="color:#E5484D;font-weight:700"><span>Выйти из аккаунта</span><span></span></button></div>' + tabs(); };
-V.profile = () => S.mode === 'owner' && S.own && S.user ? ownerProfile() : '<div class="top"><span class="t">Профиль</span></div><div class="body" style="gap:0">' +
-  '<div style="display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line)">' + ava() + '<input type="file" id="avafile" accept="image/*" hidden>' + (S.user
-      ? '<div><b>Семья ' + esc(famGen(S.user.surname)) + '</b><div class="small muted">' + esc(S.user.name) + ' · ' + esc(S.user.phone) + '</div><div class="small muted">' + kidsTxt() + '</div><div class="small muted">Переезд в ' + inCity(S.anketa.city) + ' ' + S.anketa.when + '</div></div></div>'
-      : '<div style="flex:1"><b>Вы не вошли</b><div class="small muted">Войдите, чтобы писать собственникам и записываться на просмотры</div></div></div><button class="btn p" style="margin-top:14px" data-act="sign-in">Войти или зарегистрироваться</button>') +
-  '<button class="list-row" data-act="go" data-v="family"><span>Анкета семьи<div class="small muted">' + kidsTxt() + ' · ' + S.anketa.city + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  (S.user ? '<button class="list-row" data-act="me-edit"><span>Имя, фамилия и телефон</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' : '') +
-  ((S.live ? '<button class="list-row" data-act="tab" data-v="home"><span>Мой дом<div class="small muted">' + byId(S.live.id).short + ' · живёте с ' + S.live.since + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>'
-      : dealRow()) +
-      '<button class="list-row" data-act="own-start"><span>' + (ownOk() ? 'Перейти в режим «Сдаю»' : 'Сдаю квартиру') + '<div class="small muted">' + (!S.own ? 'Кабинет собственника: объявления, просмотры, жильцы' : ownOk() ? 'Объявления, просмотры, жильцы и чаты' : S.own.status === 'review' ? 'Документы на проверке у модератора' : 'Продолжить: шаг ' + ownStep() + ' из 4') + '</div></span><span class="muted chev">' + ic('chev', 18) + '</span></button>') +
-  walletRow() + '<button class="list-row" data-act="go" data-v="settings"><span>Настройки</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="support"><span>Чат с поддержкой' + (S.support.length > 1 ? '<div class="small muted">' + esc(S.support[S.support.length-1].t).slice(0, 40) + '…</div>' : '') + '</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  '<button class="list-row" data-act="go" data-v="help"><span>Помощь</span><span class="muted chev">' + ic('chev', 18) + '</span></button>' +
-  (S.user ? '<button class="list-row" data-act="sign-out-ask" style="color:#E5484D;font-weight:700"><span>Выйти из аккаунта</span><span></span></button>' : '') +
-  '</div>' + tabs();
+  return '<div class="top"><span class="t">Профиль</span></div><div class="body pbody">' +
+    phead(esc(S.user.name + ' ' + S.user.surname), ['Собственник · ' + esc(S.user.phone)], ['<span class="bdg' + (o.passport ? ' g' : '') + '">' + (o.passport ? ic('check', 12) + 'Паспорт сверен' : 'Паспорт не загружен') + '</span>', '<span class="bdg">' + kv(n) + ' на «Дворе»</span>', t ? '<span class="bdg">сдано: ' + t + '</span>' : '']) +
+    pgrp('Сдаю', [prow('list', 'data-act="tab" data-v="cabinet"', 'Мои объявления', o.list.map(titleOf).join('; ')),
+      prow('users', 'data-act="tab" data-v="otenants"', 'Жильцы', t ? o.list.filter(L => L.tenant).map(L => L.tenant.who).join(', ') : 'пока никто не заехал'),
+      prow('bot', 'data-act="ocfg"', 'Ответы Дворецкого', 'Что он отвечает семьям за вас')]) +
+    pgrp('Деньги', [prow('wallet', 'data-act="go" data-v="wallet"', 'Кошелёк', rub(S.wallet.bal))]) +
+    pgrp('Аккаунт', [prow('phone', 'data-act="me-edit"', 'Имя, фамилия и телефон', esc(S.user.phone)),
+      prow('swap', 'data-act="mode-tenant"', 'Перейти в режим «Снимаю»', 'Поиск квартиры для своей семьи'),
+      prow('gear', 'data-act="go" data-v="settings"', 'Настройки', 'Город, уведомления, Дворецкий')]) +
+    pgrp('Помощь', [prow('chat', 'data-act="support"', 'Чат с поддержкой', supSub()), prow('help', 'data-act="go" data-v="help"', 'Частые вопросы')]) +
+    pfoot() + '</div>' + tabs(); };
+V.profile = () => { if(S.mode === 'owner' && S.own && S.user) return ownerProfile();
+  const D = S.deal && !S.deal.cancelled && !S.deal.actDone ? S.deal : null;
+  return '<div class="top"><span class="t">Профиль</span></div><div class="body pbody">' +
+    (S.user ? phead('Семья ' + esc(famGen(S.user.surname)), [esc(S.user.name) + ' · ' + esc(S.user.phone)], ['<span class="bdg">' + kidsTxt() + '</span>', '<span class="bdg">' + S.anketa.city + ', ' + S.anketa.when + '</span>'])
+      : '<div class="phead">' + ava() + '<div style="flex:1"><div class="pname">Вы не вошли</div><div class="small muted">Войдите, чтобы писать собственникам и записываться на просмотры</div></div></div><button class="btn p" data-act="sign-in">Войти или зарегистрироваться</button>') +
+    pgrp('Семья', [prow('users', 'data-act="go" data-v="family"', 'Анкета семьи', kidsTxt() + ' · ' + S.anketa.city), S.user && prow('phone', 'data-act="me-edit"', 'Имя, фамилия и телефон', esc(S.user.phone))]) +
+    pgrp('Жильё и деньги', [S.live ? prow('home', 'data-act="tab" data-v="home"', 'Мой дом', byId(S.live.id).short + ' · живёте с ' + S.live.since)
+        : D ? prow('key', 'data-act="deal" data-v="' + D.id + '"', 'Заселение · ' + byId(D.id).short, cap(DSTAGE[dealStage(D)]) + ', заезд ' + D.moveIn) : '',
+      prow('wallet', 'data-act="go" data-v="wallet"', 'Кошелёк', rub(S.wallet.bal) + (S.wallet.auto ? ' · автопополнение' : ''))]) +
+    pgrp('Ещё', [!S.live && prow('list', 'data-act="own-start"', ownOk() ? 'Перейти в режим «Сдаю»' : 'Сдаю квартиру', !S.own ? 'Кабинет собственника: объявления, просмотры, жильцы' : ownOk() ? 'Объявления, просмотры, жильцы и чаты' : S.own.status === 'review' ? 'Документы на проверке у модератора' : 'Продолжить: шаг ' + ownStep() + ' из 4'),
+      prow('gear', 'data-act="go" data-v="settings"', 'Настройки', 'Тема, уведомления, карта')]) +
+    pgrp('Помощь', [prow('chat', 'data-act="support"', 'Чат с поддержкой', supSub()), prow('help', 'data-act="go" data-v="help"', 'Частые вопросы')]) +
+    pfoot() + '</div>' + tabs(); };
 const EDIT_T = {1:'Город и дата переезда', 2:'Дети и что рядом', 3:'Работа, машины и доход', 4:'Питомцы и собственник'};
 V.family = () => { const a = S.anketa;
   const near = Object.keys(DIST).filter(k => a.near.includes(k)).map(k => DIST[k][1] + ' до ' + fmtMin(a[k + 'Max'])).join(', ') || 'не учитываем';
