@@ -1104,12 +1104,12 @@ const kv = n => n + ' ' + plural(n,'квартира','квартиры','ква
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------- data: Казань, Ново-Савиновский; залог = аренда, комиссия 0 ---------- */
-const CITIES = [['Казань','Казани'],['Москва','Москве'],['Санкт-Петербург','Санкт-Петербурге'],['Екатеринбург','Екатеринбурге'],['Новосибирск','Новосибирске'],['Нижний Новгород','Нижнем Новгороде'],['Самара','Самаре'],['Уфа','Уфе'],['Краснодар','Краснодаре'],['Пермь','Перми'],['Воронеж','Воронеже'],['Ростов-на-Дону','Ростове-на-Дону'],['Челябинск','Челябинске'],['Омск','Омске'],['Тюмень','Тюмени'],['Иннополис','Иннополисе']];
-const inCity = c => (CITIES.find(x=>x[0]===c) || [c,c])[1];
+const CITIES = [['Казань','Казани',55.7963,49.1088,1,'Казанка'],['Москва','Москве',55.7558,37.6173,2.1,'Москва-река'],['Санкт-Петербург','Санкт-Петербурге',59.9343,30.3351,1.45,'Нева'],['Екатеринбург','Екатеринбурге',56.8389,60.6057,1,'Исеть'],['Новосибирск','Новосибирске',55.0084,82.9357,0.95,'Обь'],['Нижний Новгород','Нижнем Новгороде',56.2965,43.9361,0.95,'Ока'],['Самара','Самаре',53.1959,50.1002,0.85,'Волга'],['Уфа','Уфе',54.7388,55.9721,0.85,'Белая'],['Краснодар','Краснодаре',45.0355,38.9753,0.95,'Кубань'],['Пермь','Перми',58.0105,56.2502,0.8,'Кама'],['Воронеж','Воронеже',51.6755,39.2089,0.75,'Воронеж'],['Ростов-на-Дону','Ростове-на-Дону',47.2357,39.7015,0.9,'Дон'],['Челябинск','Челябинске',55.1644,61.4368,0.7,'Миасс'],['Омск','Омске',54.9885,73.3242,0.65,'Иртыш'],['Тюмень','Тюмени',57.1530,65.5343,0.9,'Тура'],['Иннополис','Иннополисе',55.7520,48.7440,0.8,null],['Красноярск','Красноярске',56.0153,92.8932,0.85,'Енисей'],['Волгоград','Волгограде',48.7080,44.5133,0.7,'Волга'],['Саратов','Саратове',51.5331,46.0342,0.65,'Волга'],['Тольятти','Тольятти',53.5303,49.3461,0.6,'Волга'],['Ижевск','Ижевске',56.8526,53.2045,0.65,'Иж'],['Барнаул','Барнауле',53.3548,83.7698,0.6,'Обь'],['Ульяновск','Ульяновске',54.3142,48.4031,0.6,'Волга'],['Иркутск','Иркутске',52.2870,104.3050,0.8,'Ангара'],['Хабаровск','Хабаровске',48.4802,135.0719,0.85,'Амур'],['Махачкала','Махачкале',42.9849,47.5047,0.7,null],['Ярославль','Ярославле',57.6261,39.8845,0.75,'Волга'],['Владивосток','Владивостоке',43.1155,131.8855,1.1,null],['Оренбург','Оренбурге',51.7682,55.0970,0.6,'Урал'],['Томск','Томске',56.4977,84.9744,0.75,'Томь'],['Кемерово','Кемерове',55.3547,86.0873,0.6,'Томь'],['Новокузнецк','Новокузнецке',53.7557,87.1099,0.55,'Томь'],['Рязань','Рязани',54.6269,39.6916,0.7,'Ока'],['Набережные Челны','Набережных Челнах',55.7436,52.3958,0.65,'Кама'],['Астрахань','Астрахани',46.3497,48.0408,0.6,'Волга'],['Пенза','Пензе',53.1959,45.0183,0.6,'Сура'],['Киров','Кирове',58.6036,49.6680,0.6,'Вятка'],['Липецк','Липецке',52.6031,39.5708,0.65,'Воронеж'],['Чебоксары','Чебоксарах',56.1439,47.2489,0.6,'Волга'],['Калининград','Калининграде',54.7104,20.4522,0.9,'Преголя'],['Тула','Туле',54.1961,37.6182,0.75,'Упа'],['Курск','Курске',51.7304,36.1926,0.65,'Тускарь'],['Ставрополь','Ставрополе',45.0428,41.9734,0.7,null],['Сочи','Сочи',43.5855,39.7231,1.6,null],['Улан-Удэ','Улан-Удэ',51.8335,107.5841,0.7,'Селенга'],['Тверь','Твери',56.8587,35.9176,0.75,'Волга'],['Магнитогорск','Магнитогорске',53.4072,58.9791,0.55,'Урал'],['Иваново','Иванове',57.0004,40.9739,0.55,'Уводь'],['Брянск','Брянске',53.2434,34.3640,0.6,'Десна'],['Белгород','Белгороде',50.5954,36.5873,0.75,null],['Сургут','Сургуте',61.2540,73.3962,1,'Обь'],['Владимир','Владимире',56.1290,40.4066,0.75,'Клязьма'],['Чита','Чите',52.0339,113.4994,0.7,null],['Архангельск','Архангельске',64.5393,40.5187,0.75,'Северная Двина'],['Нижний Тагил','Нижнем Тагиле',57.9101,59.9813,0.5,null],['Симферополь','Симферополе',44.9521,34.1024,0.8,'Салгир'],['Калуга','Калуге',54.5293,36.2754,0.8,'Ока'],['Смоленск','Смоленске',54.7826,32.0453,0.65,'Днепр'],['Волжский','Волжском',48.7858,44.7797,0.55,null],['Якутск','Якутске',62.0355,129.6755,1,'Лена'],['Саранск','Саранске',54.1838,45.1749,0.55,null],['Череповец','Череповце',59.1265,37.9093,0.6,'Шексна'],['Курган','Кургане',55.4410,65.3411,0.5,'Тобол'],['Вологда','Вологде',59.2181,39.8886,0.65,'Вологда'],['Орёл','Орле',52.9672,36.0697,0.55,'Ока'],['Владикавказ','Владикавказе',43.0367,44.6678,0.6,'Терек'],['Грозный','Грозном',43.3178,45.6982,0.65,'Сунжа'],['Подольск','Подольске',55.4312,37.5446,1.4,'Пахра'],['Мурманск','Мурманске',68.9585,33.0827,0.75,null],['Тамбов','Тамбове',52.7212,41.4523,0.55,'Цна'],['Стерлитамак','Стерлитамаке',53.6305,55.9302,0.55,'Белая'],['Петрозаводск','Петрозаводске',61.7849,34.3469,0.7,null],['Кострома','Костроме',57.7679,40.9269,0.55,'Волга'],['Нижневартовск','Нижневартовске',60.9397,76.5694,0.9,null],['Новороссийск','Новороссийске',44.7239,37.7708,0.9,null],['Йошкар-Ола','Йошкар-Оле',56.6346,47.8999,0.55,'Малая Кокшага'],['Балашиха','Балашихе',55.7963,37.9381,1.5,null],['Химки','Химках',55.8970,37.4297,1.6,null],['Мытищи','Мытищах',55.9116,37.7308,1.55,'Яуза'],['Королёв','Королёве',55.9162,37.8545,1.45,null],['Люберцы','Люберцах',55.6772,37.8932,1.5,null],['Таганрог','Таганроге',47.2362,38.8969,0.6,null],['Сыктывкар','Сыктывкаре',61.6688,50.8364,0.7,'Сысола'],['Нальчик','Нальчике',43.4853,43.6071,0.6,null],['Шахты','Шахтах',47.7085,40.2160,0.5,null],['Братск','Братске',56.1513,101.6338,0.5,'Ангара'],['Дзержинск','Дзержинске',56.2389,43.4631,0.55,'Ока'],['Орск','Орске',51.2049,58.5668,0.45,'Урал'],['Ангарск','Ангарске',52.5444,103.8882,0.55,null],['Благовещенск','Благовещенске',50.2907,127.5272,0.75,'Амур'],['Великий Новгород','Великом Новгороде',58.5215,31.2755,0.65,'Волхов'],['Псков','Пскове',57.8136,28.3496,0.6,'Великая'],['Пятигорск','Пятигорске',44.0486,43.0594,0.7,'Подкумок'],['Кисловодск','Кисловодске',43.9133,42.7208,0.75,null],['Южно-Сахалинск','Южно-Сахалинске',46.9591,142.7380,1.3,null],['Петропавловск-Камчатский','Петропавловске-Камчатском',53.0452,158.6483,1.1,null],['Севастополь','Севастополе',44.6167,33.5254,0.95,null],['Абакан','Абакане',53.7215,91.4425,0.6,'Абакан'],['Норильск','Норильске',69.3558,88.1893,0.9,null],['Майкоп','Майкопе',44.6098,40.1006,0.55,'Белая'],['Элиста','Элисте',46.3078,44.2558,0.45,null],['Черкесск','Черкесске',44.2233,42.0578,0.5,'Кубань'],['Кызыл','Кызыле',51.7191,94.4378,0.55,'Енисей'],['Горно-Алтайск','Горно-Алтайске',51.9581,85.9603,0.55,'Майма'],['Ханты-Мансийск','Ханты-Мансийске',61.0042,69.0019,0.95,'Иртыш'],['Салехард','Салехарде',66.5300,66.6019,1,'Обь'],['Магадан','Магадане',59.5612,150.8301,1,null],['Биробиджан','Биробиджане',48.7946,132.9217,0.5,'Бира'],['Анадырь','Анадыре',64.7337,177.5089,1,null],['Нарьян-Мар','Нарьян-Маре',67.6380,53.0069,0.9,'Печора'],['Магас','Магасе',43.1716,44.8117,0.5,null],['Новый Уренгой','Новом Уренгое',66.0833,76.6333,1.05,null],['Альметьевск','Альметьевске',54.9014,52.2973,0.6,null],['Нижнекамск','Нижнекамске',55.6366,51.8245,0.55,null],['Зеленодольск','Зеленодольске',55.8466,48.5010,0.55,'Волга'],['Обнинск','Обнинске',55.0968,36.6101,0.85,'Протва'],['Геленджик','Геленджике',44.5622,38.0848,1.2,null],['Анапа','Анапе',44.8942,37.3167,1,null]];
+const inCity = c => (CITIES.find(x=>x[0]===c) || [c, 'городе ' + c])[1];
 const DISTRICTS = ['Ново-Савиновский','Вахитовский','Советский','Приволжский','Московский','Кировский','Авиастроительный'];
 const HAS = {city:'Казань', district:'Ново-Савиновский'};
 const DISTG = {'Ново-Савиновский':'Ново-Савиновском','Вахитовский':'Вахитовском','Советский':'Советском','Приволжский':'Приволжском','Московский':'Московском','Кировский':'Кировском','Авиастроительный':'Авиастроительном'};
-const area = () => S.anketa.city === HAS.city && S.district === HAS.district;
+const area = () => !!S.anketa.city;
 const findTxt = s => s.toLowerCase().replace(/ё/g,'е').trim();
 const SADS = {'Сад № 87':[24,50], 'Сад № 123':[47,53], 'Сад № 41':[70,39]};
 const SCHOOLS = {'Школа № 12':[10,72], 'Школа № 45':[50,87], 'Школа № 19':[88,62]};
@@ -1316,7 +1316,7 @@ const TOPICS = [
   ['water', /горяч\w* вод|напор|(^|[^а-я])вод[аыу]([^а-я]|$)|бойлер/, f => cap(dos(f).water) + '.'],
   ['floor', /этаж/, f => 'Квартира на ' + f.floor + ' этаже из ' + f.floors + '.'],
   ['shops', /магазин|продукт|аптек|супермаркет|пятерочк|магнит/, f => cap(dos(f).shops) + '.', 'магазины рядом'],
-  ['transport', /остановк|автобус|метро|транспорт|трамва|троллейбус|маршрут/, f => { const d = dos(f); return 'Остановка «' + d.stopName + '» в ' + minW(f.stop) + ' пешком: ' + d.routes + '. До метро «' + d.metro + '» ' + d.metroMin + ' минут пешком или две остановки на автобусе.'; }, 'транспорт'],
+  ['transport', /остановк|автобус|метро|транспорт|трамва|троллейбус|маршрут/, f => { const d = dos(f); return 'Остановка «' + d.stopName + '» в ' + minW(f.stop) + ' пешком: ' + d.routes + (d.metro ? '. До метро «' + d.metro + '» ' + d.metroMin + ' минут пешком или две остановки на автобусе.' : '.'); }, 'транспорт'],
   ['security', /домофон|консьерж|охран|камер|безопасно ли|район спокойн/, f => 'В подъезде ' + dos(f).security + '. Район спокойный.'],
   ['trash', /мусор/, () => 'Контейнеры во дворе, мусоропровода нет.'],
   ['smoke', /кур[ия]|сигарет|вейп|кальян/, () => 'В квартире не курить, пожалуйста. На балконе тоже.'],
@@ -1477,7 +1477,7 @@ function osmRoute(key, a, b){ LF.routes[key] = 'wait';
   fetch('https://routing.openstreetmap.de/routed-foot/route/v1/foot/' + a[1] + ',' + a[0] + ';' + b[1] + ',' + b[0] + '?overview=full&geometries=geojson', ctl ? {signal:ctl.signal} : {})
     .then(r => r.json()).then(j => { const c = j.routes && j.routes[0] && j.routes[0].geometry.coordinates; LF.routes[key] = c && c.length > 1 ? c.map(([x, y]) => [y, x]) : 'fail'; })
     .catch(() => { LF.routes[key] = 'fail'; }).then(() => { if(S.screen === 'map') mapMount(); }); }
-const LL = (x, y) => [55.8420 - y * 0.00030, 49.0850 + x * 0.00095];
+const LL = (x, y) => [GEO.o[0] - y * 0.00030, GEO.o[1] + x * 0.00095 * GEO.k];
 /* schema: keep the view centre across re-renders and zoom; mouse drag pans the schema and the compare table */
 function schemaMount(){ const m = document.querySelector('#phone .map.schema'); if(!m) return;
   const c = S.mapC || [.5, .5];
@@ -1565,6 +1565,65 @@ function match(f, flt){
   if(flt.pets && !PET_OK[flt.pets].includes(dos(f).pets)) return false;
   return true;
 }
+/* ---------- cities: any city in Russia. The 16 sample flats are re-addressed and re-priced for each city and district ---------- */
+const CITY_DISTS = {
+  'Казань':['Ново-Савиновский','Вахитовский','Советский','Приволжский','Московский','Кировский','Авиастроительный'],
+  'Москва':['Хамовники','Раменки','Марьино','Митино','Южное Бутово','Кунцево','Сокольники'],
+  'Санкт-Петербург':['Приморский','Выборгский','Калининский','Московский','Невский','Красногвардейский','Фрунзенский'],
+  'Екатеринбург':['Академический','Верх-Исетский','Кировский','Ленинский','Октябрьский','Орджоникидзевский','Чкаловский'],
+  'Новосибирск':['Центральный','Заельцовский','Калининский','Кировский','Ленинский','Октябрьский','Советский'],
+  'Нижний Новгород':['Нижегородский','Советский','Приокский','Канавинский','Автозаводский','Московский','Сормовский'],
+  'Самара':['Октябрьский','Промышленный','Кировский','Ленинский','Советский'],
+  'Уфа':['Кировский','Советский','Октябрьский','Ленинский','Калининский','Дёмский','Орджоникидзевский'],
+  'Ростов-на-Дону':['Ворошиловский','Октябрьский','Советский','Пролетарский','Кировский','Ленинский'],
+  'Краснодар':['Западный','Центральный','Карасунский','Прикубанский'],
+  'Пермь':['Свердловский','Дзержинский','Индустриальный','Ленинский','Мотовилихинский','Кировский'],
+  'Воронеж':['Центральный','Коминтерновский','Ленинский','Советский','Железнодорожный','Левобережный'],
+  'Челябинск':['Центральный','Калининский','Курчатовский','Советский','Ленинский','Тракторозаводский'],
+  'Волгоград':['Центральный','Дзержинский','Ворошиловский','Кировский','Красноармейский'],
+  'Красноярск':['Центральный','Железнодорожный','Октябрьский','Советский','Свердловский','Кировский'],
+  'Омск':['Центральный','Советский','Кировский','Ленинский','Октябрьский']
+};
+const METRO = {
+  'Москва':['Профсоюзная','Новые Черёмушки','Калужская','Беляево','Коньково','Тёплый Стан','Ясенево'],
+  'Санкт-Петербург':['Пионерская','Чёрная речка','Удельная','Озерки','Проспект Просвещения','Комендантский проспект','Старая Деревня'],
+  'Новосибирск':['Заельцовская','Гагаринская','Красный проспект','Площадь Ленина','Октябрьская','Речной вокзал','Студенческая'],
+  'Екатеринбург':['Уралмаш','Машиностроителей','Уральская','Динамо','Площадь 1905 года','Геологическая','Чкаловская'],
+  'Нижний Новгород':['Горьковская','Московская','Чкаловская','Ленинская','Заречная','Двигатель Революции','Пролетарская'],
+  'Самара':['Российская','Московская','Гагаринская','Спортивная','Советская','Победа','Безымянка']
+};
+const KZN_D = {'Ново-Савиновский':[55.8270, 49.1325], 'Вахитовский':[55.7900, 49.1200], 'Советский':[55.7800, 49.2000], 'Приволжский':[55.7450, 49.1700], 'Московский':[55.8200, 49.0700], 'Кировский':[55.8000, 49.0300], 'Авиастроительный':[55.8600, 49.0800]};
+const GEO_ST = ['Ленина','Мира','Советская','Гагарина','Молодёжная','Садовая','Победы','Пушкина','Строителей','Школьная','Комсомольская','Октябрьская','Лесная','Космонавтов','Кирова','Чехова','Солнечная','Северная','Профсоюзная','Чкалова'];
+const CITY_NAMES = CITIES.map(c => c[0]);
+const cityOf = c => CITIES.find(x => x[0] === c);
+const cityDists = c => CITY_DISTS[c] || null;
+const dname = d => /(ский|цкий|ной|ный|ний)$/.test(d) ? d + ' район' : 'район ' + d;
+const hashS = s => { let h = 2166136261; for(const ch of s){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
+const GEO = {key:null, o:[55.8420, 49.0850], k:1, ll:true, river:'р. Казанка', st:null};
+function geoApply(){ const city = S.anketa.city || HAS.city, dist = S.district || '', key = city + '|' + dist; if(GEO.key === key) return;
+  FLATS.forEach(f => { if(!f._b) f._b = {short:f.short, rent:f.rent, dep:f.dep}; const d = DOS[f.id] || (DOS[f.id] = {}); if(!d._b) d._b = {stopName:d.stopName, metro:d.metro, metroMin:d.metroMin}; });
+  const C = cityOf(city), home = city === HAS.city && dist === HAS.district;
+  if(GEO.key !== null){ LF.first = false; LF.routes = {}; LF.sig = null; LF.lastSel = null; S.mapSel = null; }
+  GEO.key = key;
+  if(home){ FLATS.forEach(f => { Object.assign(f, f._b); Object.assign(DOS[f.id], DOS[f.id]._b); f.entry = f.rent + f.dep; });
+    GEO.o = [55.8420, 49.0850]; GEO.k = 1; GEO.ll = true; GEO.river = 'р. Казанка'; GEO.st = null; return; }
+  const seed = hashS(key), coef = (C ? C[4] : .7) * (1 + ((seed % 13) - 6) / 100), kazan = city === HAS.city;
+  const stems = [...new Set(FLATS.map(f => f._b.short.split(', ')[0]))], pool = GEO_ST.slice().sort((a, b) => hashS(a + seed) - hashS(b + seed));
+  const map = {}; stems.forEach((s, i) => { map[s] = kazan ? s : pool[i % pool.length]; });
+  const nums = n => ((n * 7 + seed) % 89) + 1;
+  FLATS.forEach((f, i) => { const [stem, num] = f._b.short.split(', '); f.short = map[stem] + ', ' + (kazan ? num : nums(i + +num));
+    f.rent = Math.max(15000, Math.round(f._b.rent * coef / 500) * 500); f.dep = Math.round(f.rent * f._b.dep / f._b.rent / 500) * 500; f.entry = f.rent + f.dep;
+    const d = DOS[f.id], m = METRO[city]; d.stopName = map[d._b.stopName] || map[stem];
+    if(kazan){ d.metro = d._b.metro; d.metroMin = d._b.metroMin; } else if(m){ d.metro = m[(seed + i) % m.length]; d.metroMin = d._b.metroMin; } else { d.metro = null; } });
+  GEO.st = map; GEO.river = C && C[5] ? (/^(Москва-река)$/.test(C[5]) ? C[5] : 'р. ' + C[5]) : 'Пруд';
+  let lat, lng; const ds = cityDists(city) || [];
+  if(kazan && KZN_D[dist]) [lat, lng] = KZN_D[dist];
+  else if(C){ lat = C[2]; lng = C[3]; const i = ds.indexOf(dist); if(i > 0){ const a = i * 2 * Math.PI / (ds.length - 1); lat += .03 * Math.sin(a); lng += .05 * Math.cos(a) * Math.cos(55.84 * Math.PI / 180) / Math.cos(lat * Math.PI / 180); } }
+  GEO.ll = !!C; if(C){ GEO.k = Math.cos(55.84 * Math.PI / 180) / Math.cos(lat * Math.PI / 180); GEO.o = [lat + .015, lng - .0475 * GEO.k]; } }
+const geoSt = (stem, pre) => GEO.st ? 'ул. ' + GEO.st[stem] : pre + stem;
+const workStreets = () => S.anketa.city === HAS.city ? STREETS : GEO_ST.slice(0, 14).map((s, i) => 'ул. ' + s + ', ' + (i * 7 % 40 + 1));
+const capCity = s => s.trim().replace(/(^|[\s-])([а-яёa-z])/g, (m, a, b) => a + b.toUpperCase());
+
 function results(flt){
   if(!area()) return [];
   const r = FLATS.filter(f => match(f, flt || S.filters) && !(S.rented || {})[f.id]);
@@ -1714,16 +1773,18 @@ function stepFoot(n){
 function workSug(){
   const q = findTxt(S.workQ || '');
   if(q.length < 2) return '';
-  const list = STREETS.filter(x => findTxt(x).includes(q.replace(/^(ул\.?|улица|пр\.?|проспект)\s*/, '')) && findTxt(x) !== q).slice(0, 5);
+  const list = workStreets().filter(x => findTxt(x).includes(q.replace(/^(ул\.?|улица|пр\.?|проспект)\s*/, '')) && findTxt(x) !== q).slice(0, 5);
   return list.length ? '<div class="sug" role="listbox" style="display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden">' + list.map(x => '<button class="list-row" style="padding:10px 12px;font-size:14px" role="option" data-act="work-pick" data-v="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>'
     : '<div class="small muted">Такой улицы нет в подсказках. Можно оставить как есть.</div>';
 }
 function citySearch(){
   const a = S.anketa, q = findTxt(S.cityQ);
-  let list = q ? CITIES.map(c=>c[0]).filter(c => findTxt(c).includes(q)) : ['Казань','Москва','Санкт-Петербург','Екатеринбург'];
+  let list = q ? CITY_NAMES.filter(c => findTxt(c).includes(q)) : ['Казань','Москва','Санкт-Петербург','Екатеринбург'];
   if(!q && !list.includes(a.city)) list = [a.city, ...list.slice(0,3)];
+  const own = q.length > 1 && !CITY_NAMES.some(c => findTxt(c).startsWith(q)) ? capCity(S.cityQ) : '';
   return '<input class="field" id="citysearch" type="search" autocomplete="off" placeholder="Найти город" value="' + esc(S.cityQ) + '">' +
-    (list.length ? choice('city', list.slice(0,8), a.city) : '<div class="small muted">Такого города нет в списке. Проверьте написание.</div>');
+    (list.length ? choice('city', list.slice(0,8), a.city) : '') +
+    (own ? '<div class="chips"><button class="chip' + (a.city === own ? ' on' : '') + '" data-act="pick" data-g="city" data-v="' + esc(own) + '">+ ' + esc(own) + '</button></div><div class="small muted">Города нет в списке? Выберите своё название, квартиры найдём и там</div>' : '');
 }
 const WHENS = ['через 2 недели','через месяц','через 2–3 месяца'];
 const dateTxt = v => { const [y,m,d] = v.split('-').map(Number); return d + ' ' + MONTHS[m-1] + (y !== 2026 ? ' ' + y : ''); };
@@ -1739,7 +1800,7 @@ V.anketa = () => {
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Город</div>' + citySearch() + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Когда нужна квартира?</div>' + whenPick() + '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px"><div class="lbl">Нужна помощь с переездом?</div>' + choice('move', ['да', 'нет', 'решу позже'], a.move) + '<div class="small muted">Грузчики и машина. Сколько нужно, посчитаем перед переездом по количеству вещей</div></div>' +
-    '<div class="box small muted">В прототипе квартиры есть в Казани, в Ново-Савиновском районе.</div>' + stepFoot(1);
+    '<div class="box small muted">Ищем в любом городе России. Нет вашего города в списке? Впишите название.</div>' + stepFoot(1);
   if(n === 2){
     const nearOpts = [['park','Парк'],['liftc','Лифт для коляски'],['parking','Парковка']];
     return stepTop(2) +
@@ -1871,7 +1932,7 @@ V.card = () => {
       '<div class="row"><span>Парк</span><b>пешком ' + f.park + ' мин</b></div></div>' +
       '<div class="box"><div style="font-weight:800">Транспорт</div>' +
       '<div class="row" style="align-items:flex-start"><span>Остановка «' + dos(f).stopName + '»<div class="small muted">' + cap(dos(f).routes) + '</div></span><b style="white-space:nowrap">пешком ' + f.stop + ' мин</b></div>' +
-      '<div class="row"><span>Метро «' + dos(f).metro + '»</span><b style="white-space:nowrap">пешком ' + dos(f).metroMin + ' мин</b></div>' +
+      (dos(f).metro ? '<div class="row"><span>Метро «' + dos(f).metro + '»</span><b style="white-space:nowrap">пешком ' + dos(f).metroMin + ' мин</b></div>' : '') +
       '<div class="row muted" style="align-items:flex-start"><span>До работы (из анкеты)</span><span style="text-align:right">' + workTxt(f) + '</span></div></div>';
   const from = {results:'К выдаче', fav:'К избранному', compare:'К сравнению', map:'К карте', chat:'К чату'}[S.stack[S.stack.length-1]] || 'Назад';
   return '<div class="top"><button data-act="back" class="bk">' + ic('back', 20) + from + '</button><span class="t small" style="text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + f.short + '</span>' +
@@ -2245,7 +2306,7 @@ function mapSvg(){
     '<rect x="82" y="72" width="16" height="24" rx="2" fill="#33483A"/>' +
     '<g fill="#45413A"><rect x="0" y="34" width="100" height="4.4"/><rect x="0" y="66" width="100" height="3.6"/><rect x="32" y="13" width="4.2" height="87"/><rect x="64" y="13" width="3.6" height="87"/></g>' +
     '</svg>' +
-    [['р. Казанка',18,9.5,''],['пр. Ямашева',14,36.2,''],['ул. Чистопольская',84,67.8,''],['ул. Адоратского',34.1,80,' v'],['ул. Амирхана',65.8,24,' v'],['Парк',90,84,'']].map(([t,x,y,c]) =>
+    [[GEO.river,18,9.5,''],[geoSt('Ямашева','пр. '),14,36.2,''],[geoSt('Чистопольская','ул. '),84,67.8,''],[geoSt('Адоратского','ул. '),34.1,80,' v'],[geoSt('Амирхана','ул. '),65.8,24,' v'],['Парк',90,84,'']].map(([t,x,y,c]) =>
       '<span class="mlbl' + c + '" style="left:' + x + '%;top:' + y + '%">' + t + '</span>').join('');
 }
 V.map = () => {
@@ -2256,7 +2317,7 @@ V.map = () => {
   const nearest = sel && Object.entries(P).sort((a,b) => Math.hypot(a[1][0]-sel.x, a[1][1]-sel.y) - Math.hypot(b[1][0]-sel.x, b[1][1]-sel.y))[0][0];
   const routes = sel ? pks.map(k => [k, sel[POI[k][0]], POI[k][1][sel[POI[k][0]]]]) : [];
   const placed = []; const pos = r.map(f => { let y = f.y; while(placed.some(p => Math.abs(p[0] - f.x) < 9 / (S.mapZoom || 1) && Math.abs(p[1] - y) < 4.5 / (S.mapZoom || 1))) y += 4.5 / (S.mapZoom || 1); placed.push([f.x, y]); return [f, y]; });
-  const z = S.mapZoom || 1, real = S.mapMode !== 'schema' && !!window.L && LF.ok !== false;
+  const z = S.mapZoom || 1, real = S.mapMode !== 'schema' && !!window.L && LF.ok !== false && GEO.ll;
   S.mapDraw = real ? {r, sel, pks} : null;
   return head +
     '<div class="chips" role="group" aria-label="Показать путь до, можно несколько">' + Object.entries(POI).map(([k, p]) => '<button class="chip' + (pks.includes(k) ? ' on' : '') + '" data-act="map-poi" data-v="' + k + '" aria-pressed="' + pks.includes(k) + '">' + p[2] + ' ' + DIST[k][1] + '</button>').join('') + '<span style="margin-left:auto;display:flex;gap:6px"><button class="chip" style="width:34px;justify-content:center;font-size:16px" data-act="map-zoom" data-v=".5" aria-label="Приблизить">+</button><button class="chip" style="width:34px;justify-content:center;font-size:16px" data-act="map-zoom" data-v="-.5" aria-label="Отдалить">−</button><button class="chip" data-act="map-mode">' + (real ? 'Схема' : 'Карта') + '</button></span></div>' +
@@ -2438,16 +2499,16 @@ SH.more = () => {
     '<button class="btn p" id="applymore" data-act="apply-more">Показать ' + kva(results(d).length) + '</button>');
 };
 SH.district = () => {
-  const q = findTxt(S.placeQ), cur = S.anketa.city;
+  const q = findTxt(S.placeQ), cur = S.anketa.city, ds = cityDists(cur);
   const row = (act, v, title, sub, on) => '<button class="list-row" data-act="' + act + '" data-v="' + esc(v) + '"><span>' + title + (sub ? '<div class="small muted">' + sub + '</div>' : '') + '</span><span>' + (on ? ic('check', 18) : ic('chev', 18)) + '</span></button>';
-  const dists = DISTRICTS.filter(d => !q || findTxt(d).includes(q) || findTxt(d + ' район').includes(q));
-  const cities = CITIES.map(c=>c[0]).filter(c => q ? findTxt(c).includes(q) : c !== cur).slice(0, q ? 8 : 4);
-  const dOn = d => cur === HAS.city && S.district === d;
   let out = '';
-  if(dists.length && (q || cur === HAS.city)) out += '<div class="lbl">Районы Казани</div>' + dists.map(d => row('place-d', d, d + ' район', d === HAS.district ? kv(FLATS.length) + ' в прототипе' : 'в прототипе пока нет квартир', dOn(d))).join('');
-  if(cities.length) out += '<div class="lbl">' + (q ? 'Города' : 'Другой город') + '</div>' + cities.map(c => row('place-c', c, c, c === HAS.city ? '' : 'в прототипе пока нет квартир', c === cur && !S.district)).join('');
-  if(!out) out = '<div class="small muted">Ничего не нашли по запросу «' + esc(S.placeQ) + '». Попробуйте название города или района.</div>';
-  return sheet('<div class="h1" style="font-size:17px">Где ищем</div><input class="field" id="placesearch" type="search" autocomplete="off" placeholder="Город или район" value="' + esc(S.placeQ) + '">' + out);
+  const dl = ds ? ds.filter(d => !q || findTxt(d).includes(q) || findTxt(dname(d)).includes(q)) : [];
+  if(ds && (!q || dl.length)) out += '<div class="lbl">Районы · ' + cur + '</div>' + (q ? '' : row('place-d', '', 'Весь город', kv(FLATS.length) + ' по анкете', !S.district)) + dl.map(d => row('place-d', d, cap(dname(d)), kv(FLATS.length), S.district === d)).join('');
+  const cities = CITY_NAMES.filter(c => q ? findTxt(c).includes(q) : c !== cur).slice(0, q ? 8 : 6);
+  if(cities.length) out += '<div class="lbl">' + (q ? 'Города' : 'Другой город') + '</div>' + cities.map(c => row('place-c', c, c, (cityDists(c) ? cityDists(c).length + ' районов · ' : '') + (METRO[c] || c === HAS.city ? 'есть метро' : 'квартиры по всему городу'), c === cur)).join('');
+  if(q && q.length > 1 && !CITY_NAMES.some(c => findTxt(c).startsWith(q)) && !dl.length) out += row('place-c', capCity(S.placeQ), 'Искать в городе «' + esc(capCity(S.placeQ)) + '»', 'Нет в списке? Ищем квартиры и в небольших городах', false);
+  if(!out) out = '<div class="small muted">Ничего не нашли. Попробуйте название города или района.</div>';
+  return sheet('<div class="h1" style="font-size:17px">Где ищем</div><div class="small muted">Любой город России. Если вашего нет в списке, впишите название</div><input class="field" id="placesearch" type="search" autocomplete="off" placeholder="Город или район" value="' + esc(S.placeQ) + '">' + out);
 };
 SH.why = () => { const v = verdict(S.fav.map(byId)); return sheet('<div class="h1" style="font-size:17px">Почему такой вывод</div><div style="font-size:14px;line-height:20px">Дворецкий взял приоритеты из вашей анкеты: ' + (needSchool() ? 'сад и школу пешком (у вас ' + (onlySchool() ? 'школьник' : 'есть ребёнок 7+ или выбрана школа') + ')' : 'сад пешком до ' + S.anketa.sadMax + ' минут') + ', сумму въезда и лифт. Лучше всех по этим минутам квартира на ' + v.best.short + ', поэтому она первая. Если важнее деньги, смотрите строку «Въезд»: там серым выделен самый дешёвый въезд.</div><div class="small muted">Дворецкий не знает того, чего нет в анкете и объявлениях. Решение за вами.</div><button class="btn p" data-act="close-sheet">Понятно</button>'); };
 SH.book = () => {
@@ -2497,6 +2558,7 @@ SH.cancel = () => { const f = byId(S.cur), b = S.booking[f.id]; return sheet('<d
 
 /* ---------- render ---------- */
 function render(resetScroll){
+  geoApply();
   const ph = $('#phone');
   const k = keyOf(), pb = ph.querySelector('.body'), keep = !resetScroll && pb && ph.dataset.k === k ? pb.scrollTop : null;
   const focused = document.activeElement && document.activeElement.id;
@@ -2598,7 +2660,7 @@ const A = {
   pick(v, el){
     const g = el.dataset.g;
     if(g === 'when' && v === 'Своя дата'){ if(!S.whenDate) S.whenDate = '2026-11-15'; v = 'к ' + dateTxt(S.whenDate); }
-    if(g === 'city'){ S.district = v === HAS.city ? HAS.district : ''; S.cityQ = ''; }
+    if(g === 'city'){ S.district = v === HAS.city ? HAS.district : ''; S.cityQ = ''; if(['ул. Баумана, 1', 'ул. Ленина, 1'].includes(S.anketa.work)) S.anketa.work = v === HAS.city ? 'ул. Баумана, 1' : 'ул. Ленина, 1'; }
     S.anketa[g] = v; render();
   },
   commute(v){ const c = S.anketa.commute, i = c.indexOf(v); if(i < 0) c.push(v); else if(c.length > 1) c.splice(i,1); render(); },
@@ -2626,8 +2688,8 @@ const A = {
   'map-zoom'(v){ if(LF.map && document.querySelector('#phone .lmap-host')){ +v > 0 ? LF.map.zoomIn() : LF.map.zoomOut(); return; } S.mapZoom = Math.max(.5, Math.min(3, (S.mapZoom || 1) + (+v))); render(); },
   'set-sort'(v){ S.sort = v; S.sheet = null; S.scroll.results = 0; render(); },
   district(){ S.sheet = 'district'; S.placeQ = ''; render(); },
-  'place-d'(v){ S.anketa.city = HAS.city; S.district = v; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
-  'place-c'(v){ S.anketa.city = v; S.district = v === HAS.city ? HAS.district : ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
+  'place-d'(v){ S.district = v; S.placeQ = ''; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
+  'place-c'(v){ S.anketa.city = v; S.district = v === HAS.city ? HAS.district : ''; S.placeQ = ''; if(['ул. Баумана, 1', 'ул. Ленина, 1'].includes(S.anketa.work)) S.anketa.work = v === HAS.city ? 'ул. Баумана, 1' : 'ул. Ленина, 1'; S.sheet = null; S.mapSel = null; S.scroll.results = 0; render(); },
   'to-has'(){ S.anketa.city = HAS.city; S.district = HAS.district; S.mapSel = null; render(); },
   'relax-dist'(v){ const [k, m] = v.split(':'); S.filters[k] = +m; render(); },
   'relax-lift'(){ S.filters.lift = false; render(); },
@@ -2642,7 +2704,7 @@ const A = {
     else { S.fav.splice(i,1); toast('Убрали из избранного', {act:'unfav-undo', v, label:'Вернуть'}); }
   },
   'unfav-undo'(v){ if(!S.fav.includes(v)){ S.fav.push(v); S.fav.sort(); } S.toast = null; render(); },
-  share(){ try{ navigator.clipboard.writeText('Квартира на ' + byId(S.cur).short + ' в Казани').catch(()=>{}); }catch(e){} toast('Ссылка на квартиру скопирована'); },
+  share(){ try{ navigator.clipboard.writeText('Квартира на ' + byId(S.cur).short + ' в ' + inCity(S.anketa.city)).catch(()=>{}); }catch(e){} toast('Ссылка на квартиру скопирована'); },
   photo(){ S.photo = (S.photo||1) % 12 + 1; render(); },
   'photo-prev'(){ S.photo = ((S.photo||1) + 10) % 12 + 1; render(); },
   compare(){ S.toast = null; go('compare'); },
