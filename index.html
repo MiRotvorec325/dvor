@@ -1335,6 +1335,7 @@ const walkMid = p => { let best = 0, k = 1; for(let i = 1; i < p.length; i++){ c
 function crossAns(f, q){
   const k = /школ/.test(q) ? 'school' : /поликлин|врач|больниц/.test(q) ? 'clinic' : 'sad', [nk, P] = POI[k], c = walkCross([f.x, f.y], P[f[nk]]);
   const to = (k === 'clinic' ? 'до поликлиники' : 'до ' + f[nk].replace('Сад', 'сада').replace('Школа', 'школы'));
+  if(RG.R) return 'Путь ' + to + ' занимает ' + mins(f[k]) + ' пешком, маршрут видно на карте: нажмите на цену квартиры.';
   if(!c.length) return 'Дорогу ' + to + ' переходить не нужно: идти дворами, ' + mins(f[k]) + ' пешком.';
   return 'По пути ' + to + ' ' + (c.length === 1 ? 'один переход' : c.length + ' перехода') + ': ' + c.map(([n, light]) => 'зебра ' + (light ? 'со светофором' : 'без светофора') + ' через ' + n.replace('пр.', 'проспект').replace('ул. Чистопольской', 'Чистопольскую').replace('ул. Адоратского', 'Адоратского').replace('ул. Амирхана', 'Амирхана')).join(', ') + '. Всего ' + mins(f[k]) + ' пешком.';
 }
@@ -3688,7 +3689,7 @@ function rgName(k, t){ const n = (t.name || '').replace(/[«»“”„]/g, '"')
   return n; }
 function fetchT(u, o, ms){ const c = window.AbortController ? new AbortController() : null; if(c) setTimeout(() => c.abort(), ms); return fetch(u, Object.assign({}, o, c ? {signal:c.signal} : {})); }
 async function ovp(q){ let err = null;
-  for(const u of OVP){ try { const r = await fetchT(u, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(q)}, 25000);
+  for(const u of OVP){ try { const r = await fetchT(u, {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'data=' + encodeURIComponent(q)}, 45000);
     if(!r.ok) throw new Error('overpass ' + r.status); const j = await r.json(); if(j.remark && /runtime error/.test(j.remark)) throw new Error(j.remark); return j.elements || []; } catch(e){ err = e; } }
   throw err; }
 async function osrmTable(src, dst){ const out = src.map(() => []);
@@ -3704,7 +3705,7 @@ async function rgFetch(byAddr){
   const houses = (byAddr ? FLATS.map(f => { const [st, no] = f._b.short.split(', '); return 'nwr["addr:street"~"' + st + '"]["addr:housenumber"="' + no + '"](' + bbOf(pts0, .03, .05) + ');'; })
     : pts0.map(p => 'way(around:260,' + p[0].toFixed(5) + ',' + p[1].toFixed(5) + ')' + HB + ';')).join('');
   let H = await ovp('[out:json][timeout:25];(' + houses + ');out tags center;');
-  const pen = t => /^(apartments|residential)$/.test(t.building) ? 0 : t.building === 'dormitory' ? 60 : 90 + (t.shop || t.office || t.amenity ? 150 : 0) + (/house|terrace/.test(t.building) ? 120 : 0);
+  const pen = t => /^(apartments|residential)$/.test(t.building) ? 0 : t.building === 'dormitory' ? 60 : 90 + (t.shop || t.office || t.amenity ? 150 : 0) + (/house|terrace/.test(t.building) ? 120 : 0) + (+t['building:levels'] && +t['building:levels'] < 3 ? 250 : 0);
   const used = new Set(), flats = {};
   const pick = (f, p, list, exactOnly) => { const fx = f._b.short.split(', ');
     const c = list.filter(e => e.tags && e.tags['addr:street'] && !used.has(e.tags['addr:street'] + e.tags['addr:housenumber'])).map(e => { const t = e.tags, ll = llOf(e),
